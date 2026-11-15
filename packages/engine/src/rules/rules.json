@@ -1,0 +1,975 @@
+{
+  "version": 1,
+  "parameters": {
+    "startingMoney": 1500,
+    "passStartBonus": 200,
+    "bail": 50,
+    "maxJailTurns": 3,
+    "incomeTax": 200,
+    "luxuryTax": 100,
+    "stationRent": [30, 60, 120, 240],
+    "utilityMultiplier": [5, 12],
+    "maxHouses": 4,
+    "fullGroupMultiplier": 2,
+    "houseSaleFactor": 0.5,
+    "mortgageFactor": 0.5,
+    "mortgageInterest": 0.1,
+    "tradeStep": 10,
+    "tradeStepFast": 50,
+    "maxProposalsPerTurn": 2,
+    "maxConsecutiveDoubles": 3,
+    "diceFaces": 6,
+    "cardsPerDeck": 16,
+    "highRentThreshold": 500,
+    "messageDurationMs": 4000,
+    "minPlayers": 2,
+    "maxPlayers": 6,
+    "maxNameLength": 10
+  },
+  "modes": {
+    "classic": {},
+    "time": {
+      "optionsMinutes": [30, 45, 60, 90],
+      "defaultMinutes": 45
+    },
+    "rounds": {
+      "options": [20, 30, 40, 60],
+      "default": 30
+    }
+  },
+  "houseRules": {
+    "RP-01": {
+      "active": false,
+      "description": "Pote do Descanso: impostos, fianças e multas vão para um pote; quem para no Descanso leva tudo"
+    },
+    "RP-02": {
+      "active": false,
+      "description": "Partida em dobro: parar exatamente na Partida paga R$ 400"
+    },
+    "RP-03": {
+      "active": true,
+      "description": "Dono preso não cobra aluguel (substitui RN-042)"
+    },
+    "RP-04": {
+      "active": false,
+      "description": "Imposto de Renda: pagar R$ 200 ou 10% do patrimônio"
+    },
+    "RP-05": {
+      "active": false,
+      "description": "Bônus de grupo: completar um grupo rende R$ 100"
+    }
+  },
+  "groups": {
+    "brown": {
+      "name": "Marrom",
+      "color": "#8B5A3C",
+      "houseCost": 50,
+      "positions": [1, 3]
+    },
+    "lightBlue": {
+      "name": "Azul-claro",
+      "color": "#6FB8E0",
+      "houseCost": 50,
+      "positions": [6, 8, 9]
+    },
+    "pink": {
+      "name": "Rosa",
+      "color": "#D9559A",
+      "houseCost": 100,
+      "positions": [11, 13, 14]
+    },
+    "orange": {
+      "name": "Laranja",
+      "color": "#EE8A2A",
+      "houseCost": 100,
+      "positions": [16, 18, 19]
+    },
+    "red": {
+      "name": "Vermelho",
+      "color": "#C62F2F",
+      "houseCost": 150,
+      "positions": [21, 23, 24]
+    },
+    "yellow": {
+      "name": "Amarelo",
+      "color": "#F2CF3B",
+      "houseCost": 150,
+      "positions": [26, 27, 29]
+    },
+    "green": {
+      "name": "Verde",
+      "color": "#2E9E5B",
+      "houseCost": 200,
+      "positions": [31, 32, 34]
+    },
+    "darkBlue": {
+      "name": "Azul-escuro",
+      "color": "#2B4FA8",
+      "houseCost": 200,
+      "positions": [37, 39]
+    }
+  },
+  "spaces": [
+    {
+      "position": 0,
+      "type": "start",
+      "name": "Partida",
+      "label": "PARTIDA"
+    },
+    {
+      "position": 1,
+      "type": "street",
+      "name": "Travessa do Porto",
+      "group": "brown",
+      "price": 60,
+      "rent": [4, 20, 60, 180, 320, 450]
+    },
+    {
+      "position": 2,
+      "type": "chance",
+      "name": "Sorte",
+      "label": "SORTE"
+    },
+    {
+      "position": 3,
+      "type": "street",
+      "name": "Beco das Flores",
+      "group": "brown",
+      "price": 60,
+      "rent": [4, 20, 60, 180, 320, 450]
+    },
+    {
+      "position": 4,
+      "type": "tax",
+      "name": "Imposto de Renda",
+      "taxParameter": "incomeTax",
+      "label": "IMPOSTO"
+    },
+    {
+      "position": 5,
+      "type": "station",
+      "name": "Estação Sul",
+      "price": 200,
+      "label": "ESTAÇÃO"
+    },
+    {
+      "position": 6,
+      "type": "street",
+      "name": "Rua da Fonte",
+      "group": "lightBlue",
+      "price": 100,
+      "rent": [6, 25, 80, 240, 425, 600]
+    },
+    {
+      "position": 7,
+      "type": "setback",
+      "name": "Revés",
+      "label": "REVÉS"
+    },
+    {
+      "position": 8,
+      "type": "street",
+      "name": "Rua do Mercado",
+      "group": "lightBlue",
+      "price": 100,
+      "rent": [6, 25, 80, 240, 425, 600]
+    },
+    {
+      "position": 9,
+      "type": "street",
+      "name": "Rua da Escola",
+      "group": "lightBlue",
+      "price": 120,
+      "rent": [8, 30, 95, 280, 495, 700]
+    },
+    {
+      "position": 10,
+      "type": "jail",
+      "name": "Prisão",
+      "label": "PRISÃO"
+    },
+    {
+      "position": 11,
+      "type": "street",
+      "name": "Rua das Acácias",
+      "group": "pink",
+      "price": 140,
+      "rent": [10, 35, 110, 320, 570, 800]
+    },
+    {
+      "position": 12,
+      "type": "utility",
+      "name": "Companhia de Energia",
+      "price": 150,
+      "label": "ENERGIA"
+    },
+    {
+      "position": 13,
+      "type": "street",
+      "name": "Rua dos Ipês",
+      "group": "pink",
+      "price": 140,
+      "rent": [10, 35, 110, 320, 570, 800]
+    },
+    {
+      "position": 14,
+      "type": "street",
+      "name": "Alameda das Orquídeas",
+      "group": "pink",
+      "price": 160,
+      "rent": [12, 40, 120, 360, 640, 900]
+    },
+    {
+      "position": 15,
+      "type": "station",
+      "name": "Estação Oeste",
+      "price": 200,
+      "label": "ESTAÇÃO"
+    },
+    {
+      "position": 16,
+      "type": "street",
+      "name": "Rua da Praça",
+      "group": "orange",
+      "price": 180,
+      "rent": [14, 45, 130, 380, 675, 950]
+    },
+    {
+      "position": 17,
+      "type": "chance",
+      "name": "Sorte",
+      "label": "SORTE"
+    },
+    {
+      "position": 18,
+      "type": "street",
+      "name": "Rua do Coreto",
+      "group": "orange",
+      "price": 180,
+      "rent": [14, 45, 130, 380, 675, 950]
+    },
+    {
+      "position": 19,
+      "type": "street",
+      "name": "Avenida da Matriz",
+      "group": "orange",
+      "price": 200,
+      "rent": [16, 50, 135, 400, 710, 1000]
+    },
+    {
+      "position": 20,
+      "type": "rest",
+      "name": "Descanso",
+      "label": "DESCANSO"
+    },
+    {
+      "position": 21,
+      "type": "street",
+      "name": "Rua dos Coqueiros",
+      "group": "red",
+      "price": 220,
+      "rent": [18, 55, 150, 440, 780, 1100]
+    },
+    {
+      "position": 22,
+      "type": "setback",
+      "name": "Revés",
+      "label": "REVÉS"
+    },
+    {
+      "position": 23,
+      "type": "street",
+      "name": "Rua das Mangueiras",
+      "group": "red",
+      "price": 220,
+      "rent": [18, 55, 150, 440, 780, 1100]
+    },
+    {
+      "position": 24,
+      "type": "street",
+      "name": "Rua das Palmeiras",
+      "group": "red",
+      "price": 240,
+      "rent": [20, 60, 155, 460, 815, 1150]
+    },
+    {
+      "position": 25,
+      "type": "station",
+      "name": "Estação Norte",
+      "price": 200,
+      "label": "ESTAÇÃO"
+    },
+    {
+      "position": 26,
+      "type": "street",
+      "name": "Rua da Aurora",
+      "group": "yellow",
+      "price": 260,
+      "rent": [22, 65, 160, 480, 850, 1200]
+    },
+    {
+      "position": 27,
+      "type": "street",
+      "name": "Rua do Horizonte",
+      "group": "yellow",
+      "price": 260,
+      "rent": [22, 65, 160, 480, 850, 1200]
+    },
+    {
+      "position": 28,
+      "type": "utility",
+      "name": "Companhia de Água",
+      "price": 150,
+      "label": "ÁGUA"
+    },
+    {
+      "position": 29,
+      "type": "street",
+      "name": "Rua do Sol",
+      "group": "yellow",
+      "price": 280,
+      "rent": [24, 70, 170, 500, 890, 1250]
+    },
+    {
+      "position": 30,
+      "type": "goToJail",
+      "name": "Vá para a prisão",
+      "label": "VÁ PARA A PRISÃO"
+    },
+    {
+      "position": 31,
+      "type": "street",
+      "name": "Avenida dos Bancos",
+      "group": "green",
+      "price": 300,
+      "rent": [26, 75, 175, 520, 925, 1300]
+    },
+    {
+      "position": 32,
+      "type": "street",
+      "name": "Rua do Comércio",
+      "group": "green",
+      "price": 300,
+      "rent": [26, 75, 175, 520, 925, 1300]
+    },
+    {
+      "position": 33,
+      "type": "chance",
+      "name": "Sorte",
+      "label": "SORTE"
+    },
+    {
+      "position": 34,
+      "type": "street",
+      "name": "Avenida Central",
+      "group": "green",
+      "price": 320,
+      "rent": [28, 80, 190, 560, 995, 1400]
+    },
+    {
+      "position": 35,
+      "type": "station",
+      "name": "Estação Leste",
+      "price": 200,
+      "label": "ESTAÇÃO"
+    },
+    {
+      "position": 36,
+      "type": "setback",
+      "name": "Revés",
+      "label": "REVÉS"
+    },
+    {
+      "position": 37,
+      "type": "street",
+      "name": "Alameda dos Barões",
+      "group": "darkBlue",
+      "price": 350,
+      "rent": [35, 90, 205, 600, 1065, 1500]
+    },
+    {
+      "position": 38,
+      "type": "tax",
+      "name": "Taxa de Luxo",
+      "taxParameter": "luxuryTax",
+      "label": "IMPOSTO"
+    },
+    {
+      "position": 39,
+      "type": "street",
+      "name": "Avenida do Senhorio",
+      "group": "darkBlue",
+      "price": 400,
+      "rent": [40, 120, 245, 720, 1280, 1800]
+    }
+  ],
+  "cards": {
+    "chance": [
+      {
+        "id": "S-01",
+        "title": "Atalho pela ciclovia!",
+        "effect": "Avance até a Partida e receba R$ 200",
+        "action": {
+          "type": "goTo",
+          "destination": 0,
+          "backward": false
+        }
+      },
+      {
+        "id": "S-02",
+        "title": "Sonhando alto",
+        "effect": "Avance até a Avenida do Senhorio",
+        "action": {
+          "type": "goTo",
+          "destination": 39,
+          "backward": false
+        }
+      },
+      {
+        "id": "S-03",
+        "title": "Passeio no centro",
+        "effect": "Avance até a Rua das Palmeiras",
+        "action": {
+          "type": "goTo",
+          "destination": 24,
+          "backward": false
+        }
+      },
+      {
+        "id": "S-04",
+        "title": "Hora de viajar",
+        "effect": "Avance até a Estação Norte",
+        "action": {
+          "type": "goTo",
+          "destination": 25,
+          "backward": false
+        }
+      },
+      {
+        "id": "S-05",
+        "title": "Pegue o próximo trem",
+        "effect": "Vá à estação mais próxima, à frente",
+        "action": {
+          "type": "nearestStation"
+        }
+      },
+      {
+        "id": "S-06",
+        "title": "Visita técnica",
+        "effect": "Avance até a Companhia de Energia",
+        "action": {
+          "type": "goTo",
+          "destination": 12,
+          "backward": false
+        }
+      },
+      {
+        "id": "S-07",
+        "title": "Melhor vizinho do ano",
+        "effect": "Receba R$ 150",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 150
+        }
+      },
+      {
+        "id": "S-08",
+        "title": "Restituição do imposto",
+        "effect": "Receba R$ 100",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 100
+        }
+      },
+      {
+        "id": "S-09",
+        "title": "Ganhou o bolão",
+        "effect": "Receba R$ 75",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 75
+        }
+      },
+      {
+        "id": "S-10",
+        "title": "Dinheiro no casaco velho",
+        "effect": "Receba R$ 50",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 50
+        }
+      },
+      {
+        "id": "S-11",
+        "title": "Vendeu bolo no condomínio",
+        "effect": "Receba R$ 25",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 25
+        }
+      },
+      {
+        "id": "S-12",
+        "title": "Seu aniversário!",
+        "effect": "Cada jogador lhe dá R$ 20",
+        "action": {
+          "type": "collectFromEachPlayer",
+          "amount": 20
+        }
+      },
+      {
+        "id": "S-13",
+        "title": "Bom comportamento",
+        "effect": "Saia da prisão de graça. Guarde esta carta",
+        "action": {
+          "type": "getOutOfJailFree"
+        }
+      },
+      {
+        "id": "S-14",
+        "title": "Esqueceu a carteira",
+        "effect": "Volte 3 casas",
+        "action": {
+          "type": "move",
+          "spaces": -3
+        }
+      },
+      {
+        "id": "S-15",
+        "title": "Vaquinha da festa",
+        "effect": "Pague R$ 15 a cada jogador",
+        "action": {
+          "type": "payEachPlayer",
+          "amount": 15
+        }
+      },
+      {
+        "id": "S-16",
+        "title": "Estacionou na vaga errada",
+        "effect": "Vá direto para a prisão",
+        "action": {
+          "type": "goToJail"
+        }
+      }
+    ],
+    "setback": [
+      {
+        "id": "R-01",
+        "title": "Pego no flagra",
+        "effect": "Vá direto para a prisão",
+        "action": {
+          "type": "goToJail"
+        }
+      },
+      {
+        "id": "R-02",
+        "title": "Escola das crianças",
+        "effect": "Pague R$ 150",
+        "action": {
+          "type": "payToBank",
+          "amount": 150
+        }
+      },
+      {
+        "id": "R-03",
+        "title": "Conserto do carro",
+        "effect": "Pague R$ 100",
+        "action": {
+          "type": "payToBank",
+          "amount": 100
+        }
+      },
+      {
+        "id": "R-04",
+        "title": "Conta de luz nas alturas",
+        "effect": "Pague R$ 75",
+        "action": {
+          "type": "payToBank",
+          "amount": 75
+        }
+      },
+      {
+        "id": "R-05",
+        "title": "Multa de trânsito",
+        "effect": "Pague R$ 50",
+        "action": {
+          "type": "payToBank",
+          "amount": 50
+        }
+      },
+      {
+        "id": "R-06",
+        "title": "Lavou o carro e choveu",
+        "effect": "Pague R$ 30",
+        "action": {
+          "type": "payToBank",
+          "amount": 30
+        }
+      },
+      {
+        "id": "R-07",
+        "title": "Reforma geral",
+        "effect": "Pague R$ 25 por casa e R$ 100 por hotel",
+        "action": {
+          "type": "repairs",
+          "perHouse": 25,
+          "perHotel": 100
+        }
+      },
+      {
+        "id": "R-08",
+        "title": "Vistoria da prefeitura",
+        "effect": "Pague R$ 40 por casa e R$ 115 por hotel",
+        "action": {
+          "type": "repairs",
+          "perHouse": 40,
+          "perHotel": 115
+        }
+      },
+      {
+        "id": "R-09",
+        "title": "Rodada de pizza",
+        "effect": "Pague R$ 25 a cada jogador",
+        "action": {
+          "type": "payEachPlayer",
+          "amount": 25
+        }
+      },
+      {
+        "id": "R-10",
+        "title": "Eleito síndico",
+        "effect": "Pague R$ 50 a cada jogador",
+        "action": {
+          "type": "payEachPlayer",
+          "amount": 50
+        }
+      },
+      {
+        "id": "R-11",
+        "title": "Pegou o ônibus errado",
+        "effect": "Volte 3 casas",
+        "action": {
+          "type": "move",
+          "spaces": -3
+        }
+      },
+      {
+        "id": "R-12",
+        "title": "Mudança de planos",
+        "effect": "Volte até a Travessa do Porto, sem passar pela Partida",
+        "action": {
+          "type": "goTo",
+          "destination": 1,
+          "backward": true
+        }
+      },
+      {
+        "id": "R-13",
+        "title": "Achou dinheiro na calçada",
+        "effect": "Receba R$ 50",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 50
+        }
+      },
+      {
+        "id": "R-14",
+        "title": "O seguro pagou",
+        "effect": "Receba R$ 100",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 100
+        }
+      },
+      {
+        "id": "R-15",
+        "title": "Advogado esperto",
+        "effect": "Saia da prisão de graça. Guarde esta carta",
+        "action": {
+          "type": "getOutOfJailFree"
+        }
+      },
+      {
+        "id": "R-16",
+        "title": "Herdou um terreninho",
+        "effect": "Receba R$ 120",
+        "action": {
+          "type": "receiveFromBank",
+          "amount": 120
+        }
+      }
+    ]
+  },
+  "texts": {
+    "D-01": {
+      "text": "Vez de {player}",
+      "options": ["Começar"],
+      "subtitle": "Passe o controle para {player}"
+    },
+    "D-02": {
+      "text": "{player}, sua vez de jogar",
+      "options": ["Rolar dados"],
+      "hint": "Aperte OK para rolar os dados"
+    },
+    "D-03": {
+      "text": "Dupla! Jogue de novo, {player}",
+      "options": ["Rolar de novo"],
+      "hint": "Aperte OK para rolar de novo"
+    },
+    "D-04": {
+      "text": "{player}, algo mais antes de passar a vez?",
+      "options": ["Encerrar turno"]
+    },
+    "D-05": {
+      "text": "{player}, você está preso ({n}ª tentativa de {max})",
+      "options": ["Tentar dupla", "Pagar {bail}", "Usar carta"]
+    },
+    "D-06": {
+      "text": "Sem dupla de novo. Fiança obrigatória de {amount}",
+      "options": ["Pagar e andar"]
+    },
+    "D-07": {
+      "text": "{player}, quer comprar esta propriedade?",
+      "options": ["Comprar por {amount}", "Não comprar"]
+    },
+    "D-08": {
+      "text": "{player}, quer comprar esta propriedade?",
+      "options": ["Comprar", "Não comprar"],
+      "disabledReason": "Faltam {amount}"
+    },
+    "D-09": {
+      "text": "{title}",
+      "options": ["OK"]
+    },
+    "D-10": {
+      "text": "O que você quer fazer, {player}?",
+      "options": [
+        "Construir",
+        "Vender casas",
+        "Hipotecar",
+        "Resgatar",
+        "Venda simples",
+        "Pausar",
+        "Abandonar"
+      ]
+    },
+    "D-11": {
+      "text": "Onde construir? Casa custa {amount}",
+      "options": ["Construir", "Concluir"]
+    },
+    "D-12": {
+      "text": "Vender casa por {amount}?",
+      "options": ["Vender", "Concluir"]
+    },
+    "D-13": {
+      "text": "Hipotecar {property} por {amount}?",
+      "options": ["Hipotecar", "Concluir"]
+    },
+    "D-14": {
+      "text": "Resgatar {property} por {amount}?",
+      "options": ["Resgatar", "Concluir"]
+    },
+    "D-15": {
+      "text": "Jogo pausado",
+      "options": ["Continuar", "Salvar e sair"]
+    },
+    "D-16": {
+      "text": "{player}, sair da partida? Seus bens voltam ao banco",
+      "options": ["Não, continuar", "Sim, abandonar"]
+    },
+    "D-17a": {
+      "text": "Comprar ou vender?",
+      "options": ["Comprar de alguém", "Vender para alguém"]
+    },
+    "D-17b": {
+      "text": "Qual propriedade?",
+      "options": ["OK"]
+    },
+    "D-17c": {
+      "text": "Quanto oferecer por {property}?",
+      "options": ["Enviar proposta", "Cancelar"],
+      "sellText": "Por quanto vender {property}?"
+    },
+    "D-18": {
+      "text": "{player} oferece {amount} por {property}",
+      "options": ["Recusar", "Aceitar"],
+      "subtitle": "Passe o controle para {owner}",
+      "after": "Devolva o controle para {player}",
+      "limit": "Limite de {max} propostas por turno",
+      "sellText": "{player} quer vender {property} por {amount}"
+    },
+    "D-19": {
+      "text": "{player}, faltam {amount} para pagar {creditor}",
+      "options": ["Vender casas", "Hipotecar", "Declarar falência"],
+      "disabledReason": "Ainda dá para levantar {amount}"
+    },
+    "D-19b": {
+      "text": "Mesmo vendendo tudo, faltam {amount}",
+      "options": ["Declarar falência"]
+    },
+    "D-20": {
+      "text": "{player} faliu. Os bens vão para {creditor}",
+      "options": ["OK"]
+    },
+    "D-21": {
+      "text": "Senhorio",
+      "options": ["Continuar partida", "Nova partida"]
+    },
+    "D-22": {
+      "text": "Começar outra partida? A atual será apagada",
+      "options": ["Não, voltar", "Sim, começar"]
+    },
+    "D-23": {
+      "text": "Quantos jogadores?",
+      "options": ["OK"]
+    },
+    "D-24": {
+      "text": "Como a partida termina?",
+      "options": ["Clássico", "Tempo", "Rodadas"]
+    },
+    "D-25": {
+      "text": "O banco sorteou a ordem",
+      "options": ["Começar partida"]
+    },
+    "D-26": {
+      "text": "{winner} é o grande Senhorio!",
+      "options": ["Jogar de novo", "Sair"]
+    },
+    "M-01": "{player} passou pela Partida: +{amount}. Salário caiu!",
+    "M-02": "{player} agora é dono de {property}. Um senhorio em formação!",
+    "M-03": "{property} continua à venda. Fica pra próxima.",
+    "M-04": "{player} pagou {amount} a {owner}. Tchau dinheiro!",
+    "M-05": "{player} pagou {amount} a {owner}. Doeu no bolso.",
+    "M-06": "{property} está hipotecada. Hoje a estadia é de graça!",
+    "M-07": "{owner} está preso e não pode cobrar. Que sorte!",
+    "M-08": "{player} pagou {amount} de imposto. Obrigado!",
+    "M-09": "{player} foi para a prisão. Comporte-se!",
+    "M-10": "Três duplas? Suspeito… {player} vai para a prisão.",
+    "M-11": "Dupla! {player} está livre.",
+    "M-12": "{property} ganhou a {houseCount}ª casa. Aluguel agora: {amount}.",
+    "M-13": "Hotel inaugurado em {property}! Diária: {amount}.",
+    "M-14": "{player} hipotecou {property} e recebeu {amount}.",
+    "M-15": "Negócio fechado! {property} agora é de {buyer}.",
+    "M-16": "{owner} recusou. Quem sabe na próxima rodada.",
+    "M-17": "{player} faliu. Foi bom enquanto durou.",
+    "M-18": "Tempo esgotado! Última rodada.",
+    "I-01": "senhorio",
+    "I-02": "Rodada {n} · Banco: computador",
+    "I-03": "JOGANDO",
+    "I-04": "NA PRISÃO",
+    "I-05": "FALIU · RODADA {n}",
+    "I-06": "ÚLTIMOS ACONTECIMENTOS",
+    "I-07": "OK",
+    "I-08": "Voltar",
+    "I-09": "confirmar",
+    "I-10": "escolher",
+    "I-11": "menu",
+    "I-12": "ver tabuleiro",
+    "I-13": "R$ {amount}",
+    "I-14": ".",
+    "I-15": "GRUPO {group} · {n} DE {total}",
+    "I-16": "GRUPO {group} · COMPLETO",
+    "I-17": "ESTAÇÃO · {n} DE {total}",
+    "I-18": "COMPANHIA · {n} DE {total}",
+    "I-19": "Preço",
+    "I-20": "Aluguel base",
+    "I-21": "{player} tirou {d1} + {d2} = {sum}",
+    "I-22": "o banco",
+    "I-23": "+ {amount}",
+    "I-24": "{position}º {player}",
+    "I-25": "Sem casas",
+    "I-26": "{n} casa",
+    "I-27": "{n} casas",
+    "I-28": "Hotel",
+    "I-29": "Cada casa custa {amount} · até {max} casas, depois hotel",
+    "I-30": "Com a {n}ª casa, o aluguel vai de {from} para {to}",
+    "I-31": "Com o hotel, o aluguel vai de {from} para {to}",
+    "I-32": "Vendendo, o aluguel vai de {from} para {to}",
+    "I-33": "Aluguel {amount} · hipoteca {mortgage}",
+    "I-34": "HIPOTECADA",
+    "I-35": "Salvamento chega na próxima versão",
+    "I-36": "outra propriedade",
+    "I-37": "continuar",
+    "I-38": "Dono: {owner} · preço {amount}",
+    "I-39": "Aluguel por estação: {amounts}",
+    "I-40": "Aluguel: dados × {mult1} (1 companhia) ou × {mult2} (as duas)",
+    "I-41": "Nenhum grupo completo para construir",
+    "I-42": "Sem casas para vender",
+    "I-43": "Nada para hipotecar",
+    "I-44": "Nada hipotecado",
+    "I-45": "Faltam {amount}",
+    "I-46": "{action} · {amount}",
+    "I-47": "Quem está preso não negocia",
+    "I-48": "Ninguém disponível para negociar",
+    "I-49": "Para quem vender {property}?",
+    "I-50": "Sem propriedades para negociar",
+    "I-51": "ajusta {step} · segure para {fastStep}",
+    "I-52": "CADA CASA, MAIS ALUGUEL",
+    "I-53": "Rodada {n} · {players} jogadores · modo {mode}",
+    "I-54": "A partida salva é de outra versão das regras e não pode ser continuada",
+    "I-55": "Passo {n} de {total}",
+    "I-56": "Cor",
+    "I-57": "Jogador {n}",
+    "I-58": "quantidade",
+    "I-59": "jogador",
+    "I-60": "editar nome",
+    "I-61": "trocar cor",
+    "I-62": "Continuar",
+    "I-63": "modo",
+    "I-64": "ajustar valor",
+    "I-65": "continuar",
+    "I-66": "jogadores",
+    "I-67": "começar",
+    "I-68": "mudar o modo",
+    "I-69": "Até sobrar um só jogador. Quem fica sem dinheiro sai da partida.",
+    "I-70": "Quando o tempo acaba, a rodada termina e vence o maior patrimônio.",
+    "I-71": "Depois da última rodada completa, vence o maior patrimônio.",
+    "I-72": "Sem hora para acabar",
+    "I-73": "{n} min",
+    "I-74": "{n} rodadas",
+    "I-75": "{n} jogadores · cada um começa com {amount}",
+    "I-76": "{n}º",
+    "I-77": "Cada jogador começa na Partida com {amount} · {mode}",
+    "I-78": "modo clássico",
+    "I-79": "modo tempo, {n} minutos",
+    "I-80": "modo rodadas, {n} rodadas",
+    "I-81": "FIM DE PARTIDA · {mode} · {n} RODADAS",
+    "I-82": "Dinheiro {money} · Propriedades {properties} · Casas {houses}",
+    "I-83": "Faliu na rodada {n}",
+    "I-84": "—",
+    "I-85": "Rodada {n} · {min} min",
+    "I-86": "Rodada {n} de {total}",
+    "I-87": "Não foi possível salvar",
+    "I-88": "Nome do jogador {n}",
+    "I-89": "clássico",
+    "I-90": "tempo",
+    "I-91": "rodadas",
+    "H-01": "{player} passou pela Partida (+{amount})",
+    "H-02": "{player} comprou {property}",
+    "H-03": "{player} não comprou {property}",
+    "H-04": "{player} pagou {amount} de aluguel a {owner}",
+    "H-05": "{player} não pagou: {property} hipotecada",
+    "H-06": "{player} não pagou: {owner} está preso",
+    "H-07": "{player} pagou {amount} de imposto",
+    "H-08": "{player} tirou a carta {title}",
+    "H-09": "{player} recebeu {amount} do banco",
+    "H-10": "{player} pagou {amount} ao banco",
+    "H-11": "{player} pagou {amount} a {owner}",
+    "H-12": "{player} foi para a prisão",
+    "H-13": "{player} tirou três duplas e foi para a prisão",
+    "H-14": "{player} saiu da prisão",
+    "H-15": "{player} pagou a fiança de {amount}",
+    "H-16": "{player} construiu a {houseCount}ª casa em {property}",
+    "H-17": "{player} construiu um hotel em {property}",
+    "H-18": "{player} vendeu uma casa de {property}",
+    "H-19": "{player} hipotecou {property}",
+    "H-20": "{player} resgatou {property}",
+    "H-21": "{property} agora é de {buyer}",
+    "H-22": "{owner} recusou a proposta por {property}",
+    "H-23": "{player} faliu",
+    "H-24": "{player} abandonou a partida",
+    "H-25": "Tempo esgotado: última rodada",
+    "H-26": "{player} pagou {amount} de juros de hipoteca",
+    "defaultNames": ["Ana", "Bruno", "Carla", "Diego", "Elisa", "Fábio"]
+  }
+}

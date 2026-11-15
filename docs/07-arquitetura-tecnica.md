@@ -89,7 +89,87 @@ As diretrizes do docs/03-fluxo-do-turno.md continuam valendo, traduzidas para Ty
 6. **Valores só do arquivo de regras.** Nenhum preço, aluguel ou parâmetro no código.
 7. **Sem dependência de plataforma.** O motor não usa APIs de navegador nem da Cloudflare, para rodar igual nos dois lados e nos testes.
 
-Ações, eventos, fases e chaves do JSON passam a ter nomes em inglês (por exemplo `ROLL` → `ROLL_DICE`, `DadosRolados` → `DiceRolled`, `dinheiroInicial` → `startingMoney`). A tabela de correspondência com os nomes do Roku é criada na Etapa 1 e fica neste documento.
+Ações, eventos, fases e chaves do JSON passam a ter nomes em inglês. A correspondência com os nomes do Roku está na seção abaixo.
+
+## Correspondência de nomes: Roku → web
+
+O arquivo `packages/engine/src/rules/rules.json` foi gerado a partir do `source/data/regras.json` v1 do Roku por conversão automática, que conferiu a mesma quantidade de casas, cartas e textos e os mesmos valores numéricos. Os textos em português não mudaram; só as chaves e os marcadores. Fases, ações e eventos do motor entram nesta seção na Parte 2 da Etapa 1.
+
+### Arquivo de regras
+
+| Roku | Web |
+| --- | --- |
+| `versao` | `version` |
+| `parametros` | `parameters` |
+| `modos` | `modes` |
+| `regrasProprias` (`ativa`, `descricao`) | `houseRules` (`active`, `description`) |
+| `grupos` (`nome`, `cor`, `custoCasa`, `posicoes`) | `groups` (`name`, `color`, `houseCost`, `positions`) |
+| `casas` (`posicao`, `tipo`, `nome`, `rotulo`, `grupo`, `preco`, `aluguel`, `parametro`) | `spaces` (`position`, `type`, `name`, `label`, `group`, `price`, `rent`, `taxParameter`) |
+| `cartas` (`sorte`, `reves`) | `cards` (`chance`, `setback`) |
+| carta: `id`, `titulo`, `efeito`, `acao` | `id`, `title`, `effect`, `action` |
+| `textos` | `texts` |
+| `textos.nomesPadrao` | `texts.defaultNames` |
+
+### Parâmetros
+
+| Roku | Web | Roku | Web |
+| --- | --- | --- | --- |
+| `dinheiroInicial` | `startingMoney` | `fatorHipoteca` | `mortgageFactor` |
+| `bonusPartida` | `passStartBonus` | `jurosHipoteca` | `mortgageInterest` |
+| `fianca` | `bail` | `passoVenda` | `tradeStep` |
+| `turnosMaxPrisao` | `maxJailTurns` | `passoVendaRapido` | `tradeStepFast` |
+| `impostoRenda` | `incomeTax` | `maxPropostasTurno` | `maxProposalsPerTurn` |
+| `taxaLuxo` | `luxuryTax` | `maxDuplasSeguidas` | `maxConsecutiveDoubles` |
+| `estacao` | `stationRent` | `facesDado` | `diceFaces` |
+| `multCompanhia` | `utilityMultiplier` | `cartasPorBaralho` | `cardsPerDeck` |
+| `maxCasas` | `maxHouses` | `aluguelAltoMensagem` | `highRentThreshold` |
+| `multGrupoCompleto` | `fullGroupMultiplier` | `duracaoMensagemMs` | `messageDurationMs` |
+| `fatorVendaCasa` | `houseSaleFactor` | `minJogadores` / `maxJogadores` | `minPlayers` / `maxPlayers` |
+| | | `tamanhoMaxNome` | `maxNameLength` |
+
+### Modos, grupos e tipos de casa
+
+| Roku | Web |
+| --- | --- |
+| Modos `classico`, `tempo` (`opcoesMin`, `padraoMin`), `rodadas` (`opcoes`, `padrao`) | `classic`, `time` (`optionsMinutes`, `defaultMinutes`), `rounds` (`options`, `default`) |
+| Grupos `marrom`, `azulClaro`, `rosa`, `laranja` | `brown`, `lightBlue`, `pink`, `orange` |
+| Grupos `vermelho`, `amarelo`, `verde`, `azulEscuro` | `red`, `yellow`, `green`, `darkBlue` |
+| Casas `partida`, `rua`, `estacao`, `companhia`, `imposto` | `start`, `street`, `station`, `utility`, `tax` |
+| Casas `sorte`, `reves`, `prisao`, `descanso`, `vaParaPrisao` | `chance`, `setback`, `jail`, `rest`, `goToJail` |
+
+### Cartas
+
+| Roku (`acao.tipo`) | Web (`action.type`) | Campos |
+| --- | --- | --- |
+| `receberBanco` | `receiveFromBank` | `valor` → `amount` |
+| `pagarBanco` | `payToBank` | `valor` → `amount` |
+| `receberCadaJogador` | `collectFromEachPlayer` | `valor` → `amount` |
+| `pagarCadaJogador` | `payEachPlayer` | `valor` → `amount` |
+| `irPara` | `goTo` | `destino` → `destination`, `paraTras` → `backward` |
+| `estacaoMaisProxima` | `nearestStation` | — |
+| `andar` | `move` | `casas` → `spaces` |
+| `irPrisao` | `goToJail` | — |
+| `reparos` | `repairs` | `porCasa` → `perHouse`, `porHotel` → `perHotel` |
+| `saiaPrisao` | `getOutOfJailFree` | — |
+
+### Textos
+
+Os códigos (D-xx, M-xx, H-xx, I-xx) não mudam. Campos dos textos com opções: `texto` → `text`, `opcoes` → `options`, `subtitulo` → `subtitle`, `dica` → `hint`, `motivoDesabilitado` → `disabledReason`, `textoVender` → `sellText`, `depois` → `after`, `limite` → `limit`.
+
+Marcadores dentro dos textos (`{jogador}` vira `{player}`):
+
+| Roku | Web | Roku | Web | Roku | Web |
+| --- | --- | --- | --- | --- | --- |
+| `jogador` | `player` | `casa` | `property` | `valor` | `amount` |
+| `jogadores` | `players` | `casas` | `houses` | `valores` | `amounts` |
+| `dono` | `owner` | `qtdCasas` | `houseCount` | `dinheiro` | `money` |
+| `comprador` | `buyer` | `propriedades` | `properties` | `hipoteca` | `mortgage` |
+| `credor` | `creditor` | `grupo` | `group` | `fianca` | `bail` |
+| `vencedor` | `winner` | `posicao` | `position` | `soma` | `sum` |
+| `de` / `para` | `from` / `to` | `modo` | `mode` | `acao` | `action` |
+| `passo` | `step` | `rapido` | `fastStep` | `titulo` | `title` |
+
+Iguais nos dois: `n`, `min`, `max`, `total`, `d1`, `d2`, `mult1`, `mult2`.
 
 ## Salas (vários dispositivos)
 

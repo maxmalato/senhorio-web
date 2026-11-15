@@ -16,6 +16,11 @@ export default tseslint.config(
     },
   },
   {
+    // Testes estragam campos arbitrários do arquivo de regras de propósito
+    files: ['**/test/**/*.ts', '**/*.test.ts'],
+    rules: { '@typescript-eslint/no-explicit-any': 'off' },
+  },
+  {
     files: ['**/*.svelte', '**/*.svelte.ts'],
     languageOptions: {
       parserOptions: { parser: tseslint.parser },
