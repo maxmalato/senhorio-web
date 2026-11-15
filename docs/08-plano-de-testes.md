@@ -10,7 +10,7 @@ Todas as etapas têm testes automáticos, e o CI no GitHub Actions roda tudo a c
 | @vitest/coverage-v8 | Cobertura do motor | Relatório gerado pelo `pnpm test:coverage` |
 | fast-check | Propriedades: milhares de partidas aleatórias conferindo invariantes | `packages/engine/test/` |
 | @testing-library/svelte | Componentes da interface: cartão central, listas, foco e teclas | `apps/web/src/**/*.test.ts` |
-| @cloudflare/vitest-pool-workers | Servidor das salas, no mesmo runtime da produção | `apps/server/test/` |
+| @cloudflare/vitest-plugin | Servidor das salas, no mesmo runtime da produção (workerd) | `apps/server/test/` |
 | Playwright | Ponta a ponta: tamanhos de tela, só teclado, vários jogadores, offline | `e2e/` |
 | @axe-core/playwright | Acessibilidade: contraste, rótulos e foco | `e2e/` |
 
@@ -53,7 +53,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | 1 – Motor | 45 CTs, invariantes, simulação e balanceamento | Todos passam; balanceamento próximo do Roku |
 | 2 – Telas | Componentes; partida inteira no Playwright em cada perfil de tela | Todos passam; roteiro manual aprovado em celular, desktop e TV reais |
 | 3 – PWA | Salvar e continuar; jogar com o navegador offline | Todos passam |
-| 4 – Salas | Servidor (vitest-pool-workers); sala com 3 ou mais navegadores, queda e volta de conexão, remoção de jogador | Todos passam; partida real com aparelhos diferentes |
+| 4 – Salas | Servidor (@cloudflare/vitest-plugin); sala com 3 ou mais navegadores, queda e volta de conexão, remoção de jogador | Todos passam; partida real com aparelhos diferentes |
 | 5 – Publicação | Fumaça no endereço publicado; acessibilidade | Jogo acessível pela internet |
 | 6 – Acabamento | Desempenho do 3D com reserva 2D | Fluido na TV e no celular mais fraco disponível |
 

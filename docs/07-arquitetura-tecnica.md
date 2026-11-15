@@ -73,7 +73,9 @@ senhorio-web/
 | Validação de dados | Esquema em TypeScript para o `rules.json` e para as mensagens da sala | Recusar arquivo ou mensagem inválida com motivo claro |
 | Qualidade | ESLint, Prettier, `tsc --noEmit` | Mesmo padrão em todos os pacotes |
 
-As versões exatas ficam nos `package.json` e só mudam com teste passando.
+As versões exatas ficam nos `package.json` e só mudam com teste passando. Restrição conhecida: TypeScript na 6.0, a mais nova aceita pelo typescript-eslint.
+
+O Worker (`apps/server`) serve o site gerado por `apps/web` (`apps/web/dist`) e responde primeiro só nas rotas `/api/*`; por isso `@senhorio/web` é dependência de desenvolvimento do servidor, o que garante que o site seja gerado antes no `pnpm build`. A telemetria do Wrangler fica desligada (`send_metrics: false`).
 
 ## Motor de regras
 

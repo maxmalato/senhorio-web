@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+**/*.md
+**/dist/
+**/coverage/
+**/.wrangler/
+playwright-report/
+test-results/

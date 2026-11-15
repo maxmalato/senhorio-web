@@ -6,7 +6,7 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 
 | Etapa | Situação | Tag |
 | --- | --- | --- |
-| 0 – Fundação | Em andamento | `v0.1-fundacao` |
+| 0 – Fundação | Concluída | `v0.1-fundacao` |
 | 1 – Motor em TS | A fazer | `v0.2-motor` |
 | 1b – Mockups no Figma | A fazer | — |
 | 2 – Telas (um dispositivo) | A fazer | `v0.3-telas` |
