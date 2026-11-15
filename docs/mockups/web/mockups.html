@@ -1,0 +1,845 @@
+<title>Mockups Senhorio Web</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: barra de ferramentas da página + palco com o aparelho escalado. Dentro do aparelho,
+   a mesma tela do jogo se reorganiza por container query (paisagem, tablet em pé, celular A/B).
+   Identidade do Senhorio para Roku: azul-noite, tabuleiro creme, foco dourado. Só tema escuro. */
+:root {
+  color-scheme: dark;
+  --night: #13213a;        /* fundo do jogo */
+  --panel: #1c2e4d;        /* painéis e cartões escuros */
+  --panel-2: #243a5e;      /* realce de painel */
+  --board: #f4f1e8;        /* tabuleiro */
+  --board-line: #cfc7b0;
+  --board-corner: #e9e2cc;
+  --ink: #1b2436;          /* texto sobre o tabuleiro e cartões claros */
+  --ink-2: #5d6578;
+  --card: #ffffff;
+  --card-2: #efe8d8;       /* botão secundário */
+  --focus: #f2b84b;        /* destaque único: foco */
+  --text: #f5f7fa;
+  --text-2: #a9b6cc;
+  --danger: #e5736b;
+  --ok: #7fd1a0;
+  --tool-bg: #0d1729;      /* barra de ferramentas da página (fora do jogo) */
+  --tool-line: #2a3c5c;
+  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+}
+html, body { height: 100%; }
+body {
+  background: var(--tool-bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+}
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ---------- barra de ferramentas da página ---------- */
+.tools {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: var(--tool-bg);
+  border-bottom: 1px solid var(--tool-line);
+  padding-block: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--tool-bg); }
+.tools h1 {
+  margin: 0;
+  font: 600 1.05rem/1 var(--font-display);
+  letter-spacing: .01em;
+  display: flex; align-items: center; gap: 8px;
+  white-space: nowrap;
+}
+.tools h1 small { font: 600 .72rem var(--font-body); color: var(--text-2); letter-spacing: .06em; text-transform: uppercase; }
+.group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.group > span { font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); margin-right: 2px; }
+.chip {
+  border: 1px solid var(--tool-line);
+  background: transparent;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chip:hover { color: var(--text); border-color: #3d5482; }
+.chip[aria-pressed="true"] { background: var(--panel-2); color: var(--text); border-color: var(--focus); }
+.note { font-size: .78rem; color: var(--text-2); width: 100%; margin: 0; }
+.tool-groups { display: contents; }
+.toggle { display: none; margin-left: auto; }
+@media (max-width: 760px) {
+  .tools { padding-block: 8px; }
+  .toggle { display: inline-flex; gap: 6px; align-items: center; }
+  .tools:not(.open) .tool-groups { display: none; }
+  .tools.open .tool-groups { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+}
+.note b { color: var(--text); font-weight: 700; }
+
+/* ---------- palco ---------- */
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow: hidden;
+}
+.stage.full { padding: 0; }
+.holder { position: relative; }
+.device {
+  position: absolute; top: 0; left: 0;
+  transform-origin: 0 0;
+  container: app / size;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #2c4066, 0 24px 60px rgba(0,0,0,.45);
+}
+.stage.full .device { border-radius: 0; box-shadow: none; }
+.device-label { position: absolute; left: 0; top: -1px; transform: translateY(-100%); font-size: .72rem; color: var(--text-2); padding-bottom: 4px; white-space: nowrap; }
+
+/* ---------- o jogo (dentro do aparelho) ---------- */
+.app {
+  position: absolute; inset: 0;
+  background: var(--night);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  overflow: hidden;
+}
+.app * { -webkit-tap-highlight-color: transparent; }
+
+/* tela de jogo: regiões por grid-template-areas */
+.game {
+  height: 100%;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto 1fr;
+  grid-template-areas: "brand" "players" "board" "rest";
+}
+.brand { grid-area: brand; display: flex; align-items: center; gap: .6em; min-width: 0; }
+.logo { width: 2.3em; height: auto; flex: none; }
+.wordmark { font: 600 1.45em/1 var(--font-display); letter-spacing: .005em; }
+.round { color: var(--text-2); font-size: .82em; line-height: 1.25; }
+.brand .grow { flex: 1; min-width: 0; }
+.menu-btn {
+  border: 1px solid #3a5079; background: var(--panel);
+  border-radius: .7em; padding: .5em .85em; cursor: pointer;
+  font-weight: 800; font-size: .85em; display: inline-flex; align-items: center; gap: .45em;
+}
+.menu-btn svg { width: 1.1em; height: 1.1em; }
+.timer { font: 600 .9em var(--font-display); color: var(--text); background: var(--panel); border-radius: .6em; padding: .35em .6em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* tabuleiro */
+.board-wrap { grid-area: board; display: grid; place-items: center; min-height: 0; min-width: 0; }
+.board {
+  container: board / inline-size;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 100%;
+  background: var(--board);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 1.55fr repeat(9, 1fr) 1.55fr;
+  grid-template-rows: 1.55fr repeat(9, 1fr) 1.55fr;
+  overflow: hidden;
+  color: var(--ink);
+}
+.cell {
+  position: relative;
+  border: .5px solid var(--board-line);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.65cqw;
+  line-height: 1.1;
+  min-width: 0; min-height: 0;
+  letter-spacing: .01em;
+  padding: 1px;
+}
+.cell .lbl { font-size: .86em; font-weight: 800; color: #3b4459; overflow: hidden; }
+.cell.corner { background: var(--board-corner); font-size: 1.9cqw; }
+.cell.corner .lbl { color: var(--ink); font-size: 1em; }
+.cell .band { position: absolute; display: flex; gap: 6%; align-items: center; justify-content: center; }
+.cell.s-bottom .band { left: 0; right: 0; top: 0; height: 22%; }
+.cell.s-top .band { left: 0; right: 0; bottom: 0; height: 22%; }
+.cell.s-left .band { top: 0; bottom: 0; right: 0; width: 22%; flex-direction: column; }
+.cell.s-right .band { top: 0; bottom: 0; left: 0; width: 22%; flex-direction: column; }
+.band svg { width: 1.35cqw; height: 1.35cqw; fill: #fff; }
+.cell .price { font-variant-numeric: tabular-nums; }
+.cell.s-bottom .price { margin-top: 22%; }
+.cell.s-top .price { margin-bottom: 22%; }
+.cell.s-left .price { margin-right: 22%; }
+.cell.s-right .price { margin-left: 22%; }
+.cell .own { position: absolute; width: 1.15cqw; height: 1.15cqw; border-radius: 50%; border: 1px solid rgba(0,0,0,.35); }
+.cell.s-bottom .own { bottom: 6%; right: 8%; }
+.cell.s-top .own { top: 6%; right: 8%; }
+.cell.s-left .own { left: 6%; bottom: 10%; }
+.cell.s-right .own { right: 6%; bottom: 10%; }
+.cell.here { background: #fff3cf; box-shadow: inset 0 0 0 2px var(--ink); }
+.pawn {
+  position: absolute;
+  margin: auto;
+  width: 3.1cqw; height: 3.1cqw;
+  border-radius: 50%;
+  border: max(1px, .25cqw) solid var(--ink);
+  display: grid; place-items: center;
+  font: 700 1.7cqw/1 var(--font-display);
+  color: var(--ink);
+  z-index: 2;
+}
+.cell.s-bottom .pawn { top: 23%; left: 0; right: 0; }
+.cell.s-top .pawn { bottom: 23%; left: 0; right: 0; }
+.cell.s-left .pawn { right: 23%; top: 0; bottom: 0; }
+.cell.s-right .pawn { left: 23%; top: 0; bottom: 0; }
+.cell.corner .pawn { inset: auto; top: 10%; right: 10%; margin: 0; }
+.cell.s-bottom:not(.corner):has(.pawn) .price, .cell.s-bottom:not(.corner):has(.pawn) .lbl { margin-top: 0; align-self: flex-end; margin-bottom: 8%; }
+.cell.s-top:not(.corner):has(.pawn) .price, .cell.s-top:not(.corner):has(.pawn) .lbl { margin-bottom: 0; align-self: flex-start; margin-top: 8%; }
+.cell.s-left:has(.pawn) .price, .cell.s-left:has(.pawn) .lbl { margin-right: 0; margin-left: 4%; align-self: center; margin-inline-end: auto; }
+.cell.s-right:has(.pawn) .price, .cell.s-right:has(.pawn) .lbl { margin-left: 0; margin-inline-start: auto; margin-right: 4%; }
+.center {
+  grid-column: 2 / 11; grid-row: 2 / 11;
+  position: relative;
+  display: grid; place-items: center;
+  background: #ece6d6;
+  min-width: 0; min-height: 0;
+}
+.center .mark { opacity: .16; width: 34%; }
+
+/* cartão central (C-01) */
+.card {
+  width: min(27em, 92%);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 1em;
+  box-shadow: 0 .8em 2.4em rgba(10, 20, 40, .35);
+  overflow: hidden;
+  z-index: 5;
+  font-size: max(13px, 2.15cqw);
+}
+.card-head { padding: .85em 1.1em .9em; color: #fff; position: relative; }
+.card-head .eyebrow { font-size: .68em; font-weight: 800; letter-spacing: .1em; opacity: .9; }
+.card-head h2 { margin: .12em 0 0; font: 600 1.45em/1.1 var(--font-display); text-wrap: balance; }
+.mini {
+  position: absolute; top: .6em; right: .6em;
+  width: 2em; height: 2em; border-radius: .6em; border: 0;
+  background: rgba(255,255,255,.18); color: #fff; cursor: pointer;
+  display: grid; place-items: center;
+}
+.mini svg { width: 1.05em; height: 1.05em; }
+.card-body { padding: .9em 1.1em 1em; display: grid; gap: .7em; }
+.dice { display: flex; align-items: center; gap: .5em; color: var(--ink-2); font-size: .9em; }
+.dice svg { width: 2em; height: 2em; flex: none; }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: .2em 1em; }
+.facts dt { font-size: .78em; color: var(--ink-2); }
+.facts dd { margin: 0; font: 600 1.3em var(--font-display); font-variant-numeric: tabular-nums; }
+.question { margin: .1em 0 0; font-weight: 800; font-size: 1.05em; text-wrap: balance; }
+.actions { display: grid; gap: .55em; }
+.btn {
+  min-height: 2.9em;
+  border-radius: .75em;
+  border: 0;
+  font-weight: 800;
+  font-size: 1em;
+  cursor: pointer;
+  padding: .6em 1em;
+}
+.btn.primary { background: var(--night); color: #fff; }
+.btn.secondary { background: var(--card-2); color: var(--ink); }
+.btn.is-focus, .btn:focus-visible { outline: .22em solid var(--focus); outline-offset: .14em; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn svg { width: 1.15em; height: 1.15em; flex: none; }
+.hint { font-size: .75em; color: var(--ink-2); text-align: center; }
+.waiting { display: flex; align-items: center; gap: .6em; font-weight: 700; }
+.dots { display: inline-flex; gap: .25em; }
+.dots i { width: .45em; height: .45em; border-radius: 50%; background: var(--ink-2); animation: blink 1.2s infinite ease-in-out; }
+.dots i:nth-child(2) { animation-delay: .2s; } .dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .25 } 40% { opacity: 1 } }
+.you { font-size: .8em; color: var(--ink-2); border-top: 1px solid #e7e2d6; padding-top: .6em; }
+
+/* painel de jogadores (C-02) */
+.players { grid-area: players; display: flex; gap: 8px; overflow-x: auto; min-width: 0; scrollbar-width: none; }
+.player {
+  background: var(--panel);
+  border-radius: .9em;
+  padding: .55em .7em;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0 .6em;
+  align-items: center;
+  min-width: 0;
+  flex: none;
+  border: 2px solid transparent;
+}
+.player.turn { border-color: var(--focus); }
+.avatar { width: 2.3em; height: 2.3em; border-radius: 50%; display: grid; place-items: center; font: 700 1.05em/1 var(--font-display); color: var(--ink); }
+.pname { font: 600 1.05em/1.15 var(--font-display); display: flex; align-items: center; gap: .4em; min-width: 0; flex-wrap: wrap; }
+.tag { font: 800 .58em/1 var(--font-body); letter-spacing: .08em; padding: .35em .5em; border-radius: .5em; background: var(--focus); color: var(--ink); white-space: nowrap; }
+.tag.jail { background: #34507e; color: var(--text); }
+.tag.off { background: var(--danger); color: #2a0f0d; }
+.tag.me { background: var(--text); color: var(--ink); }
+.chips { display: flex; gap: .25em; margin-top: .3em; }
+.chips i { width: .9em; height: .45em; border-radius: .15em; }
+.money { font: 600 1.15em var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.events { grid-area: events; background: var(--panel); border-radius: .9em; padding: .8em 1em; display: none; min-width: 0; }
+.events h3 { margin: 0 0 .5em; font-size: .7em; letter-spacing: .12em; color: var(--text-2); font-weight: 800; }
+.events p { margin: .35em 0; font-size: .92em; }
+.keys { grid-area: keys; display: none; flex-wrap: wrap; gap: .6em 1em; align-items: center; color: var(--text-2); font-size: .82em; }
+.keys kbd { font: 800 .9em var(--font-body); color: var(--text); border: 1px solid #3a5079; border-radius: .45em; padding: .2em .5em; margin-right: .35em; }
+.tabs { grid-area: tabs; display: none; }
+
+/* ---- celular, variação A: faixa de jogadores, tabuleiro e cartão subindo de baixo ---- */
+.app .card { font-size: 14px; }
+@container app (max-width: 599px) {
+  .app .center { position: static; }
+  .app .card {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    width: auto; border-radius: 1.2em 1.2em 0 0;
+    box-shadow: 0 -.6em 2em rgba(0,0,0,.4);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .app .card::before { content: ""; display: block; width: 2.6em; height: .3em; border-radius: 1em; background: rgba(255,255,255,.55); position: absolute; top: .45em; left: 50%; transform: translateX(-50%); z-index: 1; }
+  .app .card-head { padding-top: 1.1em; }
+  .player { font-size: 13px; padding: .4em .6em .4em .45em; }
+  .player .chips { display: none; }
+  .cell .lbl { display: none; }
+  .cell.corner .lbl { display: block; font-size: .8em; }
+  .cell { font-size: 2.15cqw; }
+  .pawn { width: 4.6cqw; height: 4.6cqw; font-size: 2.6cqw; }
+  .band svg { width: 1.9cqw; height: 1.9cqw; }
+  .cell .own { width: 1.7cqw; height: 1.7cqw; }
+  /* variação B: abas Tabuleiro e Jogadores */
+  .app[data-phone="b"] .game { grid-template-rows: auto 1fr auto; grid-template-areas: "brand" "main" "tabs"; }
+  .app[data-phone="b"] .players { display: none; }
+  .app[data-phone="b"] .board-wrap { grid-area: main; align-self: start; }
+  .app[data-phone="b"] .card { bottom: 62px; }
+  .app[data-phone="b"] .tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    margin: 0 -12px -12px; padding: 6px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: #0f1a2e; border-top: 1px solid #23365a;
+  }
+  .tab { border: 0; background: transparent; border-radius: .7em; padding: .65em; font-weight: 800; color: var(--text-2); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .45em; }
+  .tab svg { width: 1.2em; height: 1.2em; }
+  .tab[aria-selected="true"] { background: var(--panel); color: var(--text); }
+  .app[data-phone="b"][data-tab="players"] .board-wrap { display: none; }
+  .app[data-phone="b"][data-tab="players"] .players { display: flex; flex-direction: column; grid-area: main; overflow: auto; }
+  .app[data-phone="b"][data-tab="players"] .players .player { font-size: 15px; padding: .6em .8em; }
+  .app[data-phone="b"][data-tab="players"] .players .chips { display: flex; }
+  .app[data-phone="b"][data-tab="players"] .events { display: block; }
+  .app[data-phone="b"][data-tab="players"] .card { display: none; }
+}
+
+/* ---- tablet em pé: tabuleiro em cima, jogadores e acontecimentos embaixo ---- */
+@container app (min-width: 600px) and (max-aspect-ratio: 6/5) {
+  .app { font-size: 16px; }
+  .game { padding: 20px; gap: 16px; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto 1fr; grid-template-areas: "brand brand" "board board" "players events"; }
+  .players { flex-direction: column; overflow: visible; }
+  .events { display: block; }
+  .app .card { font-size: max(14px, 2.15cqw); }
+}
+
+/* ---- paisagem (desktop e TV): tabuleiro à esquerda, painel à direita, como no Roku ---- */
+@container app (min-width: 880px) and (min-aspect-ratio: 6/5) {
+  .app { font-size: clamp(13px, min(1.12cqw, 2.05cqh), 28px); }
+  .game {
+    padding: 2.4cqh 2.6cqw; gap: 1.1em 1.6em;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: "board brand" "board players" "board events" "board keys";
+  }
+  .board-wrap { height: 100%; }
+  .board { height: 100%; width: auto; aspect-ratio: 760 / 648; grid-template-rows: 1.45fr repeat(9, 1fr) 1.45fr; }
+  .players { flex-direction: column; overflow: visible; }
+  .player { padding: .7em .9em; }
+  .events { display: block; align-self: start; }
+  .keys { display: flex; }
+  .app .card { font-size: max(12px, 1.95cqw); }
+  .round { font-size: .9em; }
+}
+
+/* TV: foco sempre visível e dicas do controle remoto */
+.app.tv .keys .k-desk { display: none; }
+.app:not(.tv) .keys .k-tv { display: none; }
+
+/* sobreposição: partida pausada */
+.overlay { position: absolute; inset: 0; background: rgba(8, 14, 26, .72); display: grid; place-items: center; z-index: 10; padding: 16px; }
+.dialog { background: var(--card); color: var(--ink); border-radius: 1.1em; width: min(26em, 100%); padding: 1.3em 1.4em 1.2em; display: grid; gap: .8em; box-shadow: 0 1em 3em rgba(0,0,0,.5); }
+.dialog h2 { margin: 0; font: 600 1.5em/1.1 var(--font-display); }
+.dialog p { margin: 0; color: var(--ink-2); }
+.dialog .who { display: flex; align-items: center; gap: .7em; color: var(--ink); font-weight: 800; }
+.dialog .who .avatar { position: relative; }
+.dialog .who .avatar::after { content: ""; position: absolute; right: -.1em; bottom: -.1em; width: .75em; height: .75em; border-radius: 50%; background: var(--danger); border: 2px solid var(--card); }
+.clock { font: 600 1.05em var(--font-display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.small { font-size: .82em; }
+
+/* ---------- telas cheias (início e salas) ---------- */
+.full-screen { height: 100%; overflow: auto; display: grid; justify-items: center; align-content: start; padding: 22px 18px 28px; }
+.sheet { width: min(32em, 100%); display: grid; gap: 1.1em; }
+.back { justify-self: start; border: 0; background: transparent; color: var(--text-2); font-weight: 800; cursor: pointer; display: inline-flex; gap: .4em; align-items: center; padding: .3em 0; }
+.back svg { width: 1.1em; height: 1.1em; }
+.sheet h1 { margin: 0; font: 600 1.9em/1.1 var(--font-display); text-wrap: balance; }
+.lead { margin: 0; color: var(--text-2); }
+.hero { display: grid; justify-items: center; gap: .5em; text-align: center; padding: .8em 0 .4em; }
+.hero .logo { width: 5.2em; }
+.hero .wordmark { font-size: 2.6em; }
+.hero .lead { max-width: 22em; }
+.choice { background: var(--panel); border-radius: 1.1em; padding: 1.1em 1.2em; display: grid; gap: .55em; border: 2px solid transparent; }
+.choice.is-focus { border-color: var(--focus); }
+.choice h2 { margin: 0; font: 600 1.3em var(--font-display); display: flex; align-items: center; gap: .5em; }
+.choice h2 svg { width: 1.3em; height: 1.3em; color: var(--focus); }
+.choice p { margin: 0; color: var(--text-2); font-size: .95em; }
+.choice .row { display: flex; gap: .6em; flex-wrap: wrap; margin-top: .3em; }
+.choice .row .btn { flex: 1 1 9em; }
+.btn.gold { background: var(--focus); color: var(--ink); }
+.btn.ghost { background: transparent; color: var(--text); border: 1.5px solid #3a5079; }
+.resume { display: flex; align-items: center; gap: .9em; background: var(--panel-2); border-radius: 1.1em; padding: .9em 1.1em; }
+.resume .grow { flex: 1; min-width: 0; }
+.resume b { font: 600 1.1em var(--font-display); display: block; }
+.resume span { color: var(--text-2); font-size: .88em; }
+.field { display: grid; gap: .45em; }
+.field > label, .field > .lab { font-size: .78em; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); }
+.input { background: var(--panel); border: 2px solid #344a72; border-radius: .8em; padding: .75em .9em; color: var(--text); font: 700 1.05em var(--font-body); width: 100%; }
+.input:focus { outline: none; border-color: var(--focus); }
+.swatches { display: flex; gap: .55em; flex-wrap: wrap; }
+.swatch { width: 2.5em; height: 2.5em; border-radius: 50%; border: 3px solid transparent; cursor: pointer; display: grid; place-items: center; font: 700 1em var(--font-display); color: var(--ink); position: relative; }
+.swatch[aria-checked="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--night), 0 0 0 4px var(--focus); }
+.swatch:disabled { cursor: not-allowed; opacity: .35; }
+.swatch:disabled::after { content: ""; position: absolute; width: 120%; height: 2px; background: var(--text); transform: rotate(-45deg); }
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--panel); border-radius: .8em; padding: .25em; gap: .25em; }
+.segmented button { border: 0; background: transparent; border-radius: .6em; padding: .6em .4em; font-weight: 800; color: var(--text-2); cursor: pointer; }
+.segmented button[aria-checked="true"] { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 2px var(--focus); }
+.stepper { display: grid; grid-template-columns: auto 1fr auto; align-items: center; background: var(--panel); border-radius: .8em; padding: .3em; }
+.stepper button { width: 2.8em; height: 2.8em; border: 0; border-radius: .6em; background: var(--panel-2); cursor: pointer; display: grid; place-items: center; }
+.stepper button svg { width: 1.1em; height: 1.1em; }
+.stepper output { text-align: center; font: 600 1.25em var(--font-display); }
+.callout { display: flex; gap: .7em; background: #182844; border-radius: .9em; padding: .8em 1em; color: var(--text-2); font-size: .9em; }
+.callout svg { width: 1.3em; height: 1.3em; flex: none; color: var(--focus); margin-top: .1em; }
+.callout.error { background: #3a1f24; color: #ffd9d4; }
+.callout.error svg { color: var(--danger); }
+.code-boxes { display: grid; grid-template-columns: repeat(6, 1fr); gap: .45em; }
+.code-boxes span { aspect-ratio: 4 / 5; max-width: 100%; display: grid; place-items: center; background: var(--panel); border: 2px solid #344a72; border-radius: .7em; font: 600 1.7em var(--font-display); }
+.code-boxes span.cur { border-color: var(--focus); }
+.code-boxes.bad span { border-color: var(--danger); }
+.code-big { display: grid; justify-items: center; gap: .6em; background: var(--panel); border-radius: 1.1em; padding: 1.1em; text-align: center; }
+.code-big .lab { font-size: .75em; font-weight: 800; letter-spacing: .12em; color: var(--text-2); }
+.code-big .code { font: 600 2.6em/1 var(--font-display); letter-spacing: .14em; font-variant-numeric: tabular-nums; }
+.code-big .code span { color: var(--text-2); }
+.list { display: grid; gap: .5em; }
+.list .row { display: flex; align-items: center; gap: .75em; background: var(--panel); border-radius: .9em; padding: .6em .8em; }
+.list .row .grow { flex: 1; min-width: 0; font: 600 1.05em var(--font-display); }
+.list .row .meta { color: var(--text-2); font-size: .82em; }
+.list .row.empty { background: transparent; border: 1.5px dashed #344a72; color: var(--text-2); font-weight: 700; }
+.list .row.empty .avatar { background: transparent; border: 1.5px dashed #344a72; color: var(--text-2); }
+.count { display: flex; justify-content: space-between; align-items: baseline; }
+.count h2 { margin: 0; font: 600 1.15em var(--font-display); }
+.count span { color: var(--text-2); font-size: .88em; }
+.footnote { color: var(--text-2); font-size: .85em; text-align: center; margin: 0; }
+
+@container app (min-width: 880px) and (min-aspect-ratio: 6/5) {
+  .full-screen { align-content: center; padding: 3cqh 4cqw; }
+  .sheet { width: min(36em, 100%); }
+  .sheet.wide { width: min(60em, 100%); }
+  .sheet.wide .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1em; }
+  .sheet.split { width: min(62em, 100%); grid-template-columns: 1fr 1fr; column-gap: 2.4em; align-items: start; }
+  .sheet.split > .back, .sheet.split > .title-block { grid-column: 1 / -1; }
+}
+.choices { display: grid; gap: .9em; }
+
+@media (prefers-reduced-motion: reduce) { .dots i { animation: none; opacity: .7; } }
+</style>
+
+<header class="tools" aria-label="Opções de visualização">
+  <h1>Senhorio Web <small>mockups · rodada 1</small></h1>
+  <button class="chip toggle" id="toggle" type="button" aria-expanded="false" aria-controls="toolGroups">Opções · <span id="toggleLabel"></span></button>
+  <div class="tool-groups" id="toolGroups">
+  <div class="group" role="group" aria-label="Formato">
+    <span>Formato</span>
+    <button class="chip" data-device="auto" aria-pressed="false">Tela inteira</button>
+    <button class="chip" data-device="phone" aria-pressed="false">Celular</button>
+    <button class="chip" data-device="tablet" aria-pressed="false">Tablet</button>
+    <button class="chip" data-device="desktop" aria-pressed="false">Desktop</button>
+    <button class="chip" data-device="tv" aria-pressed="false">TV</button>
+  </div>
+  <div class="group" role="group" aria-label="Tela" id="screenChips"><span>Tela</span></div>
+  <div class="group" role="group" aria-label="Variação" id="variantChips"></div>
+  <div class="group" role="group" aria-label="Celular em pé" id="phoneChips">
+    <span>Celular em pé</span>
+    <button class="chip" data-phone="a" aria-pressed="false">A · tabuleiro e cartão</button>
+    <button class="chip" data-phone="b" aria-pressed="false">B · abas</button>
+  </div>
+  <p class="note" id="note"></p>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <div class="holder" id="holder">
+    <div class="device" id="device"><div class="app" id="app"></div></div>
+  </div>
+</main>
+
+<script>
+(() => {
+  // ---------- dados de exemplo (nomes sugeridos do jogo; valores do rules.json v1) ----------
+  const GROUPS = { brown: ['#8B5A3C', 'MARROM'], lightBlue: ['#6FB8E0', 'AZUL-CLARO'], pink: ['#D9559A', 'ROSA'], orange: ['#EE8A2A', 'LARANJA'], red: ['#C62F2F', 'VERMELHO'], yellow: ['#F2CF3B', 'AMARELO'], green: ['#2E9E5B', 'VERDE'], darkBlue: ['#2B4FA8', 'AZUL-ESCURO'] };
+  const SPACES = [["start","",0,"PARTIDA"],["street","brown",60,"Travessa do Porto"],["chance","",0,"SORTE"],["street","brown",60,"Beco das Flores"],["tax","",0,"IMPOSTO"],["station","",200,"ESTAÇÃO"],["street","lightBlue",100,"Rua da Fonte"],["setback","",0,"REVÉS"],["street","lightBlue",100,"Rua do Mercado"],["street","lightBlue",120,"Rua da Escola"],["jail","",0,"PRISÃO"],["street","pink",140,"Rua das Acácias"],["utility","",150,"ENERGIA"],["street","pink",140,"Rua dos Ipês"],["street","pink",160,"Alameda das Orquídeas"],["station","",200,"ESTAÇÃO"],["street","orange",180,"Rua da Praça"],["chance","",0,"SORTE"],["street","orange",180,"Rua do Coreto"],["street","orange",200,"Avenida da Matriz"],["rest","",0,"DESCANSO"],["street","red",220,"Rua dos Coqueiros"],["setback","",0,"REVÉS"],["street","red",220,"Rua das Mangueiras"],["street","red",240,"Rua das Palmeiras"],["station","",200,"ESTAÇÃO"],["street","yellow",260,"Rua da Aurora"],["street","yellow",260,"Rua do Horizonte"],["utility","",150,"ÁGUA"],["street","yellow",280,"Rua do Sol"],["goToJail","",0,"VÁ PARA A PRISÃO"],["street","green",300,"Avenida dos Bancos"],["street","green",300,"Rua do Comércio"],["chance","",0,"SORTE"],["street","green",320,"Avenida Central"],["station","",200,"ESTAÇÃO"],["setback","",0,"REVÉS"],["street","darkBlue",350,"Alameda dos Barões"],["tax","",0,"IMPOSTO"],["street","darkBlue",400,"Avenida do Senhorio"]];
+  const PLAYERS = [
+    { name: 'Ana', color: '#4FC3F7', money: 1180, at: 24, owns: [1, 3, 6] },
+    { name: 'Bruno', color: '#FF8A65', money: 940, at: 10, owns: [11, 13], jail: true },
+    { name: 'Carla', color: '#B39DDB', money: 1310, at: 15, owns: [16, 18, 25] },
+    { name: 'Diego', color: '#81C784', money: 760, at: 37, owns: [31, 32, 34] },
+  ];
+  const HOUSES = { 31: 1, 32: 1, 34: 1 };
+  const EVENTS = ['Diego pagou R$ 30 de aluguel a Carla', 'Bruno tirou três duplas e foi para a prisão', 'Carla comprou a Estação Norte'];
+  const PAWN_COLORS = ['#4FC3F7', '#FF8A65', '#B39DDB', '#81C784', '#F48FB1', '#4DB6AC'];
+  const brl = (n) => 'R$ ' + n.toLocaleString('pt-BR');
+
+  // ---------- ícones ----------
+  const ICON = {
+    menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+    minimize: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 12h12"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+    left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+    right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+    board: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M8 3.5v17M16 3.5v17M3.5 8h17M3.5 16h17"/></svg>',
+    people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14c2.4.2 4 1.6 4.5 4"/></svg>',
+    device: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3" stroke-linecap="round"/></svg>',
+    devices: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5" width="8" height="14" rx="2"/><rect x="13.5" y="5" width="8" height="14" rx="2"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.2"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></svg>',
+    house: '<svg viewBox="0 0 10 10"><path d="M5 1 9.4 4.8V9H.6V4.8z"/></svg>',
+  };
+  // logo C: casas empilhadas nas cores dos grupos
+  function logo(cls = 'logo') {
+    const colors = Object.values(GROUPS).map((g) => g[0]);
+    const heights = [1, 1, 2, 2, 3, 3, 4, 4];
+    let s = '';
+    heights.forEach((h, c) => {
+      for (let r = 0; r < h; r++) {
+        const x = c * 11, y = 40 - (r + 1) * 10;
+        s += `<path d="M${x + 4.5} ${y} L${x + 9} ${y + 3.6} V${y + 9} H${x} V${y + 3.6} Z" fill="${colors[c]}"/>`;
+      }
+    });
+    return `<svg class="${cls}" viewBox="0 0 88 40" role="img" aria-label="Logo do Senhorio">${s}</svg>`;
+  }
+  function die(n) {
+    const P = { 1: [[12, 12]], 2: [[7, 7], [17, 17]], 3: [[7, 7], [12, 12], [17, 17]], 4: [[7, 7], [17, 7], [7, 17], [17, 17]], 5: [[7, 7], [17, 7], [12, 12], [7, 17], [17, 17]], 6: [[7, 6.5], [17, 6.5], [7, 12], [17, 12], [7, 17.5], [17, 17.5]] };
+    return `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="1.5" width="21" height="21" rx="4.5" fill="#fff" stroke="#1b2436" stroke-width="2"/>${P[n].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.1" fill="#1b2436"/>`).join('')}</svg>`;
+  }
+
+  // ---------- telas e variações ----------
+  const SCREENS = [
+    { id: 'game', label: 'Jogo · compra', variants: [['single', 'Um aparelho'], ['mine', 'Vários · na sua vez'], ['wait', 'Vários · esperando']] },
+    { id: 'paused', label: 'Jogador desconectado', variants: [['host-early', 'Quem criou · antes de 3 min'], ['host-late', 'Quem criou · depois de 3 min'], ['guest', 'Outro jogador']] },
+    { id: 'home', label: 'Início', variants: [['saved', 'Com partida salva'], ['fresh', 'Sem partida salva']] },
+    { id: 'create', label: 'Criar sala', variants: [] },
+    { id: 'join', label: 'Entrar com código', variants: [['typing', 'Digitando'], ['error', 'Código errado']] },
+    { id: 'lobby', label: 'Sala de espera', variants: [['host', 'Quem criou'], ['guest', 'Convidado']] },
+  ];
+  const DEVICES = {
+    auto: { label: 'Tela inteira' },
+    phone: { w: 390, h: 844, label: 'Celular · 390 × 844' },
+    tablet: { w: 820, h: 1180, label: 'Tablet em pé · 820 × 1180' },
+    desktop: { w: 1440, h: 900, label: 'Desktop · 1440 × 900' },
+    tv: { w: 1920, h: 1080, label: 'TV Full HD · 1920 × 1080 (a TV HD 1280 × 720 tem a mesma proporção)' },
+  };
+  const state = { device: 'auto', screen: 'game', variant: {}, phone: 'a', tab: 'board' };
+  try {
+    const saved = JSON.parse(localStorage.getItem('senhorio-mockups') || '{}');
+    Object.assign(state, saved);
+  } catch (e) { /* sem armazenamento: usa o padrão */ }
+  const hashScreen = location.hash.slice(1);
+  if (SCREENS.some((s) => s.id === hashScreen)) state.screen = hashScreen;
+  function save() { try { localStorage.setItem('senhorio-mockups', JSON.stringify(state)); } catch (e) { /* ignora */ } }
+  const variantOf = (id) => state.variant[id] || (SCREENS.find((s) => s.id === id).variants[0] || [''])[0];
+
+  // ---------- tabuleiro ----------
+  function cellPos(p) {
+    if (p <= 10) return { row: 11, col: 11 - p, side: 'bottom' };
+    if (p < 20) return { row: 11 - (p - 10), col: 1, side: 'left' };
+    if (p <= 30) return { row: 1, col: p - 19, side: 'top' };
+    return { row: p - 29, col: 11, side: 'right' };
+  }
+  function owner(p) { return PLAYERS.find((pl) => pl.owns.includes(p)); }
+  function boardHTML(highlight) {
+    let html = '';
+    SPACES.forEach(([type, group, price, label], p) => {
+      const { row, col, side } = cellPos(p);
+      const corner = p % 10 === 0;
+      let inner = '';
+      if (type === 'street') {
+        const houses = HOUSES[p] || 0;
+        inner = `<span class="band" style="background:${GROUPS[group][0]}">${ICON.house.repeat(houses)}</span><span class="price">${brl(price)}</span>`;
+      } else {
+        inner = `<span class="lbl">${label}</span>`;
+      }
+      const own = owner(p);
+      if (own) inner += `<span class="own" style="background:${own.color}" title="${own.name}"></span>`;
+      const here = PLAYERS.filter((pl) => pl.at === p);
+      here.forEach((pl, i) => {
+        inner += `<span class="pawn" style="background:${pl.color};${here.length > 1 ? `transform:translate(${i * 60 - 30}%, 0)` : ''}" aria-label="${pl.name}">${pl.name[0]}</span>`;
+      });
+      const name = type === 'street' ? `${label}, ${brl(price)}` : label;
+      html += `<div class="cell s-${side}${corner ? ' corner' : ''}${p === highlight ? ' here' : ''}" style="grid-row:${row};grid-column:${col}" title="${name}">${inner}</div>`;
+    });
+    return html;
+  }
+
+  // ---------- partes da tela de jogo ----------
+  function brandHTML(opts = {}) {
+    return `<div class="brand">${logo()}<div class="grow"><div class="wordmark">senhorio</div><div class="round">Rodada 7 · Banco: computador</div></div>
+      ${opts.timer ? `<span class="timer" title="Modo tempo">${opts.timer}</span>` : ''}
+      <button class="menu-btn" type="button">${ICON.menu}<span>Menu</span></button></div>`;
+  }
+  function playersHTML(opts = {}) {
+    return `<div class="players" aria-label="Jogadores">${PLAYERS.map((pl, i) => {
+      let tags = '';
+      if (i === 0) tags += '<span class="tag">JOGANDO</span>';
+      if (pl.jail) tags += '<span class="tag jail">NA PRISÃO</span>';
+      if (opts.offline === i) tags += '<span class="tag off">SEM CONEXÃO</span>';
+      if (opts.me === i) tags += '<span class="tag me">VOCÊ</span>';
+      const chips = pl.owns.map((p) => `<i style="background:${SPACES[p][0] === 'street' ? GROUPS[SPACES[p][1]][0] : '#9aa6bb'}"></i>`).join('');
+      return `<div class="player${i === 0 ? ' turn' : ''}"><span class="avatar" style="background:${pl.color}">${pl.name[0]}</span><div style="min-width:0"><div class="pname">${pl.name} ${tags}</div><div class="chips">${chips}</div></div><span class="money">${brl(pl.money)}</span></div>`;
+    }).join('')}</div>`;
+  }
+  function eventsHTML() {
+    return `<section class="events" aria-label="Últimos acontecimentos"><h3>ÚLTIMOS ACONTECIMENTOS</h3>${EVENTS.map((e) => `<p>${e}</p>`).join('')}</section>`;
+  }
+  function keysHTML() {
+    return `<div class="keys"><span class="k-tv"><kbd>OK</kbd>confirmar</span><span class="k-tv"><kbd>▲▼</kbd>escolher</span><span class="k-tv"><kbd>Voltar</kbd>ver tabuleiro</span>
+      <span class="k-desk"><kbd>Enter</kbd>confirmar</span><span class="k-desk"><kbd>↑↓</kbd>escolher</span><span class="k-desk"><kbd>M</kbd>menu</span><span class="k-desk"><kbd>Esc</kbd>ver tabuleiro</span></div>`;
+  }
+  function tabsHTML() {
+    return `<nav class="tabs" role="tablist" aria-label="Seções"><button class="tab" role="tab" data-tab="board" aria-selected="${state.tab === 'board'}">${ICON.board}Tabuleiro</button><button class="tab" role="tab" data-tab="players" aria-selected="${state.tab === 'players'}">${ICON.people}Jogadores</button></nav>`;
+  }
+  function purchaseCard(variant) {
+    const [color, gname] = GROUPS.red;
+    const head = `<div class="card-head" style="background:${color}"><div class="eyebrow">GRUPO ${gname} · 3 DE 3</div><h2>Rua das Palmeiras</h2><button class="mini" type="button" aria-label="Minimizar e ver o tabuleiro">${ICON.minimize}</button></div>`;
+    const facts = `<div class="dice">${die(5)}${die(3)}<span>Ana tirou 5 + 3 = 8</span></div><dl class="facts"><dt>Preço</dt><dt>Aluguel base</dt><dd>R$ 240</dd><dd>R$ 20</dd></dl>`;
+    if (variant === 'wait') {
+      return `<div class="card" role="dialog" aria-label="Vez de Ana">${head}<div class="card-body">${facts}<div class="waiting"><span class="dots"><i></i><i></i><i></i></span>Ana está decidindo se compra</div><div class="you">Você é Carla · ${brl(1310)}. Enquanto espera, dá para ver o tabuleiro e os jogadores.</div></div></div>`;
+    }
+    const q = variant === 'mine' ? 'Sua vez! Quer comprar esta propriedade?' : 'Ana, quer comprar esta propriedade?';
+    return `<div class="card" role="dialog" aria-label="Compra">${head}<div class="card-body">${facts}<p class="question">${q}</p><div class="actions"><button class="btn primary is-focus" type="button">Comprar por R$ 240</button><button class="btn secondary" type="button">Não comprar</button></div></div></div>`;
+  }
+  function gameHTML(card, opts = {}) {
+    return `<div class="game">${brandHTML(opts)}${playersHTML(opts)}
+      <div class="board-wrap"><div class="board" role="img" aria-label="Tabuleiro">${boardHTML(24)}<div class="center">${logo('mark')}${card || ''}</div></div></div>
+      ${eventsHTML()}${keysHTML()}${tabsHTML()}</div>`;
+  }
+
+  // ---------- telas ----------
+  const render = {
+    game() {
+      const v = variantOf('game');
+      return gameHTML(purchaseCard(v), { me: v === 'mine' ? 0 : v === 'wait' ? 2 : undefined, timer: '38:12' });
+    },
+    paused() {
+      const v = variantOf('paused');
+      let action;
+      if (v === 'host-early') action = '<button class="btn secondary" type="button" disabled>Remover Bruno em 1:36</button><p class="small">Depois de 3 minutos sem conexão, você pode tirar Bruno da partida.</p>';
+      else if (v === 'host-late') action = '<button class="btn primary is-focus" type="button">Remover Bruno da partida</button><p class="small">Bruno sai como quem abandonou, e as propriedades voltam ao banco (RN-115). Se Bruno voltar antes, a partida continua normalmente.</p>';
+      else action = '<p class="small">Só quem criou a sala pode remover um jogador sem conexão.</p>';
+      const since = v === 'host-late' ? '3:05' : '1:24';
+      const dialog = `<div class="overlay"><div class="dialog" role="alertdialog" aria-label="Partida pausada"><h2>Partida pausada</h2>
+        <div class="who"><span class="avatar" style="background:${PLAYERS[1].color}">B</span><div>Bruno perdeu a conexão<div class="clock">esperando há ${since}</div></div></div>
+        <p>O cronômetro da partida está parado. Assim que Bruno voltar pelo mesmo aparelho, o jogo continua de onde parou.</p>${action}</div></div>`;
+      return gameHTML('', { offline: 1, me: v === 'guest' ? 2 : 0, timer: '38:12' }) + dialog;
+    },
+    home() {
+      const v = variantOf('home');
+      const resume = v === 'saved' ? `<div class="resume"><div class="grow"><b>Partida em andamento</b><span>Rodada 7 · Ana, Bruno, Carla e Diego · salva há 2 h</span></div><button class="btn gold is-focus" type="button">Continuar</button></div>` : '';
+      return `<div class="full-screen"><div class="sheet wide"><div class="hero">${logo()}<div class="wordmark">senhorio</div><p class="lead">O banco faz as contas. Vocês só decidem. De 2 a 6 jogadores.</p></div>${resume}
+        <div class="choices">
+          <section class="choice${v === 'fresh' ? ' is-focus' : ''}"><h2>${ICON.device}Neste aparelho</h2><p>Um aparelho só, passado de mão em mão na vez de cada um. Funciona sem internet.</p><div class="row"><button class="btn secondary" type="button">Nova partida</button></div></section>
+          <section class="choice"><h2>${ICON.devices}Cada um no seu</h2><p>Crie uma sala e passe o código. Cada jogador entra pelo próprio celular, tablet ou computador.</p><div class="row"><button class="btn secondary" type="button">Criar sala</button><button class="btn ghost" type="button">Entrar com código</button></div></section>
+        </div><p class="footnote">Nenhuma sala é pública: só entra quem recebe o código.</p></div></div>`;
+    },
+    create() {
+      return `<div class="full-screen"><div class="sheet split"><button class="back" type="button">${ICON.back}Voltar</button><div class="title-block"><h1>Criar sala</h1><p class="lead">Você vai receber um código para passar aos outros jogadores.</p></div>
+        <div style="display:grid;gap:1.1em">
+          <div class="field"><label for="c-name">Seu apelido</label><input class="input" id="c-name" value="Ana" maxlength="10" autocomplete="off"><span class="small" style="color:var(--text-2)">Até 10 letras. Não precisa de conta nem e-mail.</span></div>
+          <div class="field"><span class="lab">Cor do seu peão</span><div class="swatches" role="radiogroup" aria-label="Cor">${PAWN_COLORS.map((c, i) => `<button class="swatch" type="button" role="radio" aria-checked="${i === 0}" style="background:${c}" aria-label="Cor ${i + 1}">${i === 0 ? 'A' : ''}</button>`).join('')}</div></div>
+        </div>
+        <div style="display:grid;gap:1.1em">
+          <div class="field"><span class="lab">Modo de partida</span><div class="segmented" role="radiogroup" aria-label="Modo"><button type="button" role="radio" aria-checked="false">Clássico</button><button type="button" role="radio" aria-checked="true">Tempo</button><button type="button" role="radio" aria-checked="false">Rodadas</button></div>
+            <div class="stepper"><button type="button" aria-label="Menos tempo">${ICON.left}</button><output>45 minutos</output><button type="button" aria-label="Mais tempo">${ICON.right}</button></div></div>
+          <div class="callout">${ICON.lock}<span>A sala não aparece em nenhuma lista. Ela é apagada quando a partida termina ou depois de um tempo sem ninguém jogando.</span></div>
+          <button class="btn gold is-focus" type="button">Criar sala</button>
+        </div></div></div>`;
+    },
+    join() {
+      const v = variantOf('join');
+      const chars = v === 'error' ? ['K', '7', 'P', '4', 'Q', 'Z'] : ['K', '7', 'P', '4', '', ''];
+      const boxes = chars.map((c, i) => `<span class="${v !== 'error' && i === 4 ? 'cur' : ''}">${c}</span>`).join('');
+      const error = v === 'error' ? `<div class="callout error" role="alert">${ICON.info}<span>Não encontramos a sala K7P 4QZ. Confira o código com quem criou a sala. Se a partida já começou, só entra quem já estava nela.</span></div>` : `<div class="callout">${ICON.info}<span>Peça o código para quem criou a sala. Letras e números, sem 0 e sem O para não confundir.</span></div>`;
+      return `<div class="full-screen"><div class="sheet"><button class="back" type="button">${ICON.back}Voltar</button><div><h1>Entrar numa sala</h1></div>
+        <div class="field"><span class="lab">Código da sala</span><div class="code-boxes${v === 'error' ? ' bad' : ''}" aria-label="Código de 6 caracteres">${boxes}</div></div>${error}
+        <div class="field"><label for="j-name">Seu apelido</label><input class="input" id="j-name" value="Carla" maxlength="10" autocomplete="off"></div>
+        <div class="field"><span class="lab">Cor do seu peão</span><div class="swatches" role="radiogroup" aria-label="Cor">${PAWN_COLORS.map((c, i) => `<button class="swatch" type="button" role="radio" aria-checked="${i === 2}" ${i < 2 ? 'disabled title="Já escolhida"' : ''} style="background:${c}" aria-label="Cor ${i + 1}">${i === 2 ? 'C' : ''}</button>`).join('')}</div><span class="small" style="color:var(--text-2)">Cores riscadas já foram escolhidas na sala.</span></div>
+        <button class="btn gold is-focus" type="button" ${v === 'error' ? '' : 'disabled'}>Entrar</button></div></div>`;
+    },
+    lobby() {
+      const v = variantOf('lobby');
+      const me = v === 'host' ? 0 : 2;
+      const rows = PLAYERS.slice(0, 3).map((pl, i) => `<div class="row"><span class="avatar" style="background:${pl.color}">${pl.name[0]}</span><span class="grow">${pl.name}${i === me ? ' <span class="tag me">VOCÊ</span>' : ''}</span><span class="meta">${i === 0 ? 'criou a sala' : 'entrou agora há pouco'}</span></div>`).join('');
+      const empty = '<div class="row empty"><span class="avatar">+</span><span>Esperando jogador</span></div>'.repeat(3);
+      const action = v === 'host'
+        ? '<button class="btn gold is-focus" type="button">Começar partida</button><p class="footnote">A ordem de jogo é sorteada pelo banco ao começar. Depois disso, ninguém novo entra.</p>'
+        : `<div class="callout"><span class="dots" style="margin-top:.45em"><i></i><i></i><i></i></span><span>Esperando Ana começar a partida. A ordem de jogo é sorteada pelo banco.</span></div><button class="btn ghost" type="button">Sair da sala</button>`;
+      return `<div class="full-screen"><div class="sheet split"><button class="back" type="button">${ICON.back}${v === 'host' ? 'Fechar sala' : 'Voltar'}</button><div class="title-block"><h1>Sala de espera</h1><p class="lead">Modo tempo · 45 minutos · cada jogador começa com R$ 1.500</p></div>
+        <div style="display:grid;gap:1em">
+          <div class="code-big"><span class="lab">CÓDIGO DA SALA</span><span class="code">K7P<span>·</span>4QX</span><button class="btn secondary" type="button" style="display:inline-flex;gap:.5em;align-items:center">${ICON.copy}Copiar código</button></div>
+          <p class="footnote">Passe este código para quem vai jogar. Ninguém encontra a sala sem ele.</p>
+        </div>
+        <div style="display:grid;gap:1em"><div class="count"><h2>Jogadores</h2><span>3 de 6</span></div><div class="list">${rows}${empty}</div>${action}</div>
+      </div></div>`;
+    },
+  };
+
+  // ---------- montagem ----------
+  const app = document.getElementById('app');
+  const device = document.getElementById('device');
+  const holder = document.getElementById('holder');
+  const stage = document.getElementById('stage');
+  const note = document.getElementById('note');
+
+  function draw() {
+    app.dataset.phone = state.phone;
+    app.dataset.tab = state.tab;
+    app.classList.toggle('tv', state.device === 'tv');
+    app.innerHTML = render[state.screen]();
+    // barra de ferramentas
+    document.querySelectorAll('[data-device]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.device === state.device)));
+    document.querySelectorAll('#phoneChips [data-phone]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.phone === state.phone)));
+    document.querySelectorAll('#screenChips [data-screen]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.screen === state.screen)));
+    const scr = SCREENS.find((s) => s.id === state.screen);
+    const vc = document.getElementById('variantChips');
+    vc.innerHTML = scr.variants.length ? '<span>Variação</span>' + scr.variants.map(([id, label]) => `<button class="chip" data-variant="${id}" aria-pressed="${variantOf(scr.id) === id}">${label}</button>`).join('') : '';
+    vc.hidden = !scr.variants.length;
+    document.getElementById('phoneChips').hidden = !(state.screen === 'game' || state.screen === 'paused');
+    note.innerHTML = state.device === 'auto'
+      ? 'Mostrando no tamanho da sua tela. <b>Abra este link no celular e no navegador da Smart TV</b> para ver como fica em cada um. Nas telas de jogo, use as setas e Enter para navegar como no controle remoto.'
+      : `${DEVICES[state.device].label}. Os nomes e valores são exemplos; as regras e os textos vêm do jogo do Roku.`;
+    document.getElementById('toggleLabel').textContent = scr.label;
+    fit();
+    save();
+  }
+
+  function fit() {
+    const d = DEVICES[state.device];
+    stage.classList.toggle('full', state.device === 'auto');
+    let w, h, s = 1;
+    if (state.device === 'auto') {
+      w = stage.clientWidth; h = stage.clientHeight;
+    } else {
+      const cs = getComputedStyle(stage);
+      const availW = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const availH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 18;
+      w = d.w; h = d.h;
+      s = Math.min(availW / w, availH / h, 1);
+    }
+    device.style.width = w + 'px';
+    device.style.height = h + 'px';
+    device.style.transform = `scale(${s})`;
+    holder.style.width = Math.floor(w * s) + 'px';
+    holder.style.height = Math.floor(h * s) + 'px';
+    let label = holder.querySelector('.device-label');
+    if (!label) { label = document.createElement('div'); label.className = 'device-label'; holder.appendChild(label); }
+    label.textContent = state.device === 'auto' ? '' : `${d.label.split(' (')[0]} · ${Math.round(s * 100)}%`;
+  }
+
+  // chips de telas
+  document.getElementById('screenChips').insertAdjacentHTML('beforeend', SCREENS.map((s) => `<button class="chip" data-screen="${s.id}" aria-pressed="false">${s.label}</button>`).join(''));
+
+  const tools = document.querySelector('.tools');
+  document.getElementById('toggle').addEventListener('click', () => {
+    const open = !tools.classList.contains('open');
+    tools.classList.toggle('open', open);
+    document.getElementById('toggle').setAttribute('aria-expanded', String(open));
+    fit();
+  });
+  tools.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b || b.id === 'toggle') return;
+    if (b.dataset.device) state.device = b.dataset.device;
+    else if (b.dataset.screen) { state.screen = b.dataset.screen; try { history.replaceState(null, '', '#' + state.screen); } catch (err) { /* ignora */ } }
+    else if (b.dataset.variant) state.variant[state.screen] = b.dataset.variant;
+    else if (b.dataset.phone) state.phone = b.dataset.phone;
+    else return;
+    draw();
+  });
+
+  // interações dentro do mockup: abas, seleção de cor e de modo, minimizar o cartão
+  app.addEventListener('click', (e) => {
+    const t = e.target.closest('button');
+    if (!t) return;
+    if (t.dataset.tab) { state.tab = t.dataset.tab; draw(); return; }
+    if (t.classList.contains('swatch') && !t.disabled) {
+      t.parentElement.querySelectorAll('.swatch').forEach((s) => { s.setAttribute('aria-checked', 'false'); s.textContent = ''; });
+      t.setAttribute('aria-checked', 'true');
+      return;
+    }
+    if (t.closest('.segmented')) {
+      t.parentElement.querySelectorAll('button').forEach((s) => s.setAttribute('aria-checked', String(s === t)));
+      return;
+    }
+    if (t.classList.contains('mini')) {
+      const card = t.closest('.card');
+      card.hidden = true;
+      const restore = document.createElement('button');
+      restore.className = 'btn primary';
+      restore.type = 'button';
+      restore.textContent = 'Voltar à decisão';
+      restore.style.cssText = 'position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;box-shadow:0 0 0 .2em var(--focus)';
+      restore.addEventListener('click', () => { card.hidden = false; restore.remove(); });
+      app.appendChild(restore);
+    }
+  });
+  app.addEventListener('focusin', (e) => {
+    if (e.target.matches('.btn')) app.querySelectorAll('.is-focus').forEach((el) => el.classList.remove('is-focus'));
+  });
+
+  // navegação pelas setas, como no controle remoto: percorre os botões da decisão aberta
+  document.addEventListener('keydown', (e) => {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    if (e.target.matches('input')) return;
+    const scope = app.querySelector('.overlay .dialog') || app.querySelector('.card:not([hidden])') || app.querySelector('.sheet');
+    if (!scope) return;
+    const items = [...scope.querySelectorAll('button:not(:disabled), input')].filter((el) => el.offsetParent !== null && !el.classList.contains('mini'));
+    if (!items.length) return;
+    e.preventDefault();
+    const current = items.indexOf(document.activeElement);
+    const startAt = current === -1 ? items.indexOf(scope.querySelector('.is-focus')) : current;
+    const step = e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 1;
+    const next = items[(Math.max(startAt, 0) + (current === -1 && startAt !== -1 ? 0 : step) + items.length) % items.length];
+    next.focus();
+  });
+
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', () => {
+    const id = location.hash.slice(1);
+    if (SCREENS.some((s) => s.id === id)) { state.screen = id; draw(); }
+  });
+  draw();
+})();
+</script>

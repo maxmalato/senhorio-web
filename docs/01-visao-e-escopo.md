@@ -103,11 +103,12 @@ Uma decisão nova entra no topo da tabela com o motivo.
 
 | Data | Decisão | Motivo |
 | --- | --- | --- |
+| 15/11/2026 | Mockups da Etapa 1b em HTML responsivo (`docs/mockups/web/`), publicados como página privada no claude.ai, em vez do Figma | O plano gratuito do Figma limita o conector a poucas chamadas por mês; em HTML não há limite, o layout responsivo é real e pode ser aberto no celular e no navegador da Smart TV |
 | 15/11/2026 | Motor do Roku portado inteiro para TypeScript (Partes 2 a 4 da Etapa 1 juntas), com os cenários CT-01 a CT-42 e CT-45 e os novos CT-46 a CT-52 para tipos de carta que não tinham cenário; `newGame` passa a recusar modo tempo ou rodadas sem limite válido (`invalidMode`) | Os módulos do Roku dependem uns dos outros; na web o servidor recebe a configuração da partida pela rede, então o motor confere o modo em vez de confiar na tela |
 | 15/11/2026 | Etapa 0 (fundação) concluída com a tag `v0.1-fundacao`: monorepo pnpm, TypeScript 6.0, Svelte 5, Vite 8, Vitest 5, Playwright e CI no GitHub Actions | Testes do servidor com `@cloudflare/vitest-plugin`, novo nome do `vitest-pool-workers` (descontinuado); TypeScript fica na 6.0 porque o typescript-eslint ainda não aceita versão mais nova |
 | 15/11/2026 | Testes com Vitest, fast-check, Testing Library (Svelte), @cloudflare/vitest-plugin, Playwright e axe-core; CI no GitHub Actions bloqueia etapa com teste falhando | Mesmo rigor do Roku (45 CTs), com mais automação: vários tamanhos de tela, vários jogadores e modo offline |
 | 15/11/2026 | Nomes técnicos (pastas, arquivos, código, ações, eventos, chaves do JSON) em inglês; README, docs, comentários e textos do jogo em PT-BR; commits em PT-BR no imperativo | Pedido do dono do projeto; código em inglês combina com as bibliotecas, e a documentação continua em português |
-| 15/11/2026 | Mockups no Figma (Etapa 1b), em paralelo com o motor e antes das telas | O motor não tem tela; as telas da web precisam de layouts novos para celular, tablet, desktop, TV e salas |
+| 15/11/2026 | Mockups (Etapa 1b) em paralelo com o motor e antes das telas (inicialmente no Figma; ver decisão acima) | O motor não tem tela; as telas da web precisam de layouts novos para celular, tablet, desktop, TV e salas |
 | 15/11/2026 | Repositório novo; o repositório do Roku é só referência | Tecnologias diferentes; o Roku segue como produto próprio |
 | 15/11/2026 | Regras e valores do `regras.json` v1 do Roku, abertos a mudanças | Regras já aprovadas e balanceadas; ajustes virão do uso |
 | 15/11/2026 | Queda de conexão pausa a partida; depois de alguns minutos, quem criou a sala pode remover o jogador (RN-115) | Ninguém perde a partida por uma queda rápida, e ninguém fica preso esperando para sempre |
