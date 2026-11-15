@@ -8,7 +8,7 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 | --- | --- | --- |
 | 0 – Fundação | Concluída | `v0.1-fundacao` |
 | 1 – Motor em TS | Em andamento (Partes 1 a 4 concluídas) | `v0.2-motor` |
-| 1b – Mockups (HTML) | Em andamento (rodada 1 em revisão) | — |
+| 1b – Mockups (HTML) | Em andamento (rodada 1 aprovada, rodada 2 em revisão) | — |
 | 2 – Telas (um dispositivo) | A fazer | `v0.3-telas` |
 | 3 – PWA e salvamento | A fazer | `v0.4-pwa` |
 | 4 – Vários dispositivos | A fazer | `v0.5-salas` |

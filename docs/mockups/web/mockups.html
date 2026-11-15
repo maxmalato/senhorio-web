@@ -464,11 +464,65 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 .choices { display: grid; gap: .9em; }
 
+.card-head.dark { background: var(--panel); }
+.card-head.chance { background: #2f7d5b; }
+.card-head.setback { background: #8c3b52; }
+.card-sub { font-size: .9em; color: var(--ink-2); margin: -.2em 0 0; }
+.big-text { font: 600 1.25em/1.25 var(--font-display); margin: 0; text-wrap: balance; }
+.opts { display: grid; gap: .3em; }
+.opt { display: grid; grid-template-columns: auto 1fr auto; gap: .05em .7em; align-items: center; text-align: left; background: #f6f2e8; border: 0; border-radius: .7em; padding: .4em .7em; cursor: pointer; color: var(--ink); line-height: 1.25; }
+.card { display: flex; flex-direction: column; max-height: calc(100% - 1.2em); }
+.card-body { overflow: auto; min-height: 0; }
+@container app (max-width: 599px) { .app .card { max-height: 78%; } }
+.opt .sw { width: .8em; height: 1.9em; border-radius: .25em; grid-row: span 2; }
+.opt b { font-weight: 800; }
+.opt small { grid-column: 2 / 4; color: var(--ink-2); font-size: .82em; }
+.opt .val { font: 600 1em var(--font-display); font-variant-numeric: tabular-nums; }
+.opt.is-focus, .opt:focus-visible { outline: .2em solid var(--focus); outline-offset: .1em; background: #fff; }
+.opt:disabled { opacity: .5; cursor: not-allowed; }
+.opt.icon .sw { display: grid; place-items: center; width: 1.9em; background: var(--night); color: #fff; border-radius: .5em; }
+.opt.icon .sw svg { width: 1.05em; height: 1.05em; }
+.opt.danger b { color: #a8322a; }
+.ladder { display: grid; grid-template-columns: repeat(6, 1fr); gap: .25em; }
+.ladder div { background: #f6f2e8; border-radius: .5em; padding: .35em .2em; text-align: center; }
+.ladder span { display: block; font-size: .7em; color: var(--ink-2); font-weight: 700; }
+.ladder b { font: 600 .95em var(--font-display); font-variant-numeric: tabular-nums; }
+.ladder .now { outline: 2px solid var(--ink); background: #fff; }
+.ladder .next { background: var(--focus); }
+.card .stepper { background: #f6f2e8; }
+.card .stepper button { background: #fff; color: var(--ink); }
+.card .stepper output { color: var(--ink); font-size: 1.6em; }
+.card .note2 { font-size: .8em; color: var(--ink-2); text-align: center; margin: 0; }
+.prop-line { display: flex; align-items: center; gap: .6em; background: #f6f2e8; border-radius: .7em; padding: .55em .7em; }
+.prop-line .sw { width: .8em; height: 1.9em; border-radius: .25em; }
+.prop-line b { font-weight: 800; flex: 1; }
+.debt-bar { display: grid; gap: .3em; }
+.debt-bar .track { height: .7em; border-radius: 1em; background: #eadfd0; overflow: hidden; display: flex; }
+.debt-bar .track i { display: block; height: 100%; }
+.debt-bar .legend { display: flex; justify-content: space-between; font-size: .78em; color: var(--ink-2); font-weight: 700; }
+.toast { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(30em, 88%); background: rgba(19, 33, 58, .96); color: var(--text); border-radius: .9em; padding: .9em 1.2em; display: flex; gap: .8em; align-items: center; font-weight: 700; z-index: 6; box-shadow: 0 .6em 2em rgba(0,0,0,.35); font-size: max(13px, 2.1cqw); }
+.toast .coin { width: 2.2em; height: 2.2em; border-radius: 50%; background: var(--focus); color: var(--ink); display: grid; place-items: center; font: 700 1em var(--font-display); flex: none; }
+.toast .t-bar { position: absolute; left: 1.2em; right: 1.2em; bottom: .45em; height: 3px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+.toast .t-bar i { display: block; width: 62%; height: 100%; background: var(--focus); }
+.rank { display: grid; gap: .55em; }
+.rank .r { display: grid; grid-template-columns: 2.2em auto 1fr auto; gap: .2em .8em; align-items: center; background: var(--panel); border-radius: 1em; padding: .75em 1em; }
+.rank .r.first { background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--focus); }
+.rank .pos { font: 600 1.4em var(--font-display); color: var(--text-2); text-align: center; }
+.rank .r.first .pos { color: var(--focus); }
+.rank .nm { font: 600 1.15em var(--font-display); }
+.rank .total { font: 600 1.25em var(--font-display); font-variant-numeric: tabular-nums; text-align: right; }
+.rank .parts { grid-column: 3 / 5; color: var(--text-2); font-size: .82em; }
+.rank .r.out { opacity: .65; }
+.crown { width: 2.6em; height: 2.6em; color: var(--focus); }
+.eyebrow-l { font-size: .75em; font-weight: 800; letter-spacing: .12em; color: var(--text-2); }
+.tools .sep { width: 1px; height: 18px; background: var(--tool-line); margin: 0 4px; }
+.tools .rlabel { font-size: .68rem; font-weight: 800; color: var(--focus); letter-spacing: .08em; }
+
 @media (prefers-reduced-motion: reduce) { .dots i { animation: none; opacity: .7; } }
 </style>
 
 <header class="tools" aria-label="Opções de visualização">
-  <h1>Senhorio Web <small>mockups · rodada 1</small></h1>
+  <h1>Senhorio Web <small>mockups · rodadas 1 e 2</small></h1>
   <button class="chip toggle" id="toggle" type="button" aria-expanded="false" aria-controls="toolGroups">Opções · <span id="toggleLabel"></span></button>
   <div class="tool-groups" id="toolGroups">
   <div class="group" role="group" aria-label="Formato">
@@ -527,6 +581,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>',
     copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></svg>',
     house: '<svg viewBox="0 0 10 10"><path d="M5 1 9.4 4.8V9H.6V4.8z"/></svg>',
+    hammer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l9-9M12.5 4.5l7 7-2.5 2.5-7-7z"/></svg>',
+    tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3.5 12.5V4h8.5l8.5 8.5-8 8z"/><circle cx="8" cy="8.5" r="1.4" fill="currentColor"/></svg>',
+    bank: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20.5h18"/></svg>',
+    swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="3.6" height="14" rx="1"/><rect x="13.9" y="5" width="3.6" height="14" rx="1"/></svg>',
+    exit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/></svg>',
+    crown: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>',
   };
   // logo C: casas empilhadas nas cores dos grupos
   function logo(cls = 'logo') {
@@ -554,6 +615,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     { id: 'create', label: 'Criar sala', variants: [] },
     { id: 'join', label: 'Entrar com código', variants: [['typing', 'Digitando'], ['error', 'Código errado']] },
     { id: 'lobby', label: 'Sala de espera', variants: [['host', 'Quem criou'], ['guest', 'Convidado']] },
+    { id: 'turn', round: 2, label: 'Vez e dados', variants: [['pass', 'Vez de (um aparelho)'], ['roll', 'Rolar dados'], ['double', 'Dupla'], ['end', 'Encerrar turno'], ['toast', 'Aviso de resultado']] },
+    { id: 'jail', round: 2, label: 'Prisão', variants: [['decide', 'Como sair'], ['bail', 'Fiança obrigatória']] },
+    { id: 'card', round: 2, label: 'Carta', variants: [['chance', 'Sorte'], ['setback', 'Revés']] },
+    { id: 'menu', round: 2, label: 'Menu', variants: [['menu', 'Menu do turno'], ['pause', 'Pausa'], ['quit', 'Abandonar']] },
+    { id: 'build', round: 2, label: 'Construir', variants: [['build', 'Construir casa'], ['sell', 'Vender casa']] },
+    { id: 'mortgage', round: 2, label: 'Hipotecar', variants: [['mortgage', 'Hipotecar'], ['redeem', 'Resgatar']] },
+    { id: 'trade', round: 2, label: 'Venda simples', variants: [['direction', '1 · comprar ou vender'], ['pick', '2 · propriedade'], ['amount', '3 · valor'], ['answer', 'Resposta (um aparelho)'], ['answer-multi', 'Resposta (vários)']] },
+    { id: 'debt', round: 2, label: 'Dívida', variants: [['raise', 'Levantar dinheiro'], ['noway', 'Sem saída'], ['bankrupt', 'Falência']] },
+    { id: 'end', round: 2, label: 'Fim de partida', variants: [['single', 'Um aparelho'], ['multi', 'Vários aparelhos']] },
   ];
   const DEVICES = {
     auto: { label: 'Tela inteira' },
@@ -613,12 +683,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   function playersHTML(opts = {}) {
     return `<div class="players" aria-label="Jogadores">${PLAYERS.map((pl, i) => {
       let tags = '';
-      if (i === 0) tags += '<span class="tag">JOGANDO</span>';
+      const turn = opts.turn ?? 0;
+      if (i === turn) tags += '<span class="tag">JOGANDO</span>';
       if (pl.jail) tags += '<span class="tag jail">NA PRISÃO</span>';
       if (opts.offline === i) tags += '<span class="tag off">SEM CONEXÃO</span>';
       if (opts.me === i) tags += '<span class="tag me">VOCÊ</span>';
+      if (opts.out === i) tags += '<span class="tag off">FALIU</span>';
       const chips = pl.owns.map((p) => `<i style="background:${SPACES[p][0] === 'street' ? GROUPS[SPACES[p][1]][0] : '#9aa6bb'}"></i>`).join('');
-      return `<div class="player${i === 0 ? ' turn' : ''}"><span class="avatar" style="background:${pl.color}">${pl.name[0]}</span><div style="min-width:0"><div class="pname">${pl.name} ${tags}</div><div class="chips">${chips}</div></div><span class="money">${brl(pl.money)}</span></div>`;
+      return `<div class="player${i === turn ? ' turn' : ''}${opts.out === i ? ' out' : ''}"><span class="avatar" style="background:${pl.color}">${pl.name[0]}</span><div style="min-width:0"><div class="pname">${pl.name} ${tags}</div><div class="chips">${chips}</div></div><span class="money">${brl(pl.money)}</span></div>`;
     }).join('')}</div>`;
   }
   function eventsHTML() {
@@ -643,7 +715,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   }
   function gameHTML(card, opts = {}) {
     return `<div class="game">${brandHTML(opts)}${playersHTML(opts)}
-      <div class="board-wrap"><div class="board" role="img" aria-label="Tabuleiro">${boardHTML(24)}<div class="center">${logo('mark')}${card || ''}</div></div></div>
+      <div class="board-wrap"><div class="board" role="img" aria-label="Tabuleiro">${boardHTML(opts.here ?? 24)}<div class="center">${logo('mark')}${card || ''}</div></div></div>
       ${eventsHTML()}${keysHTML()}${tabsHTML()}</div>`;
   }
 
@@ -716,6 +788,132 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     },
   };
 
+  // ---------- rodada 2: cartão genérico e listas ----------
+  function card({ head, body = '', actions = [], hint = '', label = 'Decisão' }) {
+    const h = head.color
+      ? `<div class="card-head" style="background:${head.color}">`
+      : `<div class="card-head ${head.cls || 'dark'}">`;
+    const btns = actions.length ? `<div class="actions">${actions.map((a) => `<button class="btn ${a.kind || 'secondary'}${a.focus ? ' is-focus' : ''}" type="button" ${a.disabled ? 'disabled' : ''}>${a.label}</button>`).join('')}</div>` : '';
+    return `<div class="card" role="dialog" aria-label="${label}">${h}${head.eyebrow ? `<div class="eyebrow">${head.eyebrow}</div>` : ''}<h2>${head.title}</h2><button class="mini" type="button" aria-label="Minimizar e ver o tabuleiro">${ICON.minimize}</button></div>
+      <div class="card-body">${body}${btns}${hint ? `<div class="hint">${hint}</div>` : ''}</div></div>`;
+  }
+  const opt = (o) => `<button class="opt${o.icon ? ' icon' : ''}${o.focus ? ' is-focus' : ''}${o.danger ? ' danger' : ''}" type="button" ${o.disabled ? 'disabled' : ''}><span class="sw" style="${o.color ? `background:${o.color}` : ''}">${o.icon || ''}</span><b>${o.name}</b>${o.val ? `<span class="val">${o.val}</span>` : '<span></span>'}${o.sub ? `<small>${o.sub}</small>` : ''}</button>`;
+  const streetName = (p) => SPACES[p][3];
+  const groupColor = (p) => GROUPS[SPACES[p][1]] ? GROUPS[SPACES[p][1]][0] : '#9aa6bb';
+  const STATION_NAMES = { 5: 'Estação Sul', 15: 'Estação Oeste', 25: 'Estação Norte', 35: 'Estação Leste' };
+  const propName = (p) => STATION_NAMES[p] || streetName(p);
+  const toastHTML = (initial, text) => `<div class="toast" role="status"><span class="coin">${initial}</span><span>${text}</span><span class="t-bar"><i></i></span></div>`;
+
+  Object.assign(render, {
+    turn() {
+      const v = variantOf('turn');
+      if (v === 'pass') {
+        return gameHTML(card({ head: { eyebrow: 'RODADA 7', title: 'Vez de Bruno' }, label: 'Vez de Bruno', body: `<p class="big-text">Passe o aparelho para Bruno</p><p class="card-sub">Só no modo "Neste aparelho". Com um aparelho por jogador, a vez aparece direto no aparelho de quem joga.</p>`, actions: [{ label: 'Começar', kind: 'primary', focus: true }] }), { turn: 1, here: 10 });
+      }
+      if (v === 'roll') {
+        return gameHTML(card({ head: { eyebrow: 'SUA VEZ', title: 'Carla, sua vez de jogar' }, body: '<p class="card-sub">Antes de rolar, dá para abrir o Menu para construir, hipotecar ou propor uma venda simples.</p>', actions: [{ label: 'Rolar dados', kind: 'primary', focus: true }], hint: 'Toque no botão ou aperte OK no controle' }), { turn: 2, here: 15 });
+      }
+      if (v === 'double') {
+        return gameHTML(card({ head: { eyebrow: 'DUPLA', title: 'Dupla! Jogue de novo, Carla' }, body: `<div class="dice">${die(3)}${die(3)}<span>Carla tirou 3 + 3 = 6</span></div><p class="card-sub">Três duplas seguidas levam à prisão.</p>`, actions: [{ label: 'Rolar de novo', kind: 'primary', focus: true }] }), { turn: 2, here: 21 });
+      }
+      if (v === 'end') {
+        return gameHTML(card({ head: { eyebrow: 'FIM DO TURNO', title: 'Carla, algo mais antes de passar a vez?' }, body: '<p class="card-sub">Construir, hipotecar e venda simples ficam no Menu.</p>', actions: [{ label: 'Encerrar turno', kind: 'primary', focus: true }, { label: 'Abrir o Menu', kind: 'secondary' }] }), { turn: 2, here: 21 });
+      }
+      return gameHTML(toastHTML('C', 'Carla pagou R$ 440 a Ana. Doeu no bolso.'), { turn: 2, here: 24 });
+    },
+    jail() {
+      const v = variantOf('jail');
+      if (v === 'bail') {
+        return gameHTML(card({ head: { eyebrow: 'PRISÃO · 3ª TENTATIVA DE 3', title: 'Sem dupla de novo' }, body: `<div class="dice">${die(4)}${die(2)}<span>Bruno tirou 4 + 2 = 6</span></div><p class="big-text">Fiança obrigatória de R$ 50</p><p class="card-sub">Depois de pagar, Bruno anda as 6 casas da rolagem.</p>`, actions: [{ label: 'Pagar e andar', kind: 'primary', focus: true }] }), { turn: 1, here: 10 });
+      }
+      return gameHTML(card({ head: { eyebrow: 'PRISÃO · 2ª TENTATIVA DE 3', title: 'Bruno, você está preso' }, body: '<p class="card-sub">Tire uma dupla para sair, pague a fiança ou use a carta guardada. Pagando ou usando a carta, você rola os dados em seguida.</p>', actions: [{ label: 'Tentar dupla', kind: 'primary', focus: true }, { label: 'Pagar R$ 50', kind: 'secondary' }, { label: 'Usar carta "Bom comportamento"', kind: 'secondary' }] }), { turn: 1, here: 10 });
+    },
+    card() {
+      const v = variantOf('card');
+      if (v === 'setback') {
+        return gameHTML(card({ head: { cls: 'setback', eyebrow: 'REVÉS', title: 'Reforma geral' }, label: 'Carta de Revés', body: `<p class="big-text">Pague R$ 25 por casa e R$ 100 por hotel</p><div class="prop-line"><span class="sw" style="background:${GROUPS.green[0]}"></span><b>Diego tem 3 casas e nenhum hotel</b><span class="val" style="font:600 1.1em var(--font-display)">R$ 75</span></div>`, actions: [{ label: 'OK, pagar R$ 75', kind: 'primary', focus: true }] }), { turn: 3, here: 36 });
+      }
+      return gameHTML(card({ head: { cls: 'chance', eyebrow: 'SORTE', title: 'Atalho pela ciclovia!' }, label: 'Carta de Sorte', body: '<p class="big-text">Avance até a Partida e receba R$ 200</p><p class="card-sub">O efeito vale depois do OK. O peão anda até a Partida.</p>', actions: [{ label: 'OK', kind: 'primary', focus: true }] }), { turn: 3, here: 33 });
+    },
+    menu() {
+      const v = variantOf('menu');
+      if (v === 'pause') {
+        const dialog = `<div class="overlay"><div class="dialog" role="alertdialog" aria-label="Jogo pausado"><h2>Jogo pausado</h2><p>O cronômetro do modo tempo está parado. A partida já está salva até o último turno concluído.</p><button class="btn primary is-focus" type="button">Continuar</button><button class="btn secondary" type="button">Salvar e sair</button><p class="small">Com um aparelho por jogador, a pausa vale para todos e aparece em todos os aparelhos.</p></div></div>`;
+        return gameHTML('', { here: 24 }) + dialog;
+      }
+      if (v === 'quit') {
+        return gameHTML(card({ head: { eyebrow: 'ABANDONAR', title: 'Ana, sair da partida?' }, body: '<p class="big-text">Seus bens voltam ao banco</p><p class="card-sub">Dinheiro e propriedades voltam ao banco e Ana sai da partida. Não dá para desfazer.</p>', actions: [{ label: 'Não, continuar', kind: 'primary', focus: true }, { label: 'Sim, abandonar', kind: 'secondary' }] }), { here: 24 });
+      }
+      const items = [
+        { icon: ICON.hammer, name: 'Construir', sub: 'Marrom completo · casa a R$ 50', focus: true },
+        { icon: ICON.tag, name: 'Vender casas', sub: 'Sem casas para vender', disabled: true },
+        { icon: ICON.bank, name: 'Hipotecar', sub: '3 propriedades' },
+        { icon: ICON.bank, name: 'Resgatar', sub: 'Nada hipotecado', disabled: true },
+        { icon: ICON.swap, name: 'Venda simples', sub: '2 propostas por turno' },
+        { icon: ICON.pause, name: 'Pausar' },
+        { icon: ICON.exit, name: 'Abandonar', danger: true },
+      ];
+      return gameHTML(card({ head: { eyebrow: 'MENU', title: 'O que você quer fazer, Ana?' }, body: `<div class="opts">${items.map(opt).join('')}</div>`, actions: [{ label: 'Fechar', kind: 'secondary' }] }), { here: 24 });
+    },
+    build() {
+      const v = variantOf('build');
+      const rentB = [4, 20, 60, 180, 320, 450];
+      if (v === 'sell') {
+        return gameHTML(card({ head: { color: GROUPS.green[0], eyebrow: 'GRUPO VERDE · VENDER CASA', title: 'Vender casa por R$ 100?' }, body: `<div class="opts">${opt({ color: GROUPS.green[0], name: 'Avenida dos Bancos', val: '1 casa', sub: 'Vendendo, o aluguel vai de R$ 130 para R$ 52', focus: true })}${opt({ color: GROUPS.green[0], name: 'Rua do Comércio', val: '1 casa', sub: 'Vendendo, o aluguel vai de R$ 130 para R$ 52' })}${opt({ color: GROUPS.green[0], name: 'Avenida Central', val: '1 casa', sub: 'Vendendo, o aluguel vai de R$ 150 para R$ 56' })}</div><p class="note2">O banco paga metade do que a casa custou. A venda também é uniforme no grupo.</p>`, actions: [{ label: 'Vender', kind: 'primary' }, { label: 'Concluir', kind: 'secondary' }] }), { turn: 3, here: 37 });
+      }
+      const ladder = ['Básico', '1', '2', '3', '4', 'Hotel'].map((l, i) => `<div class="${i === 0 ? 'now' : i === 1 ? 'next' : ''}"><span>${l}</span><b>${i === 0 ? 'R$ 8' : brl(rentB[i])}</b></div>`).join('');
+      return gameHTML(card({ head: { color: GROUPS.brown[0], eyebrow: 'GRUPO MARROM · COMPLETO', title: 'Onde construir? Casa custa R$ 50' }, body: `<div class="opts">${opt({ color: GROUPS.brown[0], name: 'Travessa do Porto', val: 'Sem casas', sub: 'Com a 1ª casa, o aluguel vai de R$ 8 para R$ 20', focus: true })}${opt({ color: GROUPS.brown[0], name: 'Beco das Flores', val: 'Sem casas', sub: 'Com a 1ª casa, o aluguel vai de R$ 8 para R$ 20' })}</div><div><div class="eyebrow-l" style="color:var(--ink-2);margin-bottom:.35em">CADA CASA, MAIS ALUGUEL · TRAVESSA DO PORTO</div><div class="ladder">${ladder}</div></div><p class="note2">Até 4 casas por rua, depois hotel. A diferença de casas entre as ruas do grupo nunca passa de 1.</p>`, actions: [{ label: 'Construir', kind: 'primary' }, { label: 'Concluir', kind: 'secondary' }] }), { here: 24 });
+    },
+    mortgage() {
+      const v = variantOf('mortgage');
+      if (v === 'redeem') {
+        return gameHTML(card({ head: { eyebrow: 'RESGATAR', title: 'Resgatar Rua da Fonte por R$ 55?' }, body: `<div class="opts">${opt({ color: GROUPS.lightBlue[0], name: 'Rua da Fonte', val: 'R$ 55', sub: 'HIPOTECADA · recebeu R$ 50 + 10% de juros', focus: true })}</div><p class="note2">Sem prazo: a hipoteca pode durar a partida inteira. Hipotecada, a propriedade não cobra aluguel.</p>`, actions: [{ label: 'Resgatar', kind: 'primary' }, { label: 'Concluir', kind: 'secondary' }] }), { here: 24 });
+      }
+      return gameHTML(card({ head: { eyebrow: 'HIPOTECAR', title: 'Hipotecar Travessa do Porto por R$ 30?' }, body: `<div class="opts">${opt({ color: GROUPS.brown[0], name: 'Travessa do Porto', val: 'R$ 30', sub: 'Aluguel R$ 8 · hipoteca R$ 30', focus: true })}${opt({ color: GROUPS.brown[0], name: 'Beco das Flores', val: 'R$ 30', sub: 'Aluguel R$ 8 · hipoteca R$ 30' })}${opt({ color: GROUPS.lightBlue[0], name: 'Rua da Fonte', val: 'R$ 50', sub: 'Aluguel R$ 6 · hipoteca R$ 50' })}</div><p class="note2">Resgatar custa o valor recebido mais 10%. Ruas de grupo com casas só hipotecam depois de vender as casas.</p>`, actions: [{ label: 'Hipotecar', kind: 'primary' }, { label: 'Concluir', kind: 'secondary' }] }), { here: 24 });
+    },
+    trade() {
+      const v = variantOf('trade');
+      if (v === 'direction') {
+        return gameHTML(card({ head: { eyebrow: 'VENDA SIMPLES · PASSO 1 DE 3', title: 'Comprar ou vender?' }, body: '<p class="card-sub">Uma propriedade por dinheiro. Ruas com casas no grupo ou hipotecadas não entram.</p>', actions: [{ label: 'Comprar de alguém', kind: 'primary', focus: true }, { label: 'Vender para alguém', kind: 'secondary' }], hint: 'Limite de 2 propostas por turno' }), { here: 24 });
+      }
+      if (v === 'pick') {
+        return gameHTML(card({ head: { eyebrow: 'VENDA SIMPLES · PASSO 2 DE 3', title: 'Qual propriedade?' }, body: `<div class="opts">${opt({ color: '#9aa6bb', name: 'Estação Norte', val: 'Carla', sub: 'Dono: Carla · preço R$ 200', focus: true })}${opt({ color: GROUPS.orange[0], name: 'Rua da Praça', val: 'Carla', sub: 'Dono: Carla · preço R$ 180' })}${opt({ color: GROUPS.orange[0], name: 'Rua do Coreto', val: 'Carla', sub: 'Dono: Carla · preço R$ 180' })}${opt({ color: GROUPS.green[0], name: 'Avenida dos Bancos', val: 'Diego', sub: 'Tem casas no grupo · não entra', disabled: true })}</div><p class="note2">Bruno está preso e não negocia.</p>`, actions: [{ label: 'Continuar', kind: 'primary' }, { label: 'Cancelar', kind: 'secondary' }] }), { here: 24 });
+      }
+      if (v === 'amount') {
+        return gameHTML(card({ head: { eyebrow: 'VENDA SIMPLES · PASSO 3 DE 3', title: 'Quanto oferecer pela Estação Norte?' }, body: `<div class="prop-line"><span class="sw" style="background:#9aa6bb"></span><b>Estação Norte · de Carla</b><span>preço R$ 200</span></div><div class="stepper"><button type="button" aria-label="Diminuir">${ICON.left}</button><output>R$ 250</output><button type="button" aria-label="Aumentar">${ICON.right}</button></div><p class="note2">Ajusta R$ 10 · segure para R$ 50. De R$ 10 até R$ 1.180, o que você tem.</p>`, actions: [{ label: 'Enviar proposta', kind: 'primary', focus: true }, { label: 'Cancelar', kind: 'secondary' }] }), { here: 24 });
+      }
+      if (v === 'answer-multi') {
+        const dialog = `<div class="overlay"><div class="dialog" role="alertdialog" aria-label="Proposta de Ana"><div class="eyebrow-l" style="color:var(--ink-2)">PROPOSTA PARA VOCÊ</div><h2>Ana oferece R$ 250 pela Estação Norte</h2><div class="prop-line"><span class="sw" style="background:#9aa6bb"></span><b>Estação Norte</b><span>preço R$ 200</span></div><button class="btn secondary is-focus" type="button">Recusar</button><button class="btn primary" type="button">Aceitar</button><p class="small">Recusar vem em foco para evitar aceite sem querer. A proposta chega só no seu aparelho; os outros veem "Carla está respondendo".</p></div></div>`;
+        return gameHTML('', { me: 2, here: 24 }) + dialog;
+      }
+      return gameHTML(card({ head: { eyebrow: 'PROPOSTA · PASSE O APARELHO PARA CARLA', title: 'Ana oferece R$ 250 pela Estação Norte' }, body: `<div class="prop-line"><span class="sw" style="background:#9aa6bb"></span><b>Estação Norte</b><span>preço R$ 200</span></div><p class="card-sub">Carla, aceita? Depois, devolva o aparelho para Ana.</p>`, actions: [{ label: 'Recusar', kind: 'secondary', focus: true }, { label: 'Aceitar', kind: 'primary' }] }), { here: 24 });
+    },
+    debt() {
+      const v = variantOf('debt');
+      if (v === 'bankrupt') {
+        return gameHTML(card({ head: { eyebrow: 'FALÊNCIA', title: 'Diego faliu' }, body: `<p class="big-text">Os bens vão para Ana</p><div class="opts">${opt({ color: GROUPS.green[0], name: '3 casas vendidas ao banco', val: '+ R$ 300' })}${opt({ color: '#9aa6bb', name: 'Dinheiro em caixa', val: 'R$ 40' })}${opt({ color: GROUPS.green[0], name: 'Avenida dos Bancos, Rua do Comércio e Avenida Central', val: '3' })}</div><p class="note2">Hipotecadas passam ainda hipotecadas, e Ana paga 10% de juros sobre cada uma.</p>`, actions: [{ label: 'OK', kind: 'primary', focus: true }] }), { turn: 3, out: 3, here: 24 });
+      }
+      if (v === 'noway') {
+        return gameHTML(card({ head: { eyebrow: 'LEVANTAR DINHEIRO', title: 'Mesmo vendendo tudo, faltam R$ 120' }, body: `<div class="debt-bar"><div class="track"><i style="width:28%;background:var(--night)"></i><i style="width:46%;background:var(--focus)"></i></div><div class="legend"><span>Caixa R$ 40 · casas e hipotecas R$ 300</span><span>Dívida R$ 460</span></div></div><p class="card-sub">Diego deve R$ 460 de aluguel a Ana. Nem vendendo casas e hipotecando tudo dá para pagar.</p>`, actions: [{ label: 'Declarar falência', kind: 'primary', focus: true }] }), { turn: 3, here: 24 });
+      }
+      return gameHTML(card({ head: { eyebrow: 'LEVANTAR DINHEIRO', title: 'Diego, faltam R$ 160 para pagar Ana' }, body: `<div class="debt-bar"><div class="track"><i style="width:65%;background:var(--night)"></i><i style="width:35%;background:var(--focus)"></i></div><div class="legend"><span>Caixa R$ 300</span><span>Dívida R$ 460</span></div></div><div class="opts">${opt({ icon: ICON.tag, name: 'Vender casas', sub: 'Até R$ 150 (3 casas a R$ 50)', focus: true })}${opt({ icon: ICON.bank, name: 'Hipotecar', sub: 'Até R$ 175 (Alameda dos Barões)' })}${opt({ icon: ICON.exit, name: 'Declarar falência', sub: 'Ainda dá para levantar R$ 325', disabled: true, danger: true })}</div>`, actions: [] }), { turn: 3, here: 24 });
+    },
+    end() {
+      const v = variantOf('end');
+      const rows = [
+        ['Carla', PLAYERS[2].color, 3240, 'Dinheiro R$ 1.840 · Propriedades R$ 1.100 · Casas R$ 300'],
+        ['Ana', PLAYERS[0].color, 2980, 'Dinheiro R$ 1.520 · Propriedades R$ 1.160 · Casas R$ 300'],
+        ['Bruno', PLAYERS[1].color, 1610, 'Dinheiro R$ 1.330 · Propriedades R$ 280 · Casas —'],
+      ].map(([n, c, t, parts], i) => `<div class="r${i === 0 ? ' first' : ''}"><span class="pos">${i + 1}º</span><span class="avatar" style="background:${c}">${n[0]}</span><span class="nm">${n}</span><span class="total">${brl(t)}</span><span class="parts">${parts}</span></div>`).join('')
+        + `<div class="r out"><span class="pos">4º</span><span class="avatar" style="background:${PLAYERS[3].color}">D</span><span class="nm">Diego</span><span class="total">—</span><span class="parts">Faliu na rodada 23</span></div>`;
+      const actions = v === 'multi'
+        ? '<button class="btn gold is-focus" type="button">Jogar de novo com a mesma sala</button><button class="btn ghost" type="button">Sair</button><p class="footnote">Quem criou a sala começa a nova partida. A sala atual é apagada quando todos saem.</p>'
+        : '<button class="btn gold is-focus" type="button">Jogar de novo</button><button class="btn ghost" type="button">Sair</button><p class="footnote">Jogar de novo mantém os mesmos jogadores e sorteia uma nova ordem.</p>';
+      return `<div class="full-screen"><div class="sheet split"><div class="title-block" style="display:grid;justify-items:center;gap:.4em;text-align:center"><svg class="crown" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg><span class="eyebrow-l">FIM DE PARTIDA · TEMPO · 24 RODADAS</span><h1>Carla é o grande Senhorio!</h1><p class="lead">Vence o maior patrimônio: dinheiro, preço das propriedades e o que foi pago por casas e hotéis.</p></div>
+        <div class="rank">${rows}</div><div style="display:grid;gap:.7em;align-content:start">${actions}</div></div></div>`;
+    },
+  });
+
   // ---------- montagem ----------
   const app = document.getElementById('app');
   const device = document.getElementById('device');
@@ -736,7 +934,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     const vc = document.getElementById('variantChips');
     vc.innerHTML = scr.variants.length ? '<span>Variação</span>' + scr.variants.map(([id, label]) => `<button class="chip" data-variant="${id}" aria-pressed="${variantOf(scr.id) === id}">${label}</button>`).join('') : '';
     vc.hidden = !scr.variants.length;
-    document.getElementById('phoneChips').hidden = !(state.screen === 'game' || state.screen === 'paused');
+    document.getElementById('phoneChips').hidden = ['home', 'create', 'join', 'lobby', 'end'].includes(state.screen);
     note.innerHTML = state.device === 'auto'
       ? 'Mostrando no tamanho da sua tela. <b>Abra este link no celular e no navegador da Smart TV</b> para ver como fica em cada um. Nas telas de jogo, use as setas e Enter para navegar como no controle remoto.'
       : `${DEVICES[state.device].label}. Os nomes e valores são exemplos; as regras e os textos vêm do jogo do Roku.`;
@@ -769,7 +967,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   }
 
   // chips de telas
-  document.getElementById('screenChips').insertAdjacentHTML('beforeend', SCREENS.map((s) => `<button class="chip" data-screen="${s.id}" aria-pressed="false">${s.label}</button>`).join(''));
+  document.getElementById('screenChips').insertAdjacentHTML('beforeend', [1, 2].map((r) => `<span class="rlabel">R${r}</span>` + SCREENS.filter((s) => (s.round || 1) === r).map((s) => `<button class="chip" data-screen="${s.id}" aria-pressed="false">${s.label}</button>`).join('')).join('<span class="sep" aria-hidden="true"></span>'));
 
   const tools = document.querySelector('.tools');
   document.getElementById('toggle').addEventListener('click', () => {
