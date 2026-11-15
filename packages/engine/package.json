@@ -9,7 +9,8 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "balance": "vitest run --config vitest.balance.config.ts"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^5.1.0",

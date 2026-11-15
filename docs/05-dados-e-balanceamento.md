@@ -196,6 +196,25 @@ Leitura:
 - **O modo clássico com robôs é longo demais para uma noite** (mediana de 174 rodadas). Os modos rodadas e tempo continuam sendo a sugestão para a família.
 
 
+### Linha de base da versão web (15/11/2026)
+
+O motor em TypeScript jogou as mesmas 50 partidas por cenário com os mesmos robôs do Roku (`pnpm --filter @senhorio/engine balance`, sementes fixas, cerca de 7 s no total). Os dados sorteados são outros, então as partidas não se repetem; a comparação é por tendência.
+
+| Medida | 4 jogadores, 30 rodadas | 6 jogadores, 30 rodadas | 4 jogadores, clássico |
+| --- | --- | --- | --- |
+| Rodadas jogadas | 30 | 30 | 181 (44–500); 5 partidas bateram o teto de 500 |
+| 1º grupo completo | Rodada 14 (4–25); nenhum grupo em 15 partidas. Sinal: 23/50 | Rodada 11 (3–30); nenhum grupo em 27 partidas. Sinal: 31/50 | Rodada 22 (3–177). Sinal: 27/50 |
+| 1ª falência | Só 1 partida teve falência (rodada 27). Sinal: 0/50 | 6 partidas tiveram falência (rodadas 16 a 27). Sinal: 0/50 | Rodada 87 (13–285). Sinal: 0/50 |
+| Dinheiro médio na rodada 20 | R$ 673 (410–1.036). Sinal: 0/50 | R$ 1.013 (783–1.291). Sinal: 0/50 | R$ 710 (431–1.014). Sinal: 0/50 |
+| Sem dono na rodada 15 | 5 (1–9). Sinal: 3/50 | 2 (0–5). Sinal: 0/50 | 5 (1–12). Sinal: 3/50 |
+| Vendas simples aceitas | 5 (0–12). Sinal: 1/50 | 8 (3–12). Sinal: 0/50 | 24 (4–82). Sinal: 0/50 |
+| Erros do motor | 0 | 0 | 0 |
+
+Comparação com o Roku:
+- **Batem:** rodadas do modo clássico, 1º grupo completo com 4 jogadores, falências com 4 jogadores e no clássico, dinheiro médio, propriedades sem dono e vendas simples. Os sinais de problema acendem nas mesmas medidas e em proporções parecidas.
+- **Diferença a observar:** falências com 6 jogadores em 30 rodadas. Em 600 partidas com sementes espalhadas, a taxa da web fica em torno de 6 a 7% (contra cerca de 3% com 4 jogadores), e o Roku teve 0 em 50. Com essa taxa, 0 em 50 tem cerca de 3% de chance de acontecer: improvável, mas possível. Nenhuma diferença de regra foi encontrada (os 45 cenários do Roku passam, e as falências se distribuem por todos os jogadores e posições na ordem). Fica registrada para observar nas partidas reais.
+- **Mediana do 1º grupo com 6 jogadores** (rodada 11 contra 17 no Roku): a mediana conta só as cerca de 20 partidas que completaram um grupo, por isso varia muito; a faixa e o número de partidas sem grupo são parecidos.
+
 ## Pendências
 
 Responda abaixo de cada item, como nos documentos anteriores.

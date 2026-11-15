@@ -59,6 +59,10 @@ Valem depois de qualquer sequência de ações válidas:
 
 ## Simulação e balanceamento
 
+Situação: invariantes em `packages/engine/test/invariants.test.ts` (fast-check, 60 partidas de robôs e 60 partidas com ações ao acaso a cada execução); simulação em `packages/engine/test/simulation.test.ts`; balanceamento completo em `packages/engine/balance/` (fora do `pnpm test`), com o resultado registrado no docs/05.
+
+As invariantes ficam em `packages/engine/src/sim/invariants.ts`. Além das listadas acima, conferem que cada carta está em um só lugar (baralho, mão de jogador ou revelada), que a vez nunca fica com um jogador falido fora da falência e que RAISE_MONEY sempre tem uma dívida aberta. Um teste de sanidade quebrou de propósito a construção uniforme: as invariantes acusaram o erro em segundos.
+
 A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) é portada como comando do pacote do motor. Com o mesmo `rules.json`, os números (duração, falências, primeiro grupo completo) devem ficar próximos da linha de base do Roku; diferença grande é tratada como bug até prova em contrário.
 
 ## Tamanhos de tela (Playwright)

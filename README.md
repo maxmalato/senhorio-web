@@ -2,7 +2,7 @@
 
 Jogo de tabuleiro imobiliário por turnos para o navegador, de 2 a 6 jogadores, em que o computador faz o papel do banco. Versão web do Senhorio para Roku, com as mesmas regras.
 
-> **Situação:** Etapa 0 (fundação) concluída; próxima: Etapa 1 (motor de regras). Ainda não há jogo jogável. Acompanhe em [docs/09-roadmap.md](docs/09-roadmap.md).
+> **Situação:** Etapas 0 (fundação) e 1 (motor de regras) concluídas; mockups em revisão; próxima: Etapa 2 (telas). Ainda não há jogo jogável. Acompanhe em [docs/09-roadmap.md](docs/09-roadmap.md).
 
 ## Modos de jogo
 
@@ -45,6 +45,7 @@ pnpm install
 | `pnpm lint` | ESLint e Prettier |
 | `pnpm typecheck` | Checagem de tipos |
 | `pnpm build` | Gera a versão de produção |
+| `pnpm --filter @senhorio/engine balance` | Balanceamento: 50 partidas de robôs por cenário (docs/05); `BALANCE_GAMES=200` muda a quantidade |
 
 ## Trabalhar em mais de um computador
 

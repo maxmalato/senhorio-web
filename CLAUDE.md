@@ -38,6 +38,7 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm e2e
+pnpm --filter @senhorio/engine balance   # balanceamento (fora do pnpm test)
 ```
 
 ## Regras de trabalho
