@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh release create v*--repo maxmalato/senhorio-web*)",
+      "Bash(gh api repos/maxmalato/senhorio-web/git/tags *)",
+      "Bash(gh api repos/maxmalato/senhorio-web/git/refs -f ref=refs/tags/*)"
+    ]
+  }
+}
