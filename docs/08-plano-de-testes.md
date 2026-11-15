@@ -20,6 +20,32 @@ Todas são dependências de desenvolvimento; nenhuma vai para o pacote que o jog
 
 Os 45 cenários do Roku (CT-01 a CT-45, em docs/referencia-roku/plano-de-testes-roku.md) são portados com os mesmos números, para comparar os dois motores. Cenários novos começam em CT-46.
 
+| Cenários | Onde | Situação |
+| --- | --- | --- |
+| CT-01 a CT-08 (turno e compra) | `packages/engine/test/turn.test.ts` | Passando |
+| CT-09 a CT-17 (aluguel) | `packages/engine/test/rent.test.ts` | Passando |
+| CT-18 a CT-23 (construção e hipoteca) | `packages/engine/test/building.test.ts` | Passando |
+| CT-24 a CT-26 e CT-28 a CT-31 (prisão e cartas) | `packages/engine/test/jail-cards.test.ts` | Passando |
+| CT-27, CT-32 a CT-38 e CT-45 (venda simples, dívida e falência) | `packages/engine/test/trade-debt.test.ts` | Passando |
+| CT-39 a CT-42 (fim de partida e estado serializável) | `packages/engine/test/end.test.ts` | Passando |
+| CT-43 (salvamento de outra versão das regras) | Etapa 3, junto com o salvamento no IndexedDB | A fazer |
+| CT-44 (regras inválidas) | `packages/engine/test/rules.test.ts` | Passando |
+| CT-46 a CT-52 (cartas sem cenário no Roku) | `packages/engine/test/cards.test.ts` | Passando |
+
+Cenários novos da web:
+
+| CT | Regra | Cenário | Resultado esperado |
+| --- | --- | --- | --- |
+| CT-46 | RN-080 | Carta S-07 (receber do banco) | Recebe R$ 150 |
+| CT-47 | RN-080 | Carta R-05 (pagar ao banco) | Paga R$ 50 |
+| CT-48 | RN-080 | Carta S-12 (receber de cada jogador) com um falido | Cada ativo paga R$ 20; o falido fica de fora |
+| CT-49 | RN-106 | Carta R-09 (pagar a cada jogador), com e sem dinheiro | Paga R$ 25 a cada um; sem dinheiro, dívida única com o banco como credor |
+| CT-50 | RN-084 | Carta S-05 (estação mais próxima) a partir da casa 33 | Vai à casa 35 e resolve a compra |
+| CT-51 | RN-083 | Carta S-14 (volte 3 casas) a partir da casa 17 | Vai à casa 14, sem bônus |
+| CT-52 | RN-070 | Carta R-01 (vá para a prisão) | Vai à casa 10 sem bônus; o turno acaba |
+
+O CT-42 do Roku gravava no registro do aparelho; na web, o motor confere que o estado vira JSON e volta igual, e a gravação no IndexedDB é testada na Etapa 3.
+
 ## Invariantes (fast-check)
 
 Valem depois de qualquer sequência de ações válidas:

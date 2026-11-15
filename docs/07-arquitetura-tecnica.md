@@ -93,7 +93,7 @@ Ações, eventos, fases e chaves do JSON passam a ter nomes em inglês. A corres
 
 ## Correspondência de nomes: Roku → web
 
-O arquivo `packages/engine/src/rules/rules.json` foi gerado a partir do `source/data/regras.json` v1 do Roku por conversão automática, que conferiu a mesma quantidade de casas, cartas e textos e os mesmos valores numéricos. Os textos em português não mudaram; só as chaves e os marcadores. Fases, ações e eventos do motor entram nesta seção na Parte 2 da Etapa 1.
+O arquivo `packages/engine/src/rules/rules.json` foi gerado a partir do `source/data/regras.json` v1 do Roku por conversão automática, que conferiu a mesma quantidade de casas, cartas e textos e os mesmos valores numéricos. Os textos em português não mudaram; só as chaves e os marcadores.
 
 ### Arquivo de regras
 
@@ -170,6 +170,76 @@ Marcadores dentro dos textos (`{jogador}` vira `{player}`):
 | `passo` | `step` | `rapido` | `fastStep` | `titulo` | `title` |
 
 Iguais nos dois: `n`, `min`, `max`, `total`, `d1`, `d2`, `mult1`, `mult2`.
+
+### Fases do turno
+
+| Roku | Web | Roku | Web |
+| --- | --- | --- | --- |
+| `INICIO_TURNO` | `TURN_START` | `CARTA` | `CARD` |
+| `PRE_ROLAGEM` | `PRE_ROLL` | `POS_RESOLUCAO` | `POST_RESOLUTION` |
+| `PRESO_DECISAO` | `JAIL_DECISION` | `FIM_TURNO` | `TURN_END` |
+| `ROLAR` | `ROLL` | `IR_PRISAO` | `GO_TO_JAIL` |
+| `MOVER` | `MOVE` | `LEVANTAR_DINHEIRO` | `RAISE_MONEY` |
+| `RESOLVER_CASA` | `RESOLVE_SPACE` | `FALENCIA` | `BANKRUPTCY` |
+| `DECISAO_COMPRA` | `PURCHASE_DECISION` | `FIM_PARTIDA` | `GAME_OVER` |
+| `COBRANCA` | `COLLECTION` | | |
+
+### Ações (interface → motor)
+
+| Roku | Web | Parâmetros na web |
+| --- | --- | --- |
+| `COMECAR_TURNO` | `START_TURN` | — |
+| `ROLAR` | `ROLL_DICE` | — |
+| `PAGAR_FIANCA` / `USAR_CARTA_SAIDA` | `PAY_BAIL` / `USE_JAIL_CARD` | — |
+| `COMPRAR` / `NAO_COMPRAR` | `BUY` / `DECLINE_PURCHASE` | — |
+| `CONFIRMAR` | `CONFIRM` | — |
+| `ENCERRAR_TURNO` | `END_TURN` | — |
+| `CONSTRUIR` / `VENDER_CASA` | `BUILD` / `SELL_HOUSE` | `position` |
+| `HIPOTECAR` / `RESGATAR` | `MORTGAGE` / `REDEEM` | `position` |
+| `PROPOR_VENDA` | `PROPOSE_TRADE` | `direction` (`buy` ou `sell`), `position`, `amount`, `otherPlayer` |
+| `RESPONDER_VENDA` | `RESPOND_TRADE` | `accept` |
+| `DECLARAR_FALENCIA` | `DECLARE_BANKRUPTCY` | — |
+| `ABANDONAR` | `QUIT` | — |
+| `TEMPO_ESGOTADO` | `TIME_UP` | — |
+
+### Eventos (motor → interface)
+
+| Roku | Web | Roku | Web |
+| --- | --- | --- | --- |
+| `OrdemSorteada` | `OrderDrawn` | `Faliu` | `WentBankrupt` |
+| `DadosRolados` | `DiceRolled` | `PartidaTerminou` | `GameOver` |
+| `PeaoMoveu` | `PawnMoved` | `OfertaCompra` | `PurchaseOffered` |
+| `DinheiroTransferido` | `MoneyTransferred` | `PropriedadeNaoComprada` | `PurchaseDeclined` |
+| `PropriedadeMudouDeDono` | `PropertyOwnerChanged` | `AluguelIsento` | `RentExempt` |
+| `CasasMudaram` | `HousesChanged` | `FiancaObrigatoria` | `MandatoryBail` |
+| `HipotecaMudou` | `MortgageChanged` | `DividaAberta` | `DebtOpened` |
+| `CartaRevelada` | `CardRevealed` | `PropostaEnviada` | `TradeProposed` |
+| `FoiPreso` | `Jailed` | `PropostaRespondida` | `TradeAnswered` |
+| `SaiuDaPrisao` | `ReleasedFromJail` | `TempoEsgotado` | `TimeUp` |
+| `TurnoEncerrado` | `TurnEnded` | | |
+
+### Estado da partida
+
+| Roku | Web | Roku | Web |
+| --- | --- | --- | --- |
+| `versaoRegras` | `rulesVersion` | `jogadores` | `players` |
+| `fase` | `phase` | `propriedades` | `properties` |
+| `modo` (`tipo`, `limite`, `tempoEsgotado`) | `mode` (`type`, `limit`, `timeUp`) | `baralhos` (`sorte`, `reves`) | `decks` (`chance`, `setback`) |
+| `rodada` | `round` | `cartaAtual` (`id`, `baralho`) | `currentCard` (`id`, `deck`) |
+| `vez` / `ordem` | `turn` / `order` | `pendente` | `pending` |
+| `duplasSeguidas` | `consecutiveDoubles` | `classificacao` | `ranking` |
+| `ultimosDados` | `lastDice` | `novaJogada` / `semNovaJogada` | `extraRoll` / `noExtraRoll` |
+| `chegouPorCarta` | `arrivedByCard` | `propostasNoTurno` | `proposalsThisTurn` |
+| jogador: `nome`, `cor`, `dinheiro`, `posicao` | `name`, `color`, `money`, `position` | jogador: `preso`, `turnosPreso`, `cartasSaida` | `inJail`, `jailTurns`, `jailCards` |
+| jogador: `falido`, `rodadaSaida` | `bankrupt`, `exitRound` | propriedade: `dono`, `casas`, `hipotecada` | `owner`, `houses`, `mortgaged` |
+
+Pendências: cobrança `{ tipo: "cobranca", fila, retorno, divida, falencia }` virou `{ type: "collection", queue, returnTo, debt, bankruptcy }`; proposta `{ tipo: "proposta", sentido ("comprar"/"vender"), posicao, valor, proponente, outro }` virou `{ type: "trade", direction ("buy"/"sell"), position, amount, proposer, other }`. O banco continua sendo `-1` (`BANK`).
+
+### Motivos de recusa e de transferência
+
+Recusas vêm como `{ code, ... }` (no Roku, `{ codigo, ... }`). Principais códigos: `faltaDinheiro` → `insufficientFunds` (`amount`), `acaoInvalidaNaFase` → `invalidActionForPhase`, `partidaTerminada` → `gameOver`, `propostaPendente` → `tradePending`, `semProposta` → `noTrade`, `semNovaJogada` / `temNovaJogada` → `noExtraRoll` / `hasExtraRoll`, `semSaida` → `noWayOut`, `dividaCobrivel` → `debtCoverable` (`max`), `grupoIncompleto` → `incompleteGroup`, `grupoHipotecado` → `mortgagedGroup`, `temHotel` → `hasHotel`, `construcaoUniforme` / `vendaUniforme` → `unevenBuilding` / `unevenSale`, `semCasas` → `noHouses`, `naoEhRua` → `notStreet`, `naoEhDono` → `notOwner`, `jaHipotecada` / `naoHipotecada` → `alreadyMortgaged` / `notMortgaged`, `grupoComCasas` → `groupHasHouses`, `semCartaSaida` → `noJailCard`, `limitePropostas` → `proposalLimit`, `presoNaoNegocia` → `jailedCannotTrade`, `alvoInvalido` → `invalidTarget`, `propriedadeNaoNegociavel` → `propertyNotTradable`, `valorInvalido` → `invalidAmount` (`min`, `max`), `posicaoInvalida` → `invalidPosition`, `modoSemTempo` → `modeWithoutTimer`. Novo na web: `invalidMode` (modo tempo ou rodadas sem limite válido).
+
+Motivos de transferência: `bonusPartida` → `passStart`, `compra` → `purchase`, `aluguel` → `rent`, `imposto` → `tax`, `carta` → `card`, `fianca` → `bail`, `construcao` → `building`, `vendaCasa` → `houseSale`, `hipoteca` → `mortgage`, `resgate` → `redeem`, `vendaSimples` → `trade`, `falencia` → `bankruptcy`, `jurosHipoteca` → `mortgageInterest`. Isenção de aluguel: `hipotecada` → `mortgaged`, `donoPreso` → `ownerInJail`. Ida à prisão: `tresDuplas` → `threeDoubles`, `casa` → `space`, `carta` → `card`. Saída da prisão: `dupla` → `doubles`, `fiancaObrigatoria` → `mandatoryBail`, `fianca` → `bail`, `carta` → `card`.
 
 ## Salas (vários dispositivos)
 

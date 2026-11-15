@@ -7,7 +7,7 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 | Etapa | Situação | Tag |
 | --- | --- | --- |
 | 0 – Fundação | Concluída | `v0.1-fundacao` |
-| 1 – Motor em TS | Em andamento (Parte 1 de 5 concluída) | `v0.2-motor` |
+| 1 – Motor em TS | Em andamento (Partes 1 a 4 concluídas) | `v0.2-motor` |
 | 1b – Mockups no Figma | A fazer | — |
 | 2 – Telas (um dispositivo) | A fazer | `v0.3-telas` |
 | 3 – PWA e salvamento | A fazer | `v0.4-pwa` |
@@ -35,10 +35,12 @@ Porta o motor do Roku (`source/motor/` e `source/servicos/Regras.brs`) para `pac
 | Parte | Conteúdo | Situação |
 | --- | --- | --- |
 | 1 | `rules.json` com chaves em inglês, tipos, validação na carga (CT-44) e correspondência de nomes no docs/07 | Concluída |
-| 2 | Estado, `transition()`, as 15 fases do turno, dados, movimento, compra e aluguel | A fazer |
-| 3 | Prisão, cartas, construção e hipoteca | A fazer |
-| 4 | Venda simples, dívidas, falência e fim de partida (clássico, tempo e rodadas) | A fazer |
+| 2 | Estado, `transition()`, as 15 fases do turno, dados, movimento, compra e aluguel | Concluída |
+| 3 | Prisão, cartas, construção e hipoteca | Concluída |
+| 4 | Venda simples, dívidas, falência e fim de partida (clássico, tempo e rodadas) | Concluída |
 | 5 | Invariantes (fast-check), simulação e balanceamento comparado com o Roku | A fazer |
+
+As Partes 2 a 4 foram feitas juntas: no motor do Roku a cobrança já depende da dívida, a dívida da construção e da hipoteca, e o aluguel por carta (CT-17) das cartas.
 
 - `rules.json` com chaves em inglês e os mesmos valores e textos do `regras.json` v1, mais a validação na carga.
 - `transition(state, action, ctx)` com as 15 fases, módulos de regra e gerador injetável.
