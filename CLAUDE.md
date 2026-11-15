@@ -44,6 +44,7 @@ pnpm e2e
 
 - **Testes obrigatórios.** Toda mudança no motor vem com teste (Vitest; cenários CT com o número do Roku; novos a partir de CT-46). Rode `pnpm lint`, `pnpm typecheck` e `pnpm test` antes de cada commit. Etapa com teste falhando não fecha.
 - **Commits pequenos** por funcionalidade; uma tag por etapa (ver roadmap).
+- **Tags e releases são criadas manualmente pelo dono do projeto.** As sessões do Claude Code na nuvem não conseguem criar tags nem releases (o ambiente recusa). Ao fechar uma etapa, ou sempre que uma tag ou release precisar mudar, avise o dono e passe o passo a passo: nome da tag, commit (hash curto), título e descrição sugeridos, e o caminho no site do GitHub (Releases → Draft a new release).
 - **Dois computadores:** o dono do projeto alterna entre dois computadores. O GitHub é a única fonte da verdade. No início de cada sessão, confira se a cópia local está atualizada (`git pull`); ao terminar, deixe tudo commitado e enviado. Nunca deixe trabalho só na cópia local.
 - **Dependências:** só bibliotecas conhecidas e mantidas; ferramentas de teste e build como dependências de desenvolvimento. Peça aprovação antes de adicionar uma dependência de produção nova.
 
