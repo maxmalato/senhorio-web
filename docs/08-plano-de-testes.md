@@ -87,6 +87,38 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | 5 – Publicação | Fumaça no endereço publicado; acessibilidade | Jogo acessível pela internet |
 | 6 – Acabamento | Desempenho do 3D com reserva 2D | Fluido na TV e no celular mais fraco disponível |
 
+## Testes da interface (Etapa 2)
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Narração dos eventos | `apps/web/src/lib/game/narrate.test.ts` | Histórico (H-xx) e avisos (M-xx) iguais ao catálogo |
+| Controlador | `apps/web/src/lib/game/game.test.ts` | Ação aplicada no motor, vista ao fim dos eventos, recusa sem mudança, histórico de 3 linhas |
+| Menu, construção e venda simples | `apps/web/src/lib/game/Decision.test.ts` | Opções desabilitadas com o motivo, escada de aluguel, construção uniforme, foco no Recusar |
+| Fluxo do início ao jogo | `apps/web/src/App.test.ts` | Início, jogadores, modo, ordem sorteada e primeira jogada |
+| Ponta a ponta (5 perfis de tela) | `e2e/game.spec.ts` | Partida inteira de 20 rodadas só com Enter, acessibilidade (axe) em 5 telas, foco padrão, Voltar, abas do celular |
+
+Parâmetros de teste da interface: `?seed=N` reproduz os sorteios e `?speed=0` tira as esperas das animações e dos avisos.
+
 ## Roteiro manual em aparelho real
 
 Navegador de TV e celular simples não se simulam com perfeição. A partir da Etapa 2, cada etapa de interface tem um roteiro curto (abrir, jogar uma partida, testar foco e leitura) a ser feito em pelo menos um celular, um computador e uma Smart TV com navegador. O roteiro é escrito na própria etapa.
+
+### Roteiro da Etapa 2 (modo um aparelho)
+
+Fazer em pelo menos um celular, um computador e uma Smart TV com navegador (a TV pelo controle remoto, sem mouse). Endereço: o do `pnpm dev` ou do `pnpm build` + `vite preview` na rede local, até a publicação na Etapa 5.
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Abrir o jogo | Tela inicial legível; "Nova partida" em foco (anel dourado) |
+| 2 | Nova partida → mudar para 3 jogadores, trocar um nome e uma cor | Cor já escolhida fica desabilitada; nome com até 10 letras |
+| 3 | Escolher o modo Tempo, 30 min → Continuar → Começar partida | Ordem sorteada aparece; cronômetro no topo durante o jogo |
+| 4 | Jogar 2 rodadas tocando nos botões (celular) ou só com OK e setas (TV) | Dados, peão andando casa a casa, avisos centrais que somem sozinhos ou com OK |
+| 5 | Abrir o Menu e entrar em Construir, Hipotecar e Venda simples | Opções sem item possível desabilitadas com o motivo; Voltar sai sem confirmar |
+| 6 | Esconder o cartão (botão – ou Voltar) e trazer de volta | Tabuleiro inteiro visível; "Voltar à decisão" traz o cartão |
+| 7 | No celular, alternar as abas Tabuleiro e Jogadores | Lista com dinheiro e propriedades; a decisão continua por cima |
+| 8 | Pausar pelo Menu e continuar | Cronômetro parado durante a pausa |
+| 9 | Jogar até o fim (pode ser uma partida de 20 rodadas) | Tela de fim com a classificação e "Jogar de novo" |
+| 10 | Conferir leitura a cerca de 3 m na TV | Textos, valores e o foco dourado legíveis |
+
+Anote aparelho, navegador e o que estranhou; os ajustes entram antes da tag `v0.3-telas`.
+

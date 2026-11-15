@@ -35,7 +35,8 @@ export default defineConfig({
   webServer: {
     command: `pnpm --filter @senhorio/web build && pnpm --filter @senhorio/web preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
+    // sempre um build novo: reaproveitar um servidor antigo testaria uma versão velha
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

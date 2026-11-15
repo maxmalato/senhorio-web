@@ -704,17 +704,17 @@
     "D-01": {
       "text": "Vez de {player}",
       "options": ["Começar"],
-      "subtitle": "Passe o controle para {player}"
+      "subtitle": "Passe o aparelho para {player}"
     },
     "D-02": {
       "text": "{player}, sua vez de jogar",
       "options": ["Rolar dados"],
-      "hint": "Aperte OK para rolar os dados"
+      "hint": "Toque no botão ou aperte OK para rolar os dados"
     },
     "D-03": {
       "text": "Dupla! Jogue de novo, {player}",
       "options": ["Rolar de novo"],
-      "hint": "Aperte OK para rolar de novo"
+      "hint": "Toque no botão ou aperte OK para rolar de novo"
     },
     "D-04": {
       "text": "{player}, algo mais antes de passar a vez?",
@@ -793,8 +793,8 @@
     "D-18": {
       "text": "{player} oferece {amount} por {property}",
       "options": ["Recusar", "Aceitar"],
-      "subtitle": "Passe o controle para {owner}",
-      "after": "Devolva o controle para {player}",
+      "subtitle": "Passe o aparelho para {owner}",
+      "after": "Devolva o aparelho para {player}",
       "limit": "Limite de {max} propostas por turno",
       "sellText": "{player} quer vender {property} por {amount}"
     },

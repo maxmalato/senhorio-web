@@ -1,16 +1,319 @@
-/* Cores provisórias, tiradas do tema do Roku; o tema definitivo sai dos mockups (Etapa 1b). */
+/* Tema do Senhorio (identidade do Roku adaptada à web; mockups em docs/mockups/web).
+   Só tema escuro. Fontes com licença aberta (SIL OFL), servidas pelo próprio jogo. */
+@font-face {
+  font-family: 'Fredoka';
+  src: url('/fonts/Fredoka-SemiBold.ttf') format('truetype');
+  font-weight: 500 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Fredoka';
+  src: url('/fonts/Fredoka-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('/fonts/Nunito-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('/fonts/Nunito-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('/fonts/Nunito-Bold.ttf') format('truetype');
+  font-weight: 700 800;
+  font-display: swap;
+}
+
 :root {
-  --color-background: #13213a;
-  --color-text: #f4efe4;
-  --color-text-muted: #b8c0d0;
-  --color-accent: #f2b33d;
-  font-family: system-ui, sans-serif;
-  color: var(--color-text);
-  background: var(--color-background);
+  color-scheme: dark;
+  --night: #13213a;
+  --night-deep: #0f1a2e;
+  --panel: #1c2e4d;
+  --panel-2: #243a5e;
+  --line: #344a72;
+  --board: #f4f1e8;
+  --board-line: #cfc7b0;
+  --board-corner: #e9e2cc;
+  --board-center: #ece6d6;
+  --ink: #1b2436;
+  --ink-2: #5d6578;
+  --card: #ffffff;
+  --card-2: #efe8d8;
+  --card-3: #f6f2e8;
+  --focus: #f2b84b;
+  --text: #f5f7fa;
+  --text-2: #a9b6cc;
+  --danger: #e5736b;
+  --chance: #2f7d5b;
+  --setback: #8c3b52;
+  --font-display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
 }
 
 body {
+  background: var(--night);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  height: 100%;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* botões (C-06) */
+.btn {
+  min-height: 2.9em;
+  border-radius: 0.75em;
+  border: 0;
+  font-weight: 800;
+  font-size: 1em;
+  cursor: pointer;
+  padding: 0.6em 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  text-align: center;
+}
+.btn svg {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+.btn.primary {
+  background: var(--night);
+  color: #fff;
+}
+.btn.secondary {
+  background: var(--card-2);
+  color: var(--ink);
+}
+.btn.gold {
+  background: var(--focus);
+  color: var(--ink);
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid #3a5079;
+}
+.btn:focus-visible {
+  outline: 0.22em solid var(--focus);
+  outline-offset: 0.14em;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* telas cheias: início, preparação da partida e fim (mockups, rodadas 1 e 2) */
+.full-screen {
+  height: 100%;
+  overflow: auto;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding: 22px max(18px, env(safe-area-inset-right, 0px))
+    calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  container: screen / inline-size;
+}
+.sheet {
+  width: min(32em, 100%);
+  display: grid;
+  gap: 1.1em;
+}
+.sheet h1 {
   margin: 0;
-  min-height: 100vh;
-  background: var(--color-background);
+  font: 600 1.9em/1.1 var(--font-display);
+  text-wrap: balance;
+}
+.lead {
+  margin: 0;
+  color: var(--text-2);
+}
+.back {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.4em;
+  align-items: center;
+  padding: 0.3em 0;
+}
+.back svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+.field {
+  display: grid;
+  gap: 0.45em;
+}
+.field > label,
+.field > .lab {
+  font-size: 0.78em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.input {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 0.8em;
+  padding: 0.7em 0.9em;
+  color: var(--text);
+  font: 700 1.05em var(--font-body);
+  width: 100%;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--focus);
+}
+.swatches {
+  display: flex;
+  gap: 0.55em;
+  flex-wrap: wrap;
+}
+.swatch {
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font: 700 1em var(--font-display);
+  color: var(--ink);
+  position: relative;
+}
+.swatch[aria-checked='true'] {
+  border-color: var(--text);
+  box-shadow:
+    0 0 0 2px var(--night),
+    0 0 0 4px var(--focus);
+}
+.swatch:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--panel);
+  border-radius: 0.8em;
+  padding: 0.25em;
+  gap: 0.25em;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  border-radius: 0.6em;
+  padding: 0.65em 0.4em;
+  font-weight: 800;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.segmented button[aria-checked='true'] {
+  background: var(--panel-2);
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--focus);
+}
+.callout {
+  display: flex;
+  gap: 0.7em;
+  background: #182844;
+  border-radius: 0.9em;
+  padding: 0.8em 1em;
+  color: var(--text-2);
+  font-size: 0.9em;
+}
+.callout svg {
+  width: 1.3em;
+  height: 1.3em;
+  flex: none;
+  color: var(--focus);
+  margin-top: 0.1em;
+}
+.footnote {
+  color: var(--text-2);
+  font-size: 0.85em;
+  text-align: center;
+  margin: 0;
+}
+.avatar {
+  width: 2.3em;
+  height: 2.3em;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 700 1.05em/1 var(--font-display);
+  color: var(--ink);
+  flex: none;
+}
+@container screen (min-width: 880px) {
+  .full-screen {
+    align-content: center;
+  }
+  .sheet.wide {
+    width: min(60em, 100%);
+  }
+  .sheet.split {
+    width: min(62em, 100%);
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2.4em;
+    align-items: start;
+  }
+  .sheet.split > .span {
+    grid-column: 1 / -1;
+  }
 }
