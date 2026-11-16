@@ -537,6 +537,7 @@
             amount: brl(proposal.amount),
             property: spaceName(proposal.position),
           })}
+      {onminimize}
     >
       <div class="prop-line">
         <span class="sw" style:background={propertyColor(proposal.position)}></span>
@@ -990,7 +991,7 @@
     {/if}
   {:else if s.phase === 'BANKRUPTCY' && s.pending?.type === 'collection' && s.pending.bankruptcy}
     {@const b = s.pending.bankruptcy}
-    <Card title={t('D-20', { player: name(b.player), creditor: name(b.creditor) })}>
+    <Card title={t('D-20', { player: name(b.player), creditor: name(b.creditor) })} {onminimize}>
       <div class="actions">
         <button
           class="btn primary"

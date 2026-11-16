@@ -82,4 +82,28 @@ describe('venda simples (D-17, D-18)', () => {
     await user.click(screen.getByRole('button', { name: 'Aceitar' }));
     expect(game.state.properties['5']?.owner).toBe(0);
   });
+
+  it('quem recebe a proposta pode minimizar para ver o tabuleiro antes de responder', async () => {
+    const user = userEvent.setup();
+    const { ctx, state } = testGame();
+    state.properties['5']!.owner = 1;
+    state.phase = 'PRE_ROLL';
+    const game = new Game(state, ctx, INSTANT_TIMINGS);
+    render(GameScreen, { game, onend: () => {} });
+    await game.act({
+      type: 'PROPOSE_TRADE',
+      direction: 'buy',
+      position: 5,
+      amount: 150,
+      otherPlayer: 1,
+    });
+    await screen.findByRole('button', { name: 'Recusar' });
+    await user.click(screen.getByRole('button', { name: 'Minimizar e ver o tabuleiro' }));
+    expect(screen.queryByRole('button', { name: 'Recusar' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Voltar à decisão/ }));
+    expect(screen.getByRole('button', { name: 'Recusar' })).toBeVisible();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(screen.getByRole('button', { name: 'Recusar' })).toHaveFocus();
+    expect(game.state.pending?.type).toBe('trade');
+  });
 });

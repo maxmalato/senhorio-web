@@ -100,7 +100,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | --- | --- | --- |
 | Narração dos eventos | `apps/web/src/lib/game/narrate.test.ts` | Histórico (H-xx) e avisos (M-xx) iguais ao catálogo |
 | Controlador | `apps/web/src/lib/game/game.test.ts` | Ação aplicada no motor, vista ao fim dos eventos, recusa sem mudança, histórico de 3 linhas |
-| Menu, construção e venda simples | `apps/web/src/lib/game/Decision.test.ts` | Opções desabilitadas com o motivo, escada de aluguel, construção uniforme, foco no Recusar |
+| Menu, construção e venda simples | `apps/web/src/lib/game/Decision.test.ts` | Opções desabilitadas com o motivo, escada de aluguel, construção uniforme, foco no Recusar, minimizar a proposta para ver o tabuleiro |
 | Fluxo do início ao jogo | `apps/web/src/App.test.ts` | Início, jogadores, modo, ordem sorteada e primeira jogada |
 | Ponta a ponta (5 perfis de tela) | `e2e/game.spec.ts` | Partida inteira de 20 rodadas só com Enter, acessibilidade (axe) em 5 telas, foco padrão, Voltar, abas do celular |
 
