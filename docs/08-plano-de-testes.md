@@ -31,6 +31,7 @@ Os 45 cenários do Roku (CT-01 a CT-45, em docs/referencia-roku/plano-de-testes-
 | CT-43 (salvamento de outra versão das regras) | `apps/web/src/lib/save/save.test.ts` e `resume.test.ts` | Passando |
 | CT-44 (regras inválidas) | `packages/engine/test/rules.test.ts` | Passando |
 | CT-46 a CT-52 (cartas sem cenário no Roku) | `packages/engine/test/cards.test.ts` | Passando |
+| CT-53 a CT-57 (remover jogador desconectado) | `packages/engine/test/remove.test.ts` | Passando |
 
 Cenários novos da web:
 
@@ -43,6 +44,11 @@ Cenários novos da web:
 | CT-50 | RN-084 | Carta S-05 (estação mais próxima) a partir da casa 33 | Vai à casa 35 e resolve a compra |
 | CT-51 | RN-083 | Carta S-14 (volte 3 casas) a partir da casa 17 | Vai à casa 14, sem bônus |
 | CT-52 | RN-070 | Carta R-01 (vá para a prisão) | Vai à casa 10 sem bônus; o turno acaba |
+| CT-53 | RN-115 | Remover jogador fora da vez dele | Bens voltam ao banco; a vez continua |
+| CT-54 | RN-115 | Remover o jogador da vez (inclusive na compra) | O turno passa para o próximo |
+| CT-55 | RN-115 | Remover quem está levantando dinheiro | Bens vão ao banco, sem pagar o credor; o turno acaba |
+| CT-56 | RN-110 | Remover e sobrar um jogador | A partida acaba |
+| CT-57 | RN-095 | Remover com venda simples pendente | A proposta é cancelada |
 
 O CT-42 do Roku gravava no registro do aparelho; na web, o motor confere que o estado vira JSON e volta igual, e a gravação no IndexedDB é testada na Etapa 3.
 

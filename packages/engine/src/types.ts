@@ -196,7 +196,9 @@ export type Action =
   | { type: 'RESPOND_TRADE'; accept: boolean }
   | { type: 'DECLARE_BANKRUPTCY' }
   | { type: 'QUIT' }
-  | { type: 'TIME_UP' };
+  | { type: 'TIME_UP' }
+  /** Vários aparelhos: quem criou a sala tira da partida um jogador que perdeu a conexão. */
+  | { type: 'REMOVE_PLAYER'; player: number };
 
 export type ActionType = Action['type'];
 

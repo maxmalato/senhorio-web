@@ -6,9 +6,9 @@
 import { allHousesSaleValue, sellAllHouses } from './building';
 import { returnCard } from './cards';
 import { mortgageInterest, mortgageValue } from './mortgage';
-import { currentPlayerIndex, playerAt, playerProperties, propertyAt } from './state';
+import { activePlayers, currentPlayerIndex, playerAt, playerProperties, propertyAt } from './state';
 import { transfer } from './transfer';
-import { continueAfter, endTurn, setPhase } from './turn';
+import { continueAfter, endTurn, finishGame, setPhase } from './turn';
 import {
   BANK,
   type ChargeItem,
@@ -47,7 +47,7 @@ export function startCollection(
   processCollection(state, ctx, events);
 }
 
-function processCollection(state: GameState, ctx: EngineContext, events: GameEvent[]): void {
+export function processCollection(state: GameState, ctx: EngineContext, events: GameEvent[]): void {
   const pending = collection(state);
   const queue = pending.queue;
   while (queue.length > 0) {
@@ -229,4 +229,68 @@ export function transferBankruptAssets(
 export function quit(state: GameState, ctx: EngineContext, events: GameEvent[]): void {
   transferBankruptAssets(state, ctx, events, currentPlayerIndex(state), BANK, true);
   endTurn(state, ctx, events);
+}
+
+/**
+ * Vários aparelhos: tira da partida um jogador que perdeu a conexão (docs/01). Os bens
+ * voltam ao banco, como no abandono (RN-115). Funciona fora da vez do jogador; se era a
+ * vez dele, o turno acaba. Uma proposta de venda simples com ele é cancelada, e uma dívida
+ * aberta dele é encerrada com os bens indo ao banco.
+ */
+export function removePlayer(
+  state: GameState,
+  ctx: EngineContext,
+  events: GameEvent[],
+  player: number,
+): Reason | null {
+  const target = state.players[player];
+  if (!Number.isInteger(player) || !target) return { code: 'invalidTarget' };
+  if (target.bankrupt) return { code: 'alreadyOut' };
+  // a falência em andamento termina com um OK, que qualquer aparelho pode dar
+  if (state.phase === 'BANKRUPTCY') return { code: 'invalidActionForPhase', phase: state.phase };
+
+  const current = currentPlayerIndex(state);
+  const pending = state.pending;
+  if (pending?.type === 'trade' && (pending.proposer === player || pending.other === player)) {
+    state.pending = null;
+  }
+
+  // dívida aberta do próprio jogador removido: os bens vão ao banco e a cobrança segue
+  if (
+    state.phase === 'RAISE_MONEY' &&
+    pending?.type === 'collection' &&
+    pending.debt?.debtor === player
+  ) {
+    transferBankruptAssets(state, ctx, events, player, BANK, true);
+    pending.queue.shift();
+    pending.debt = null;
+    if (player === current) pending.returnTo = 'TURN_END';
+    if (finishIfOnlyOneLeft(state, ctx, events)) return null;
+    setPhase(state, 'COLLECTION');
+    processCollection(state, ctx, events);
+    return null;
+  }
+
+  // carta revelada e ainda não aplicada volta ao fundo do baralho
+  if (state.phase === 'CARD' && player === current && state.currentCard) {
+    returnCard(state, ctx, state.currentCard.id);
+    state.currentCard = null;
+  }
+  transferBankruptAssets(state, ctx, events, player, BANK, true);
+  if (finishIfOnlyOneLeft(state, ctx, events)) return null;
+  if (player === current) {
+    // cobrança de outros jogadores em andamento: termina, e então o turno acaba
+    if (state.pending?.type === 'collection') state.pending.returnTo = 'TURN_END';
+    else endTurn(state, ctx, events);
+  }
+  return null;
+}
+
+/** RN-110: sobrou um só jogador, a partida acaba. */
+function finishIfOnlyOneLeft(state: GameState, ctx: EngineContext, events: GameEvent[]): boolean {
+  if (activePlayers(state).length > 1) return false;
+  state.pending = null;
+  state.currentCard = null;
+  finishGame(state, ctx, events);
+  return true;
 }

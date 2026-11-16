@@ -103,6 +103,7 @@ Uma decisão nova entra no topo da tabela com o motivo.
 
 | Data | Decisão | Motivo |
 | --- | --- | --- |
+| 16/11/2026 | Etapa 4: remover jogador desconectado depois de 3 minutos (só quem criou a sala); cronômetro do modo tempo parado durante a pausa por queda; sem limite de tempo por decisão; sala apagada depois de 12 horas sem atividade. Nova ação do motor `REMOVE_PLAYER`: bens ao banco (RN-115), fora ou dentro da vez, cancelando proposta e encerrando dívida do removido | Propostas aprovadas nos mockups; o motor precisava tirar alguém da partida fora da própria vez |
 | 16/11/2026 | Etapa 3: partida salva no IndexedDB a cada fim de turno; PWA com `vite-plugin-pwa` (Workbox), atualização só quando o jogador pede; textos novos I-92 a I-96 no catálogo | Mesmo ponto de salvamento do Roku; nunca recarregar no meio de uma partida; textos sempre no arquivo de regras |
 | 16/11/2026 | "Começar partida" ignora um segundo toque enquanto a primeira gravação termina | Os testes acharam o início duplo da mesma partida quando o armazenamento estava lento |
 | 16/11/2026 | Tabuleiro: botão Preços/Nomes (no celular, nome curto como "Palmeiras"), destaque no tabuleiro da propriedade escolhida nas listas, ícones nas casas especiais no celular e peões agrupados em grade quando dividem a casa | Primeiro teste em aparelho real: no celular as casas especiais ficavam sem nome, o jogador não sabia em qual rua construir e mais de 5 peões na mesma casa saíam do tabuleiro |
@@ -128,6 +129,5 @@ Uma decisão nova entra no topo da tabela com o motivo.
 
 ## Em aberto
 
-- Valor de {minutosParaRemover} e tempo de expiração de sala inativa (Etapa 4).
-- Cronômetro do modo tempo no modo de vários dispositivos: além do menu, ele também para durante a pausa por queda de conexão? (proposta: sim).
-- Jogador inativo que não sai da sala: haverá limite de tempo por decisão? (proposta: não no início).
+Nada no momento.
+

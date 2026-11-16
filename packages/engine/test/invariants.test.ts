@@ -47,6 +47,7 @@ const ACTION_TYPES: ActionType[] = [
   'DECLARE_BANKRUPTCY',
   'QUIT',
   'TIME_UP',
+  'REMOVE_PLAYER',
 ];
 
 /** Ação qualquer, válida ou não, com parâmetros ao acaso (inclusive fora do tabuleiro). */
@@ -70,6 +71,11 @@ function randomAction(random: RandomSource): Action {
       };
     case 'RESPOND_TRADE':
       return { type, accept: random() < 0.5 };
+    case 'REMOVE_PLAYER':
+      // raro, para a partida não acabar cedo demais
+      return random() < 0.15
+        ? { type, player: pick([-1, 0, 1, 2, 3, 4, 5, 9]) }
+        : { type: 'CONFIRM' };
     default:
       return { type } as Action;
   }

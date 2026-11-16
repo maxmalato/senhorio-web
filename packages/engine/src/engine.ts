@@ -6,7 +6,14 @@
 
 import { build, sellHouse } from './building';
 import { applyCurrentCard } from './cards';
-import { actingPlayer, concludeBankruptcy, declareBankruptcy, quit, tryToSettleDebt } from './debt';
+import {
+  actingPlayer,
+  concludeBankruptcy,
+  declareBankruptcy,
+  quit,
+  removePlayer,
+  tryToSettleDebt,
+} from './debt';
 import { payBail, tryForDoubles, useJailCard } from './jail';
 import { mortgage, redeem } from './mortgage';
 import { cloneState, currentPlayer } from './state';
@@ -62,7 +69,7 @@ function validateAction(state: GameState, action: unknown): Reason | null {
   const type =
     typeof action === 'object' && action !== null ? (action as { type?: unknown }).type : undefined;
   if (state.phase === 'GAME_OVER') return { code: 'gameOver' };
-  if (type === 'TIME_UP') return null;
+  if (type === 'TIME_UP' || type === 'REMOVE_PLAYER') return null;
 
   // venda simples pendente: só a resposta da outra parte (RN-094)
   if (state.pending?.type === 'trade') {
@@ -142,6 +149,8 @@ function applyAction(
     case 'QUIT':
       quit(state, ctx, events);
       return null;
+    case 'REMOVE_PLAYER':
+      return removePlayer(state, ctx, events, action.player);
     case 'TIME_UP':
       // RN-113: só marca; a partida acaba em TURN_END, quando a rodada fecha
       if (state.mode.type !== 'time') return { code: 'modeWithoutTimer' };
