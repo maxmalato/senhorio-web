@@ -38,6 +38,10 @@ describe('menu e construção (D-10, D-11)', () => {
     // as duas ruas do grupo mostram o aluguel antes e depois da 1ª casa
     expect(screen.getAllByText('Com a 1ª casa, o aluguel vai de R$ 8 para R$ 20')).toHaveLength(2);
     await user.click(screen.getByRole('option', { name: /Travessa do Porto/ }));
+    // a rua escolhida fica em destaque no tabuleiro
+    expect(document.querySelector('.cell.marked')?.getAttribute('title')).toMatch(
+      /^Travessa do Porto/,
+    );
     // depois de escolher, o foco vai para o botão de confirmar
     expect(screen.getByRole('button', { name: 'Construir' })).toHaveFocus();
     await user.click(screen.getByRole('button', { name: 'Construir' }));

@@ -69,6 +69,27 @@ export const ICONS = {
   exit: { nodes: [path('M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10')] },
   crown: { fill: true, nodes: [path('M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z')] },
   house: { fill: true, viewBox: '0 0 10 10', nodes: [path('M5 1 9.4 4.8V9H.6V4.8z')] },
+  // casas especiais do tabuleiro (celular: no lugar do nome, que não cabe)
+  station: {
+    width: 2,
+    nodes: [
+      rect({ x: 6, y: 3, width: 12, height: 14, rx: 3 }),
+      path('M6 10h12M9 20l-2 2M15 20l2 2'),
+      circle({ cx: 9.5, cy: 13.5, r: 0.8, fill: 'currentColor' }),
+      circle({ cx: 14.5, cy: 13.5, r: 0.8, fill: 'currentColor' }),
+    ],
+  },
+  bolt: { fill: true, nodes: [path('M13.5 2 4.5 13.5h6.5L9.5 22l9-12h-6.5z')] },
+  drop: {
+    fill: true,
+    nodes: [path('M12 2.5c3.8 4.6 6.5 8.2 6.5 11.4a6.5 6.5 0 0 1-13 0C5.5 10.7 8.2 7.1 12 2.5z')],
+  },
+  receipt: { nodes: [path('M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3')] },
+  question: {
+    width: 2.6,
+    nodes: [path('M8.8 8.6a3.3 3.3 0 1 1 4.9 2.9c-1.1.6-1.7 1.3-1.7 2.6M12 18v.4')],
+  },
+  exclaim: { width: 2.8, nodes: [path('M12 4.5v9.5M12 18.6v.4')] },
 } satisfies Record<string, IconDef>;
 
 export type IconName = keyof typeof ICONS;

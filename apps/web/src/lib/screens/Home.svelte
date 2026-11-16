@@ -52,8 +52,9 @@
     font: 600 2.6em/1 var(--font-display);
     margin: 0;
   }
+  /* numa linha só quando cabe; em tela estreita, quebra em linhas equilibradas */
   .hero .lead {
-    max-width: 24em;
+    text-wrap: balance;
   }
   .choices {
     display: grid;

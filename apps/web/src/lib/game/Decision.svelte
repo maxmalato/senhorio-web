@@ -36,7 +36,11 @@
   import Stepper from '../ui/Stepper.svelte';
   import type { Game } from './game.svelte';
 
-  let { game, onminimize }: { game: Game; onminimize: () => void } = $props();
+  let {
+    game,
+    onminimize,
+    marked = $bindable([]),
+  }: { game: Game; onminimize: () => void; marked?: number[] } = $props();
 
   type Mode =
     | 'main'
@@ -371,6 +375,32 @@
     const refusal = await act({ type: 'RESPOND_TRADE', accept });
     if (!refusal) void game.notify(extra('D-18', 'after', { player: name(proposal.proposer) }));
   }
+
+  // ---------- destaque no tabuleiro da propriedade escolhida na lista ----------
+  const markedNow = $derived.by((): number[] => {
+    const one = (pos: number | null) => (pos === null || pos < 0 ? [] : [pos]);
+    if (s.pending?.type === 'trade') return [s.pending.position];
+    switch (mode) {
+      case 'build':
+        return one(pick(buildItems));
+      case 'sell':
+        return one(pick(sellItems));
+      case 'mortgage':
+        return one(pick(mortgageItems));
+      case 'redeem':
+        return one(pick(redeemItems));
+      case 'trade-pick':
+        return one(pick(trade.direction === 'buy' ? buyChoices : sellChoices));
+      case 'trade-buyer':
+      case 'trade-amount':
+        return one(trade.position);
+      default:
+        return [];
+    }
+  });
+  $effect(() => {
+    marked = markedNow;
+  });
 
   // ---------- compra ----------
   function propertyEyebrow(pos: number): string {

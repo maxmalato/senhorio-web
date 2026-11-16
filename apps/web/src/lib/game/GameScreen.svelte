@@ -16,6 +16,26 @@
   let { game, onend }: { game: Game; onend: () => void } = $props();
 
   let tab: 'board' | 'players' = $state('board');
+  let marked: number[] = $state([]);
+
+  // preferência deste aparelho: ruas com preço ou com nome (guardada só no navegador)
+  const NAMES_KEY = 'senhorio:board-names';
+  function loadNames(): boolean {
+    try {
+      return localStorage.getItem(NAMES_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+  let showNames = $state(loadNames());
+  function toggleNames() {
+    showNames = !showNames;
+    try {
+      localStorage.setItem(NAMES_KEY, showNames ? '1' : '0');
+    } catch {
+      // sem armazenamento: vale só até fechar
+    }
+  }
   let minimized = $state(false);
   let decision: ReturnType<typeof Decision> | undefined = $state();
   let root: HTMLElement | undefined = $state();
@@ -114,6 +134,15 @@
       <button
         class="menu-btn"
         type="button"
+        aria-pressed={showNames}
+        title="Mostrar nomes ou preços das ruas no tabuleiro"
+        onclick={toggleNames}
+      >
+        <Icon name="tag" /><span>{showNames ? 'Preços' : 'Nomes'}</span>
+      </button>
+      <button
+        class="menu-btn"
+        type="button"
         onclick={() => decision?.openMenu()}
         disabled={!showDecision}
       >
@@ -126,7 +155,7 @@
     </section>
 
     <div class="board-wrap">
-      <Board {view} highlight={current?.position ?? -1}>
+      <Board {view} highlight={current?.position ?? -1} {marked} {showNames}>
         {#if game.dice && game.busy && !game.toast && !game.interstitial}
           <div class="dice-pill" role="status">
             <Die value={game.dice.d1} rolling />
@@ -147,7 +176,12 @@
         <!-- sempre montado (só escondido durante as animações), para não perder o passo do menu -->
         <div class="decision" hidden={!showDecision || minimized} bind:this={decisionBox}>
           {#if !game.over}
-            <Decision bind:this={decision} {game} onminimize={() => (minimized = true)} />
+            <Decision
+              bind:this={decision}
+              bind:marked
+              {game}
+              onminimize={() => (minimized = true)}
+            />
           {/if}
         </div>
         {#if showDecision && minimized}
@@ -303,6 +337,10 @@
   }
   .decision {
     display: contents;
+  }
+  /* o cartão divide com a logo a mesma célula do centro do tabuleiro */
+  .decision :global(.card) {
+    grid-area: 1 / 1;
   }
   .decision[hidden] {
     display: none;
