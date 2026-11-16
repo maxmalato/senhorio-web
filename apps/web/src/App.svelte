@@ -1,5 +1,6 @@
 <script lang="ts">
   // Fluxo do modo "um aparelho": início → jogadores → modo → ordem sorteada → jogo → fim.
+  // A partida é salva no aparelho no fim de cada turno e pode ser continuada (Etapa 3).
   import {
     createContext,
     createRandomizer,
@@ -9,9 +10,13 @@
     type GameState,
     type RandomSource,
   } from '@senhorio/engine';
+  import { onMount } from 'svelte';
   import { Game, INSTANT_TIMINGS, NORMAL_TIMINGS, REDUCED_TIMINGS } from './lib/game/game.svelte';
   import GameScreen from './lib/game/GameScreen.svelte';
+  import { pwa } from './lib/pwa.svelte';
   import { defaultNames, PAWN_COLORS, RULES_RESULT, rules } from './lib/rules';
+  import { deleteGame, loadGame, saveGame, type SaveRecord } from './lib/save/save';
+  import { createIndexedDbStore, createMemoryStore, type SaveStore } from './lib/save/store';
   import End from './lib/screens/End.svelte';
   import Home from './lib/screens/Home.svelte';
   import Mode, { type ModeSetup } from './lib/screens/Mode.svelte';
@@ -19,6 +24,13 @@
   import Players, { type PlayerSetup } from './lib/screens/Players.svelte';
 
   type Screen = 'home' | 'players' | 'mode' | 'order' | 'game' | 'end';
+
+  let { store = defaultStore() }: { store?: SaveStore } = $props();
+
+  function defaultStore(): SaveStore {
+    // sem IndexedDB (alguns modos privados), o jogo funciona, mas não guarda a partida
+    return typeof indexedDB === 'undefined' ? createMemoryStore() : createIndexedDbStore();
+  }
 
   // Parâmetros para testes: ?seed=N reproduz os sorteios; ?speed=0 tira as esperas.
   const params = new URLSearchParams(location.search);
@@ -31,8 +43,9 @@
         : NORMAL_TIMINGS;
 
   function randomSource(): RandomSource {
-    if (seedParam !== null && Number.isFinite(Number(seedParam)))
+    if (seedParam !== null && Number.isFinite(Number(seedParam))) {
       return createSeededRandom(Number(seedParam));
+    }
     // sorteio do navegador com qualidade criptográfica
     return () => (crypto.getRandomValues(new Uint32Array(1))[0] ?? 0) / 2 ** 32;
   }
@@ -52,6 +65,17 @@
   let ctx: EngineContext | null = $state.raw(null);
   let initial: GameState | null = $state.raw(null);
   let game: Game | null = $state.raw(null);
+  let saved: SaveRecord | null = $state.raw(null);
+  let incompatible = $state(false);
+
+  async function refreshSaved() {
+    const loaded = await loadGame(store, rules.version);
+    saved = loaded.status === 'ok' ? loaded.record : null;
+    incompatible = loaded.status === 'incompatible';
+  }
+  onMount(() => {
+    void refreshSaved();
+  });
 
   function drawOrder() {
     ctx = createContext(RULES_RESULT, createRandomizer(randomSource()));
@@ -71,26 +95,79 @@
     screen = 'order';
   }
 
-  function start() {
-    if (!initial || !ctx) return;
-    game = new Game(initial, ctx, timings);
+  function play(state: GameState, context: EngineContext, secondsLeft: number | null = null) {
+    game = new Game(state, context, timings, {
+      persist: (st, seconds) => saveGame(store, st, seconds),
+      forget: () => deleteGame(store),
+      secondsLeft,
+    });
     screen = 'game';
+  }
+
+  // evita começar a mesma partida duas vezes (toque duplo enquanto a gravação termina)
+  let starting = false;
+  async function start() {
+    if (!initial || !ctx || starting) return;
+    starting = true;
+    // primeira gravação logo ao começar (a anterior, se havia, é substituída)
+    const seconds = initial.mode.type === 'time' ? (initial.mode.limit ?? 0) * 60 : null;
+    try {
+      await saveGame(store, initial, seconds);
+      play(initial, ctx, seconds);
+    } finally {
+      starting = false;
+    }
+  }
+
+  function resume() {
+    if (!saved) return;
+    const state = saved.state;
+    // "Jogar de novo" no fim usa os mesmos jogadores e o mesmo modo
+    players = state.players.map((p) => ({ name: p.name, color: p.color }));
+    mode = {
+      type: state.mode.type,
+      minutes: state.mode.type === 'time' ? (state.mode.limit ?? mode.minutes) : mode.minutes,
+      rounds: state.mode.type === 'rounds' ? (state.mode.limit ?? mode.rounds) : mode.rounds,
+    };
+    ctx = createContext(RULES_RESULT, createRandomizer(randomSource()));
+    play(state, ctx, saved.secondsLeft);
+  }
+
+  async function startNew() {
+    await deleteGame(store);
+    saved = null;
+    incompatible = false;
+    screen = 'players';
+  }
+
+  async function backHome() {
+    game?.stopClock();
+    await refreshSaved();
+    screen = 'home';
   }
 </script>
 
 <main class="root">
   {#if screen === 'home'}
-    <Home onnew={() => (screen = 'players')} />
+    <Home
+      {saved}
+      {incompatible}
+      updateReady={pwa.updateReady}
+      offlineReady={pwa.offlineReady}
+      onnew={startNew}
+      onresume={resume}
+      onupdate={() => pwa.update()}
+    />
   {:else if screen === 'players'}
-    <Players bind:players onback={() => (screen = 'home')} onnext={() => (screen = 'mode')} />
+    <Players bind:players onback={backHome} onnext={() => (screen = 'mode')} />
   {:else if screen === 'mode'}
     <Mode bind:mode onback={() => (screen = 'players')} onnext={drawOrder} />
   {:else if screen === 'order' && initial}
     <Order state={initial} onback={() => (screen = 'mode')} onstart={start} />
   {:else if screen === 'game' && game}
-    <GameScreen {game} onend={() => (screen = 'end')} />
+    <GameScreen {game} onend={() => (screen = 'end')} onsaveexit={backHome} />
   {:else if screen === 'end' && game && ctx}
-    <End state={game.state} {ctx} onagain={drawOrder} onexit={() => (screen = 'home')} />
+    <End state={game.state} {ctx} onagain={drawOrder} onexit={backHome} />
   {/if}
 </main>
 

@@ -9,7 +9,7 @@ import {
   type GameState,
   type Reason,
 } from '@senhorio/engine';
-import { index, rules } from '../rules';
+import { index, rules, t } from '../rules';
 import { narrate } from './narrate';
 import { viewFrom, type View } from './view';
 
@@ -52,6 +52,15 @@ export interface Interstitial {
 
 const HISTORY_SIZE = 3;
 
+export interface GameOptions {
+  /** Grava a partida; devolve false se não conseguiu. */
+  persist?: (state: GameState, secondsLeft: number | null) => Promise<boolean>;
+  /** Apaga a partida salva (fim de partida). */
+  forget?: () => Promise<void>;
+  /** Modo tempo: segundos restantes de uma partida retomada. */
+  secondsLeft?: number | null;
+}
+
 export class Game {
   readonly ctx: EngineContext;
   readonly timings: Timings;
@@ -76,13 +85,25 @@ export class Game {
   #ack: (() => void) | null = null;
   #clock: ReturnType<typeof setInterval> | null = null;
   #timeUpSent = false;
+  #persist: GameOptions['persist'];
+  #forget: GameOptions['forget'];
+  #saveWarned = false;
 
-  constructor(state: GameState, ctx: EngineContext, timings: Timings = NORMAL_TIMINGS) {
+  constructor(
+    state: GameState,
+    ctx: EngineContext,
+    timings: Timings = NORMAL_TIMINGS,
+    options: GameOptions = {},
+  ) {
     this.ctx = ctx;
     this.timings = timings;
     this.state = state;
     this.view = viewFrom(state);
-    if (state.mode.type === 'time' && state.mode.limit) this.secondsLeft = state.mode.limit * 60;
+    this.#persist = options.persist;
+    this.#forget = options.forget;
+    if (state.mode.type === 'time' && state.mode.limit) {
+      this.secondsLeft = options.secondsLeft ?? state.mode.limit * 60;
+    }
   }
 
   get over(): boolean {
@@ -103,6 +124,7 @@ export class Game {
       this.state = result.state;
       await this.#play(result.events);
       this.view = viewFrom(this.state);
+      await this.#afterTurn(result.events);
       await this.#showToasts();
     } finally {
       this.busy = false;
@@ -151,6 +173,26 @@ export class Game {
     if (this.secondsLeft === 0 && !this.#timeUpSent && !this.busy) {
       this.#timeUpSent = true;
       void this.act({ type: 'TIME_UP' });
+    }
+  }
+
+  /**
+   * Ponto de salvamento: fim do turno (evento TurnEnded), depois de todas as transferências.
+   * Partida terminada é apagada, para não aparecer em "Continuar partida" (docs/03).
+   */
+  async #afterTurn(events: GameEvent[]): Promise<void> {
+    if (events.some((e) => e.type === 'GameOver')) {
+      await this.#forget?.();
+      return;
+    }
+    if (!events.some((e) => e.type === 'TurnEnded') || !this.#persist) return;
+    const saved = await this.#persist(this.state, this.secondsLeft);
+    if (!saved && !this.#saveWarned) {
+      // I-87: avisa uma vez por partida; o jogo continua normalmente
+      this.#saveWarned = true;
+      const text = t('I-87');
+      this.history = [text, ...this.history].slice(0, HISTORY_SIZE);
+      this.#toastQueue.push(text);
     }
   }
 

@@ -9,8 +9,8 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 | 0 – Fundação | Concluída | `v0.1-fundacao` |
 | 1 – Motor em TS | Concluída | `v0.2-motor` |
 | 1b – Mockups (HTML) | Concluída (rodadas 1 e 2 aprovadas; celular em pé: variação B) | — |
-| 2 – Telas (um dispositivo) | Em andamento (telas e testes automáticos prontos; falta o roteiro manual em aparelhos reais) | `v0.3-telas` |
-| 3 – PWA e salvamento | A fazer | `v0.4-pwa` |
+| 2 – Telas (um dispositivo) | Concluída (aprovada no celular e no computador) | `v0.3-telas` |
+| 3 – PWA e salvamento | Em andamento (pronto e testado; falta o roteiro manual) | `v0.4-pwa` |
 | 4 – Vários dispositivos | A fazer | `v0.5-salas` |
 | 5 – Publicação | A fazer | `v1.0` |
 | 6 – Acabamento | A fazer | `v1.1` |

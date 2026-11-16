@@ -10,10 +10,12 @@
   import Board from './Board.svelte';
   import Decision from './Decision.svelte';
   import type { Game } from './game.svelte';
+  import { menuAvailable } from './menu';
   import PlayerPanel from './PlayerPanel.svelte';
   import Toast from './Toast.svelte';
 
-  let { game, onend }: { game: Game; onend: () => void } = $props();
+  let { game, onend, onsaveexit }: { game: Game; onend: () => void; onsaveexit?: () => void } =
+    $props();
 
   let tab: 'board' | 'players' = $state('board');
   let marked: number[] = $state([]);
@@ -41,12 +43,20 @@
   let root: HTMLElement | undefined = $state();
   let decisionBox: HTMLElement | undefined = $state();
 
-  // quando a decisão reaparece (fim das animações), a opção padrão volta a ter o foco
+  // A cada decisão nova (ou quando ela reaparece no fim das animações), a opção padrão
+  // volta a ter o foco. Sem isso, um cartão montado enquanto estava escondido ficaria sem
+  // foco e o OK do controle remoto pararia de funcionar até alguém tocar na tela.
   $effect(() => {
+    void game.state;
+    void game.busy;
     if (!showDecision || minimized || !decisionBox) return;
     const box = decisionBox;
     void tick().then(() => {
-      if (!box.contains(document.activeElement)) focusInside(box);
+      const visible = !box.hidden && !minimized;
+      const lost = !document.activeElement || document.activeElement === document.body;
+      if (visible && (lost || !box.contains(document.activeElement))) {
+        if (!root?.querySelector('.restore, .pause-dialog')) focusInside(box);
+      }
     });
   });
 
@@ -144,7 +154,7 @@
         class="menu-btn"
         type="button"
         onclick={() => decision?.openMenu()}
-        disabled={!showDecision}
+        disabled={!showDecision || !menuAvailable(s)}
       >
         <Icon name="menu" /><span>{t('I-11').charAt(0).toUpperCase() + t('I-11').slice(1)}</span>
       </button>
@@ -246,8 +256,18 @@
         >
           {options('D-15')[0]}
         </button>
-        <button class="btn secondary" type="button" disabled>{options('D-15')[1]}</button>
-        <p class="small">{t('I-35')}</p>
+        <!-- a partida já está salva no fim do último turno concluído (docs/03) -->
+        <button
+          class="btn secondary"
+          type="button"
+          disabled={!onsaveexit}
+          onclick={() => {
+            game.paused = false;
+            game.stopClock();
+            onsaveexit?.();
+          }}>{options('D-15')[1]}</button
+        >
+        <p class="small">{onsaveexit ? t('I-93') : t('I-35')}</p>
       </div>
     </div>
   {/if}

@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["svelte", "vite/client", "@testing-library/jest-dom/vitest"]
+    "types": ["svelte", "vite/client", "vite-plugin-pwa/client", "@testing-library/jest-dom/vitest"]
   },
   "include": ["src/**/*.ts", "src/**/*.svelte", "vite.config.ts", "svelte.config.js"]
 }

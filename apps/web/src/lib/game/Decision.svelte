@@ -35,6 +35,7 @@
   import OptionList, { type Option } from '../ui/OptionList.svelte';
   import Stepper from '../ui/Stepper.svelte';
   import type { Game } from './game.svelte';
+  import { menuAvailable as isMenuAvailable } from './menu';
 
   let {
     game,
@@ -120,10 +121,7 @@
       .filter(([, prop]) => prop.owner === actor && prop.mortgaged)
       .map(([pos]) => Number(pos)),
   );
-  const menuAvailable = $derived(
-    ['PRE_ROLL', 'JAIL_DECISION', 'POST_RESOLUTION', 'PURCHASE_DECISION'].includes(s.phase) &&
-      s.pending === null,
-  );
+  const menuAvailable = $derived(isMenuAvailable(s));
 
   function rentLine(pos: number): string {
     const space = rules.spaces[pos];

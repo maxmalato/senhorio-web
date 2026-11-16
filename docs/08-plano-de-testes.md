@@ -28,7 +28,7 @@ Os 45 cenários do Roku (CT-01 a CT-45, em docs/referencia-roku/plano-de-testes-
 | CT-24 a CT-26 e CT-28 a CT-31 (prisão e cartas) | `packages/engine/test/jail-cards.test.ts` | Passando |
 | CT-27, CT-32 a CT-38 e CT-45 (venda simples, dívida e falência) | `packages/engine/test/trade-debt.test.ts` | Passando |
 | CT-39 a CT-42 (fim de partida e estado serializável) | `packages/engine/test/end.test.ts` | Passando |
-| CT-43 (salvamento de outra versão das regras) | Etapa 3, junto com o salvamento no IndexedDB | A fazer |
+| CT-43 (salvamento de outra versão das regras) | `apps/web/src/lib/save/save.test.ts` e `resume.test.ts` | Passando |
 | CT-44 (regras inválidas) | `packages/engine/test/rules.test.ts` | Passando |
 | CT-46 a CT-52 (cartas sem cenário no Roku) | `packages/engine/test/cards.test.ts` | Passando |
 
@@ -121,4 +121,26 @@ Fazer em pelo menos um celular, um computador e uma Smart TV com navegador (a TV
 | 10 | Conferir leitura a cerca de 3 m na TV | Textos, valores e o foco dourado legíveis |
 
 Anote aparelho, navegador e o que estranhou; os ajustes entram antes da tag `v0.3-telas`.
+
+### Testes da Etapa 3 (salvamento e PWA)
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Salvamento | `apps/web/src/lib/save/save.test.ts` | CT-42 (salvar e ler), CT-43 (outra versão), registro estranho, apagar, falha na gravação |
+| Ponto de salvamento e retomada | `apps/web/src/lib/save/resume.test.ts` | Grava só no fim do turno, apaga no fim da partida, aviso I-87 uma vez, Continuar partida, confirmação D-22, CT-43 na tela inicial |
+| Ponta a ponta | `e2e/pwa.spec.ts` | Continuar depois de recarregar (IndexedDB real), Salvar e sair, manifesto e ícones, jogar sem internet (service worker) |
+
+### Roteiro da Etapa 3
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Jogar 2 ou 3 turnos e fechar a aba no meio de um turno | Ao abrir de novo, "Continuar partida" com rodada, jogadores e "Salva há …" |
+| 2 | Continuar | Volta no começo do turno de quem tinha a vez, com o mesmo dinheiro e as mesmas propriedades |
+| 3 | Modo tempo: anotar o cronômetro, fechar e continuar | O cronômetro volta de onde estava no fim do último turno |
+| 4 | Menu → Pausar → Salvar e sair | Volta à tela inicial com "Continuar partida" |
+| 5 | Nova partida com uma salva | Pede confirmação; "Não, voltar" mantém a salva |
+| 6 | No computador, pelo `localhost`: abrir, recarregar e desligar a internet | O jogo abre e funciona sem internet |
+| 7 | No computador, pelo `localhost`: instalar pelo ícone da barra de endereço | Abre em janela própria, com o ícone do Senhorio |
+
+Instalação e modo offline no celular só funcionam em https: ficam para depois da publicação (Etapa 5).
 

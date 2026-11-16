@@ -970,6 +970,11 @@
     "H-24": "{player} abandonou a partida",
     "H-25": "Tempo esgotado: última rodada",
     "H-26": "{player} pagou {amount} de juros de hipoteca",
-    "defaultNames": ["Ana", "Bruno", "Carla", "Diego", "Elisa", "Fábio"]
+    "defaultNames": ["Ana", "Bruno", "Carla", "Diego", "Elisa", "Fábio"],
+    "I-92": "Salva {when}",
+    "I-93": "A partida continua do começo deste turno.",
+    "I-94": "Há uma versão nova do jogo",
+    "I-95": "Atualizar agora",
+    "I-96": "Pronto para jogar sem internet neste aparelho"
   }
 }

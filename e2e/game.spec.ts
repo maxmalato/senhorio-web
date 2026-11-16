@@ -6,12 +6,12 @@ import { expect, test, type Page } from '@playwright/test';
 async function startGame(page: Page) {
   await page.goto('/?seed=7&speed=0');
   await page.getByRole('button', { name: 'Nova partida' }).click();
-  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Menos' }).click();
   await expect(page.getByText('20 rodadas')).toBeVisible();
-  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.getByRole('button', { name: 'Começar partida' }).click();
-  await expect(page.getByRole('button', { name: 'Começar' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Começar', exact: true })).toBeVisible();
 }
 
 test('partida inteira só com o teclado (Enter, como o OK do controle)', async ({ page }) => {
@@ -37,26 +37,28 @@ test('telas sem problemas de acessibilidade detectáveis', async ({ page }) => {
   await check('início');
   await page.getByRole('button', { name: 'Nova partida' }).click();
   await check('jogadores');
-  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await check('modo');
-  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await check('ordem sorteada');
   await page.getByRole('button', { name: 'Começar partida' }).click();
-  await page.getByRole('button', { name: 'Começar' }).click();
+  await page.getByRole('button', { name: 'Começar', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Rolar dados' })).toBeVisible();
   await check('jogo');
 });
 
 test('a opção padrão já vem em foco em cada decisão', async ({ page }) => {
   await startGame(page);
-  await expect(page.getByRole('button', { name: 'Começar' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Começar', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('button', { name: 'Rolar dados' })).toBeFocused();
 });
 
 test('Voltar esconde a decisão para ver o tabuleiro e a traz de volta', async ({ page }) => {
   await startGame(page);
+  await expect(page.getByRole('button', { name: 'Começar', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Rolar dados' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Rolar dados' })).toBeHidden();
   await expect(page.getByRole('button', { name: 'Voltar à decisão' })).toBeFocused();

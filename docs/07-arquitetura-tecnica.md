@@ -266,6 +266,21 @@ O protocolo de mensagens entre navegador e sala é definido e documentado na Eta
 
 O salvamento guarda a versão do arquivo de regras. Se a versão mudar, o jogo avisa e oferece só "Nova partida", como no Roku.
 
+Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
+
+- **Onde:** IndexedDB do navegador, banco `senhorio`, tabela `saves`, chave `current`. Uma partida por navegador; nada sai do aparelho.
+- **Registro:** `{ format, rulesVersion, savedAt, state, secondsLeft }`. `format` muda só se a estrutura do registro mudar; `secondsLeft` guarda o cronômetro do modo tempo, que fica na interface, fora do motor.
+- **Quando grava:** ao começar a partida e a cada evento `TurnEnded` (FIM_TURNO), depois de todas as transferências. A partida terminada é apagada. "Salvar e sair" na pausa volta ao início; o turno em andamento é refeito do começo, como no Roku.
+- **Falha:** sem IndexedDB (alguns modos privados) ou com erro de gravação, o jogo segue e mostra uma vez "Não foi possível salvar" (I-87).
+- **Retomada:** "Continuar partida" mostra rodada, jogadores, modo e há quanto tempo foi salva; nova partida com uma salva pede confirmação (D-22).
+
+## PWA
+
+- **Ferramenta:** `vite-plugin-pwa` (Workbox). O service worker guarda no aparelho todos os arquivos do jogo, inclusive as fontes (cerca de 700 KB), e o modo um dispositivo funciona sem internet depois do primeiro acesso.
+- **Atualização:** `registerType: "prompt"`. A versão nova fica esperando e a tela inicial mostra "Há uma versão nova do jogo · Atualizar agora". O jogo nunca recarrega sozinho no meio de uma partida.
+- **Manifesto:** nome Senhorio, `display: standalone`, cor azul-noite, ícones de 192 e 512 px e ícone "maskable" com margem para o Android, gerados a partir da logo (`apps/web/public/icons/`).
+- **Limite do navegador:** service worker e instalação só funcionam em https ou em `localhost`. Pela rede local (`http://192.168...`), o jogo e o salvamento funcionam, mas não a instalação nem o modo offline; no celular, isso é testado depois da publicação (Etapa 5).
+
 ## Segurança e privacidade
 
 | Risco | Medida |

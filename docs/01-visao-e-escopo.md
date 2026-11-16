@@ -103,6 +103,8 @@ Uma decisão nova entra no topo da tabela com o motivo.
 
 | Data | Decisão | Motivo |
 | --- | --- | --- |
+| 16/11/2026 | Etapa 3: partida salva no IndexedDB a cada fim de turno; PWA com `vite-plugin-pwa` (Workbox), atualização só quando o jogador pede; textos novos I-92 a I-96 no catálogo | Mesmo ponto de salvamento do Roku; nunca recarregar no meio de uma partida; textos sempre no arquivo de regras |
+| 16/11/2026 | "Começar partida" ignora um segundo toque enquanto a primeira gravação termina | Os testes acharam o início duplo da mesma partida quando o armazenamento estava lento |
 | 16/11/2026 | Tabuleiro: botão Preços/Nomes (no celular, nome curto como "Palmeiras"), destaque no tabuleiro da propriedade escolhida nas listas, ícones nas casas especiais no celular e peões agrupados em grade quando dividem a casa | Primeiro teste em aparelho real: no celular as casas especiais ficavam sem nome, o jogador não sabia em qual rua construir e mais de 5 peões na mesma casa saíam do tabuleiro |
 | 15/11/2026 | Etapa 2: nas listas (construir, vender casas, hipotecar, resgatar), escolher um item leva o foco ao botão de confirmar; o cartão de decisão fica montado durante as animações | Com o controle remoto, OK escolhe e OK de novo confirma, sem cliques escondidos; o menu não volta ao início depois de cada construção |
 | 15/11/2026 | Textos do catálogo adaptados à web: "Passe o controle" virou "Passe o aparelho" (D-01, D-18) e as dicas de D-02 e D-03 falam em tocar no botão ou apertar OK; nenhum valor de regra mudou | O jogo roda em celular, tablet, computador e TV, não só com controle remoto |
