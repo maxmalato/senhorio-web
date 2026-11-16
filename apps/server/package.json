@@ -11,7 +11,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@senhorio/engine": "workspace:*"
+    "@senhorio/engine": "workspace:*",
+    "@senhorio/protocol": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.8.2",

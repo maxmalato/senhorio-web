@@ -11,7 +11,7 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 | 1b – Mockups (HTML) | Concluída (rodadas 1 e 2 aprovadas; celular em pé: variação B) | — |
 | 2 – Telas (um dispositivo) | Concluída (aprovada no celular e no computador) | `v0.3-telas` |
 | 3 – PWA e salvamento | Concluída | `v0.4-pwa` |
-| 4 – Vários dispositivos | Em andamento (Parte 1 de 4: remover jogador no motor) | `v0.5-salas` |
+| 4 – Vários dispositivos | Em andamento (Partes 1 e 2 de 4: motor e servidor) | `v0.5-salas` |
 | 5 – Publicação | A fazer | `v1.0` |
 | 6 – Acabamento | A fazer | `v1.1` |
 
