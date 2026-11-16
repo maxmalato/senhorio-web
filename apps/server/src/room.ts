@@ -11,6 +11,8 @@ import {
   type GameState,
 } from '@senhorio/engine';
 import {
+  actorsOf,
+  MESSAGE_LIMIT,
   PAWN_COLORS,
   REMOVE_AFTER_MS,
   ROOM_TTL_MS,
@@ -151,6 +153,10 @@ export class Room extends DurableObject<Env> {
       ws.close(1000, 'sala encerrada');
       return;
     }
+    if (!this.#withinLimit(ws)) {
+      this.send(ws, { type: 'error', code: 'tooManyRequests' });
+      return;
+    }
     const message = typeof data === 'string' ? parseClientMessage(data) : null;
     if (!message) {
       this.send(ws, { type: 'error', code: 'badMessage' });
@@ -158,6 +164,19 @@ export class Room extends DurableObject<Env> {
     }
     this.room.lastActivity = Date.now();
     await this.handle(ws, message);
+  }
+
+  /** Contagem de mensagens por aparelho (só em memória: zera se a sala hibernar). */
+  #messageCount = new WeakMap<WebSocket, { start: number; count: number }>();
+
+  #withinLimit(ws: WebSocket, now = Date.now()): boolean {
+    const entry = this.#messageCount.get(ws);
+    if (!entry || now - entry.start >= MESSAGE_LIMIT.windowMs) {
+      this.#messageCount.set(ws, { start: now, count: 1 });
+      return true;
+    }
+    entry.count++;
+    return entry.count <= MESSAGE_LIMIT.count;
   }
 
   override async webSocketClose(ws: WebSocket): Promise<void> {
@@ -293,27 +312,12 @@ export class Room extends DurableObject<Env> {
     this.broadcastUpdate(events, seat);
   }
 
-  /** Quem pode agir agora: a outra parte da venda simples, o devedor ou o jogador da vez. */
-  private actors(state: GameState): number[] {
-    if (state.pending?.type === 'trade') return [state.pending.other];
-    if (
-      state.phase === 'RAISE_MONEY' &&
-      state.pending?.type === 'collection' &&
-      state.pending.debt
-    ) {
-      return [state.pending.debt.debtor];
-    }
-    // o OK da falência pode vir de qualquer aparelho
-    if (state.phase === 'BANKRUPTCY') return state.players.map((_, i) => i);
-    return [state.order[state.turn] ?? -1];
-  }
-
   private async action(ws: WebSocket, seat: number, action: Action): Promise<void> {
     const room = this.room as RoomRecord;
     const game = room.game;
     if (room.status !== 'playing' || !game) return this.refuse(ws, 'notPlaying');
     if (this.isPaused()) return this.refuse(ws, 'paused');
-    if (!this.actors(game).includes(seat)) return this.refuse(ws, 'notYourTurn');
+    if (!actorsOf(game).includes(seat)) return this.refuse(ws, 'notYourTurn');
     await this.apply(action, seat, ws);
   }
 

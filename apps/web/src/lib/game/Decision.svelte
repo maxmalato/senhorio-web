@@ -36,12 +36,20 @@
   import Stepper from '../ui/Stepper.svelte';
   import type { Game } from './game.svelte';
   import { menuAvailable as isMenuAvailable } from './menu';
+  import { actorsOf } from '@senhorio/protocol';
 
   let {
     game,
     onminimize,
     marked = $bindable([]),
-  }: { game: Game; onminimize: () => void; marked?: number[] } = $props();
+    onpause,
+  }: {
+    game: Game;
+    onminimize: () => void;
+    marked?: number[];
+    /** Vários aparelhos: pausar vale para todos e passa pela sala. */
+    onpause?: () => void;
+  } = $props();
 
   type Mode =
     | 'main'
@@ -121,7 +129,9 @@
       .filter(([, prop]) => prop.owner === actor && prop.mortgaged)
       .map(([pos]) => Number(pos)),
   );
-  const menuAvailable = $derived(isMenuAvailable(s));
+  // vários aparelhos: só quem pode agir agora decide; os outros veem quem está decidindo
+  const myTurn = $derived(game.me === null || actorsOf(s).includes(game.me));
+  const menuAvailable = $derived(isMenuAvailable(s) && myTurn);
 
   function rentLine(pos: number): string {
     const space = rules.spaces[pos];
@@ -212,7 +222,8 @@
         open('trade-direction');
         break;
       case 'pause':
-        game.paused = true;
+        if (onpause) onpause();
+        else game.paused = true;
         open('main');
         break;
       case 'quit':
@@ -371,7 +382,10 @@
     const proposal = s.pending?.type === 'trade' ? s.pending : null;
     if (!proposal) return;
     const refusal = await act({ type: 'RESPOND_TRADE', accept });
-    if (!refusal) void game.notify(extra('D-18', 'after', { player: name(proposal.proposer) }));
+    // "Devolva o aparelho" só faz sentido com um aparelho só
+    if (!refusal && !game.remote) {
+      void game.notify(extra('D-18', 'after', { player: name(proposal.proposer) }));
+    }
   }
 
   // ---------- destaque no tabuleiro da propriedade escolhida na lista ----------
@@ -466,7 +480,7 @@
 {/snippet}
 
 <div class="decision-root" bind:this={root}>
-  {#if game.interstitial}
+  {#if game.interstitial && (game.me === null || game.me === game.interstitial.player)}
     <!-- D-06: fiança obrigatória depois da terceira tentativa -->
     <Card eyebrow={t('I-04')} title={t('D-06', { amount: brl(game.interstitial.amount) })}>
       <div class="actions">
@@ -480,12 +494,38 @@
         </button>
       </div>
     </Card>
+  {:else if !myTurn}
+    {@const waitingFor = actorsOf(s)[0] ?? current}
+    <!-- vários aparelhos: outra pessoa decide; este aparelho acompanha -->
+    <Card
+      title={s.pending?.type === 'trade'
+        ? t('W-26', { player: name(waitingFor) })
+        : s.phase === 'RAISE_MONEY'
+          ? t('W-27', { player: name(waitingFor) })
+          : t('W-25', { player: name(waitingFor) })}
+      {onminimize}
+    >
+      {#if s.phase === 'PURCHASE_DECISION'}
+        {@const pos = s.players[current]?.position ?? 0}
+        <div class="prop-line">
+          <span class="sw" style:background={propertyColor(pos)}></span>
+          <b>{spaceName(pos)}</b>
+          <span>{t('I-19')}: {brl(priceOf(pos))}</span>
+        </div>
+      {/if}
+      {@render diceLine(current)}
+      <p class="waiting" role="status">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{t('W-46', {
+          player: name(game.me ?? 0),
+        })} · {brl(s.players[game.me ?? 0]?.money ?? 0)}
+      </p>
+    </Card>
   {:else if s.pending?.type === 'trade'}
     {@const proposal = s.pending}
     {@const owner = proposal.direction === 'buy' ? proposal.other : proposal.proposer}
     <!-- D-18: resposta; Recusar em foco para evitar aceite sem querer -->
     <Card
-      eyebrow={extra('D-18', 'subtitle', { owner: name(proposal.other) })}
+      eyebrow={game.remote ? t('W-39') : extra('D-18', 'subtitle', { owner: name(proposal.other) })}
       title={proposal.direction === 'buy'
         ? t('D-18', {
             player: name(proposal.proposer),
@@ -973,6 +1013,41 @@
     gap: 0.5em;
     color: var(--ink-2);
     font-size: 0.9em;
+  }
+  .waiting {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    font-weight: 700;
+    color: var(--ink-2);
+  }
+  .dots {
+    display: inline-flex;
+    gap: 0.25em;
+  }
+  .dots i {
+    width: 0.45em;
+    height: 0.45em;
+    border-radius: 50%;
+    background: var(--ink-2);
+    animation: blink 1.2s infinite ease-in-out;
+  }
+  .dots i:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .dots i:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  @keyframes blink {
+    0%,
+    80%,
+    100% {
+      opacity: 0.25;
+    }
+    40% {
+      opacity: 1;
+    }
   }
   .facts {
     display: grid;

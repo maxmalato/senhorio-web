@@ -40,10 +40,16 @@ export default defineConfig({
         // tudo o que o jogo precisa fica guardado no aparelho, inclusive as fontes
         globPatterns: ['**/*.{js,css,html,svg,png,ttf,txt,webmanifest}'],
         navigateFallback: '/index.html',
+        // as salas sempre vão ao servidor, nunca ao que está guardado no aparelho
+        navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
       },
     }),
   ],
+  // Salas (vários aparelhos): em desenvolvimento, /api vai para o servidor local da
+  // Cloudflare (pnpm --filter @senhorio/server dev, porta 8787), inclusive o WebSocket.
+  server: { proxy: { '/api': { target: 'http://localhost:8787', ws: true } } },
+  preview: { proxy: { '/api': { target: 'http://localhost:8787', ws: true } } },
   // Nos testes, usar a versão de navegador do Svelte (montagem de componentes)
   resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
   test: {

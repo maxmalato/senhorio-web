@@ -3,7 +3,11 @@
   import { brl, propertyColor, t } from '../rules';
   import type { View } from './view';
 
-  let { view }: { view: View } = $props();
+  let {
+    view,
+    me = null,
+    offline = [],
+  }: { view: View; me?: number | null; offline?: number[] } = $props();
 
   function owned(i: number): number[] {
     return Object.entries(view.properties)
@@ -28,6 +32,8 @@
           {player.name}
           {#if i === view.current && !player.bankrupt}<span class="tag">{t('I-03')}</span>{/if}
           {#if player.inJail}<span class="tag jail">{t('I-04')}</span>{/if}
+          {#if i === me}<span class="tag me">{t('W-23')}</span>{/if}
+          {#if offline.includes(i) && !player.bankrupt}<span class="tag off">{t('W-24')}</span>{/if}
           {#if player.bankrupt}<span class="tag off">{t('I-05', { n: player.exitRound })}</span
             >{/if}
         </div>
@@ -103,6 +109,10 @@
   .tag.jail {
     background: #34507e;
     color: var(--text);
+  }
+  .tag.me {
+    background: var(--text);
+    color: var(--ink);
   }
   .tag.off {
     background: var(--danger);

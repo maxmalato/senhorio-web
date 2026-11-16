@@ -10,12 +10,54 @@
   import Board from './Board.svelte';
   import Decision from './Decision.svelte';
   import type { Game } from './game.svelte';
+  import { REMOVE_AFTER_MS, type RoomView } from '@senhorio/protocol';
   import { menuAvailable } from './menu';
   import PlayerPanel from './PlayerPanel.svelte';
   import Toast from './Toast.svelte';
 
-  let { game, onend, onsaveexit }: { game: Game; onend: () => void; onsaveexit?: () => void } =
-    $props();
+  let {
+    game,
+    onend,
+    onsaveexit,
+    room = null,
+    clockOffset = 0,
+    onpause,
+    onremove,
+    onleave,
+  }: {
+    game: Game;
+    onend: () => void;
+    onsaveexit?: () => void;
+    /** Vários aparelhos: a sala (lugares, conexão, pausa) e ações que passam por ela. */
+    room?: RoomView | null;
+    clockOffset?: number;
+    onpause?: (paused: boolean) => void;
+    onremove?: (seat: number) => void;
+    onleave?: () => void;
+  } = $props();
+
+  // ---------- vários aparelhos: quem caiu, quem pausou, quem pode remover ----------
+  const offline = $derived(
+    room ? room.seats.flatMap((seat, i) => (!seat.connected && !seat.out ? [i] : [])) : [],
+  );
+  const pausedBy = $derived(room?.pausedBy ?? null);
+  // relógio do servidor, para contar os 3 minutos igual em todos os aparelhos
+  let now = $state(Date.now());
+  $effect(() => {
+    if (!room) return;
+    const tick = setInterval(() => (now = Date.now()), 1000);
+    return () => clearInterval(tick);
+  });
+  const serverNow = $derived(now + clockOffset);
+  const iAmHost = $derived(room !== null && game.me === room.host);
+  const hostAway = $derived(
+    room !== null && (!room.seats[room.host]?.connected || room.seats[room.host]?.out === true),
+  );
+  const canRemove = $derived(iAmHost || hostAway);
+  function mmss(ms: number): string {
+    const total = Math.max(0, Math.ceil(ms / 1000));
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+  }
 
   let tab: 'board' | 'players' = $state('board');
   let marked: number[] = $state([]);
@@ -99,11 +141,31 @@
     );
   }
 
+  /** Foco em lugar nenhum, num elemento escondido ou num botão desabilitado. */
+  function focusLost(): boolean {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement) || active === document.body) return true;
+    if (!active.isConnected || active.offsetParent === null || active.closest('[hidden]'))
+      return true;
+    return active instanceof HTMLButtonElement && active.disabled;
+  }
+
   function onkeydown(event: KeyboardEvent) {
     const typing = event.target instanceof HTMLInputElement;
     if (game.toast && ['Enter', ' ', 'Escape', 'Backspace'].includes(event.key)) {
       event.preventDefault();
       game.skipToast();
+      return;
+    }
+    // Rede de segurança do controle remoto: se o foco se perdeu (o botão focado sumiu ou
+    // ficou desabilitado durante uma animação), o OK devolve o foco à opção padrão em vez
+    // de não fazer nada para sempre.
+    if ((event.key === 'Enter' || event.key === ' ') && focusLost()) {
+      const area = scope();
+      if (area) {
+        event.preventDefault();
+        focusInside(area);
+      }
       return;
     }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key) && !typing) {
@@ -161,7 +223,7 @@
     </header>
 
     <section class="players-area" aria-label="Jogadores">
-      <PlayerPanel {view} />
+      <PlayerPanel {view} me={game.me} {offline} />
     </section>
 
     <div class="board-wrap">
@@ -191,6 +253,7 @@
               bind:marked
               {game}
               onminimize={() => (minimized = true)}
+              onpause={onpause ? () => onpause(true) : undefined}
             />
           {/if}
         </div>
@@ -243,7 +306,65 @@
     </nav>
   </div>
 
-  {#if game.paused}
+  {#if room && offline.length > 0}
+    {@const who = offline[0] ?? 0}
+    {@const since = room.seats[who]?.disconnectedAt ?? serverNow}
+    {@const left = REMOVE_AFTER_MS - (serverNow - since)}
+    {@const whoName = room.seats[who]?.name ?? ''}
+    <!-- queda de conexão: a partida pausa esperando a volta (docs/01) -->
+    <div class="overlay">
+      <div class="pause-dialog" role="alertdialog" aria-label={t('W-28')} use:focusDefault>
+        <h2>{t('W-28')}</h2>
+        <div class="who">
+          <span class="avatar" style:background={room.seats[who]?.color}
+            >{whoName.slice(0, 1).toUpperCase()}</span
+          >
+          <div>
+            <b>{t('W-29', { player: whoName })}</b>
+            <div class="clock">{t('W-30', { time: mmss(serverNow - since) })}</div>
+          </div>
+        </div>
+        <p class="small">{t('W-31', { player: whoName })}</p>
+        {#if canRemove}
+          {#if left > 0}
+            <button class="btn secondary" type="button" disabled
+              >{t('W-32', { player: whoName, time: mmss(left) })}</button
+            >
+          {:else}
+            <button
+              class="btn primary"
+              type="button"
+              data-default="true"
+              onclick={() => onremove?.(who)}
+            >
+              {t('W-33', { player: whoName })}
+            </button>
+            <p class="small">{t('W-34', { player: whoName })}</p>
+          {/if}
+        {:else}
+          <p class="small">{t('W-35')}</p>
+        {/if}
+        <button class="btn ghost-dark" type="button" onclick={() => onleave?.()}>{t('W-22')}</button
+        >
+      </div>
+    </div>
+  {:else if room && pausedBy !== null}
+    <!-- pausa pelo menu vale para todos os aparelhos; o cronômetro para -->
+    <div class="overlay">
+      <div class="pause-dialog" role="alertdialog" aria-label={t('D-15')} use:focusDefault>
+        <h2>{t('W-36', { player: room.seats[pausedBy]?.name ?? '' })}</h2>
+        <button
+          class="btn primary"
+          type="button"
+          data-default="true"
+          onclick={() => onpause?.(false)}
+        >
+          {options('D-15')[0]}
+        </button>
+        <button class="btn secondary" type="button" onclick={() => onleave?.()}>{t('W-22')}</button>
+      </div>
+    </div>
+  {:else if game.paused}
     <!-- D-15: pausa; o cronômetro para -->
     <div class="overlay">
       <div class="pause-dialog" role="alertdialog" aria-label={t('D-15')} use:focusDefault>
@@ -593,6 +714,35 @@
   .pause-dialog h2 {
     margin: 0;
     font: 600 1.5em/1.1 var(--font-display);
+  }
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+  }
+  .who .avatar {
+    position: relative;
+  }
+  .who .avatar::after {
+    content: '';
+    position: absolute;
+    right: -0.1em;
+    bottom: -0.1em;
+    width: 0.75em;
+    height: 0.75em;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 2px solid var(--card);
+  }
+  .clock {
+    font: 600 1em var(--font-display);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+  .ghost-dark {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--card-2);
   }
   .small {
     margin: 0;

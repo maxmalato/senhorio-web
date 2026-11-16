@@ -1,7 +1,7 @@
 // Salas do modo de vários aparelhos, no mesmo runtime da produção (workerd).
 import { env, runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
 import { exports } from 'cloudflare:workers';
-import type { ServerMessage } from '@senhorio/protocol';
+import { MESSAGE_LIMIT, type ServerMessage } from '@senhorio/protocol';
 import { describe, expect, it } from 'vitest';
 import type { Room } from '../src/room';
 
@@ -221,5 +221,17 @@ describe('mensagens inválidas', () => {
     expect((await device.next('error')).code).toBe('badMessage');
     device.send({ type: 'start' });
     expect((await device.next('error')).code).toBe('notJoined');
+  });
+
+  it('mensagens demais em pouco tempo são descartadas', async () => {
+    // direto no Durable Object: a criação pela API tem seu próprio limite por minuto
+    const code = 'RAPDZ2';
+    await stubOf(code).init(code, { type: 'rounds', limit: 20 });
+    const device = await connect(code);
+    for (let i = 0; i < MESSAGE_LIMIT.count; i++) device.send({ type: 'start' });
+    for (let i = 0; i < MESSAGE_LIMIT.count; i++)
+      expect((await device.next('error')).code).toBe('notJoined');
+    device.send({ type: 'start' });
+    expect((await device.next('error')).code).toBe('tooManyRequests');
   });
 });

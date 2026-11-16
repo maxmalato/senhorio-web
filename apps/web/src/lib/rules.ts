@@ -57,8 +57,8 @@ export function brl(amount: number): string {
 
 export const defaultNames = rules.texts.defaultNames;
 
-/** Cores dos peões (docs/06 do Roku), sempre com a inicial do nome. */
-export const PAWN_COLORS = ['#4FC3F7', '#FF8A65', '#B39DDB', '#81C784', '#F48FB1', '#4DB6AC'];
+/** Cores dos peões (docs/06 do Roku), as mesmas da sala no servidor. */
+export { PAWN_COLORS } from '@senhorio/protocol';
 
 export function spaceName(position: number): string {
   return rules.spaces[position]?.name ?? '';

@@ -22,8 +22,15 @@
   import Mode, { type ModeSetup } from './lib/screens/Mode.svelte';
   import Order from './lib/screens/Order.svelte';
   import Players, { type PlayerSetup } from './lib/screens/Players.svelte';
+  import type { ModeConfig } from '@senhorio/protocol';
+  import { createRoom } from './lib/room/api';
+  import { RoomConnection, savedSeat, ROOM_ERROR_TEXT } from './lib/room/connection.svelte';
+  import CreateRoom from './lib/room/CreateRoom.svelte';
+  import JoinRoom from './lib/room/JoinRoom.svelte';
+  import RoomFlow from './lib/room/RoomFlow.svelte';
+  import { t } from './lib/rules';
 
-  type Screen = 'home' | 'players' | 'mode' | 'order' | 'game' | 'end';
+  type Screen = 'home' | 'players' | 'mode' | 'order' | 'game' | 'end' | 'create' | 'join' | 'room';
 
   let { store = defaultStore() }: { store?: SaveStore } = $props();
 
@@ -140,6 +147,47 @@
     screen = 'players';
   }
 
+  // ---------- vários aparelhos ----------
+  let connection: RoomConnection | null = $state.raw(null);
+  let roomCode: string | null = $state(savedSeat()?.code ?? null);
+  let roomError = $state('');
+  let creating = $state(false);
+  let createError = $state('');
+
+  async function onCreateRoom(setup: { name: string; color: string; mode: ModeConfig }) {
+    creating = true;
+    createError = '';
+    const result = await createRoom(setup.mode);
+    creating = false;
+    if (!result.ok) {
+      createError = t(
+        result.error === 'offline' ? 'W-59' : (ROOM_ERROR_TEXT[result.error] ?? 'W-56'),
+      );
+      return;
+    }
+    connection = new RoomConnection(result.value.code, { name: setup.name, color: setup.color });
+    screen = 'room';
+  }
+
+  function onJoinRoom(setup: { code: string; name: string; color: string }) {
+    connection = new RoomConnection(setup.code, { name: setup.name, color: setup.color });
+    screen = 'room';
+  }
+
+  function rejoin() {
+    const seat = savedSeat();
+    if (!seat) return;
+    connection = new RoomConnection(seat.code, { token: seat.token });
+    screen = 'room';
+  }
+
+  function leaveRoom(error?: string) {
+    connection = null;
+    roomCode = savedSeat()?.code ?? null;
+    roomError = error ?? '';
+    screen = 'home';
+  }
+
   async function backHome() {
     game?.stopClock();
     await refreshSaved();
@@ -157,7 +205,25 @@
       onnew={startNew}
       onresume={resume}
       onupdate={() => pwa.update()}
+      {roomCode}
+      {roomError}
+      oncreateroom={() => ((roomError = ''), (screen = 'create'))}
+      onjoinroom={() => ((roomError = ''), (screen = 'join'))}
+      onrejoin={rejoin}
     />
+  {:else if screen === 'create'}
+    <CreateRoom
+      busy={creating}
+      error={createError}
+      onback={() => (screen = 'home')}
+      oncreate={onCreateRoom}
+    />
+  {:else if screen === 'join'}
+    <JoinRoom onback={() => (screen = 'home')} onjoin={onJoinRoom} />
+  {:else if screen === 'room' && connection}
+    {#key connection}
+      <RoomFlow {connection} {timings} onexit={leaveRoom} />
+    {/key}
   {:else if screen === 'players'}
     <Players bind:players onback={backHome} onnext={() => (screen = 'mode')} />
   {:else if screen === 'mode'}

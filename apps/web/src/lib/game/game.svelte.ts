@@ -59,6 +59,13 @@ export interface GameOptions {
   forget?: () => Promise<void>;
   /** Modo tempo: segundos restantes de uma partida retomada. */
   secondsLeft?: number | null;
+  /**
+   * Vários aparelhos: a ação vai para a sala em vez do motor local; o resultado volta por
+   * receive(), igual para todos os aparelhos.
+   */
+  send?: (action: Action) => void;
+  /** Vários aparelhos: o lugar deste aparelho na sala. */
+  me?: number;
 }
 
 export class Game {
@@ -88,6 +95,12 @@ export class Game {
   #persist: GameOptions['persist'];
   #forget: GameOptions['forget'];
   #saveWarned = false;
+  #send: GameOptions['send'];
+  #remoteQueue: Promise<void> = Promise.resolve();
+  /** Vários aparelhos: lugar deste aparelho (null no modo um aparelho). */
+  readonly me: number | null;
+  /** Vários aparelhos: o cronômetro do servidor está correndo. */
+  timerRunning = $state(true);
 
   constructor(
     state: GameState,
@@ -101,6 +114,8 @@ export class Game {
     this.view = viewFrom(state);
     this.#persist = options.persist;
     this.#forget = options.forget;
+    this.#send = options.send;
+    this.me = options.me ?? null;
     if (state.mode.type === 'time' && state.mode.limit) {
       this.secondsLeft = options.secondsLeft ?? state.mode.limit * 60;
     }
@@ -111,8 +126,18 @@ export class Game {
   }
 
   /** Envia uma ação ao motor; recusa volta com o motivo e não muda nada. */
+  get remote(): boolean {
+    return this.#send !== undefined;
+  }
+
   async act(action: Action): Promise<Reason | null> {
     if (this.busy) return { code: 'busy' };
+    if (this.#send) {
+      // vários aparelhos: quem decide é a sala; o resultado chega por receive()
+      this.refusal = null;
+      this.#send(action);
+      return null;
+    }
     const result = transition(this.state, action, this.ctx);
     if (!result.ok) {
       this.refusal = result.reason;
@@ -130,6 +155,28 @@ export class Game {
       this.busy = false;
     }
     return null;
+  }
+
+  /** Vários aparelhos: estado e eventos que a sala mandou, animados em ordem de chegada. */
+  receive(state: GameState, events: GameEvent[]): Promise<void> {
+    this.#remoteQueue = this.#remoteQueue.then(async () => {
+      this.busy = true;
+      try {
+        this.state = state;
+        await this.#play(events);
+        this.view = viewFrom(this.state);
+        await this.#showToasts();
+      } finally {
+        this.busy = false;
+      }
+    });
+    return this.#remoteQueue;
+  }
+
+  /** Vários aparelhos: o servidor manda o tempo restante e se o cronômetro corre. */
+  syncTimer(secondsLeft: number | null, running: boolean): void {
+    if (secondsLeft !== null) this.secondsLeft = secondsLeft;
+    this.timerRunning = running;
   }
 
   /** Pula a espera do aviso atual (OK, Enter, toque). */
@@ -167,6 +214,12 @@ export class Game {
   }
 
   #tick(): void {
+    if (this.#send) {
+      // vários aparelhos: só conta na tela; quem marca o tempo esgotado é a sala
+      if (this.timerRunning && this.secondsLeft !== null && this.secondsLeft > 0)
+        this.secondsLeft--;
+      return;
+    }
     if (this.secondsLeft === null || this.over || this.paused || this.menuOpen) return;
     if (this.secondsLeft > 0) this.secondsLeft--;
     // RN-113: ao zerar, só marca; a partida acaba quando a rodada fechar
@@ -247,8 +300,10 @@ export class Game {
       }
       case 'MandatoryBail':
         this.interstitial = { kind: 'mandatoryBail', player: event.player, amount: event.amount };
-        if (this.timings.toast > 0) await new Promise<void>((resolve) => (this.#ack = resolve));
-        else this.interstitial = null;
+        // vários aparelhos: só o próprio jogador confirma; os outros só veem o aviso
+        if (this.timings.toast > 0 && (this.me === null || this.me === event.player)) {
+          await new Promise<void>((resolve) => (this.#ack = resolve));
+        } else this.interstitial = null;
         break;
       case 'MoneyTransferred': {
         const from = view.players[event.from];

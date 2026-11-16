@@ -13,6 +13,11 @@ export const REMOVE_AFTER_MS = 3 * 60 * 1000;
 export const ROOM_TTL_MS = 12 * 60 * 60 * 1000;
 /** Mensagem maior que isso é descartada. */
 export const MAX_MESSAGE_BYTES = 4096;
+/**
+ * Mensagens por aparelho numa janela de tempo. Uma pessoa jogando manda poucas por segundo;
+ * acima disso a mensagem é descartada com o erro tooManyRequests.
+ */
+export const MESSAGE_LIMIT = { count: 40, windowMs: 10_000 };
 /** Cores dos peões (docs/06 do Roku), sempre com a inicial do nome. */
 export const PAWN_COLORS = ['#4FC3F7', '#FF8A65', '#B39DDB', '#81C784', '#F48FB1', '#4DB6AC'];
 
@@ -185,4 +190,19 @@ export function parseModeConfig(
     return { type: 'rounds', limit: v.limit };
   }
   return null;
+}
+
+/**
+ * Quem pode agir agora (o servidor recusa ação de qualquer outro aparelho): a outra parte da
+ * venda simples, o devedor que levanta dinheiro ou o jogador da vez. O OK da falência pode
+ * vir de qualquer aparelho, para a partida não travar.
+ */
+export function actorsOf(state: GameState): number[] {
+  if (state.phase === 'GAME_OVER') return [];
+  if (state.pending?.type === 'trade') return [state.pending.other];
+  if (state.phase === 'RAISE_MONEY' && state.pending?.type === 'collection' && state.pending.debt) {
+    return [state.pending.debt.debtor];
+  }
+  if (state.phase === 'BANKRUPTCY') return state.players.map((_, i) => i);
+  return [state.order[state.turn] ?? -1];
 }

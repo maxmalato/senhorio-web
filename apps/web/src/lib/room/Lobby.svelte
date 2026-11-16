@@ -1,0 +1,215 @@
+<script lang="ts">
+  // Sala de espera (mockups, rodada 1): código grande para ditar, jogadores e início.
+  import { formatCode, type RoomView } from '@senhorio/protocol';
+  import { brl, options, rules, t } from '../rules';
+  import { focusDefault } from '../ui/focus';
+  import Icon from '../ui/Icon.svelte';
+
+  let {
+    room,
+    me,
+    onstart,
+    onleave,
+    onremove,
+  }: {
+    room: RoomView;
+    me: number | null;
+    onstart: () => void;
+    onleave: () => void;
+    onremove: (seat: number) => void;
+  } = $props();
+
+  const p = rules.parameters;
+  let copied = $state(false);
+  const isHost = $derived(me === room.host);
+  const allConnected = $derived(room.seats.every((s) => s.connected));
+  const canStart = $derived(isHost && room.seats.length >= p.minPlayers && allConnected);
+  const modeText = $derived(
+    room.mode.type === 'classic'
+      ? t('I-78')
+      : room.mode.type === 'time'
+        ? t('I-79', { n: room.mode.limit ?? 0 })
+        : t('I-80', { n: room.mode.limit ?? 0 }),
+  );
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(room.code);
+      copied = true;
+      setTimeout(() => (copied = false), 2000);
+    } catch {
+      // sem acesso à área de transferência: o código continua na tela para ditar
+    }
+  }
+</script>
+
+<div class="full-screen">
+  <div class="sheet split" use:focusDefault>
+    <div class="span">
+      <h1>{t('W-11')}</h1>
+      <p class="lead">{t('I-77', { amount: brl(p.startingMoney), mode: modeText })}</p>
+    </div>
+    <div class="col">
+      <div class="code-big">
+        <span class="lab">{t('W-12')}</span>
+        <span class="code" aria-label="{t('W-08')}: {room.code.split('').join(' ')}"
+          >{formatCode(room.code)}</span
+        >
+        <button class="btn secondary" type="button" onclick={copy}
+          >{copied ? t('W-14') : t('W-13')}</button
+        >
+      </div>
+      <p class="footnote">{t('W-15')}</p>
+    </div>
+    <div class="col">
+      <div class="count">
+        <h2>{t('W-16')}</h2>
+        <span>{t('W-17', { n: room.seats.length, max: p.maxPlayers })}</span>
+      </div>
+      <ul class="list">
+        {#each room.seats as seat, i (seat.name)}
+          <li class="row" class:offline={!seat.connected}>
+            <span class="avatar" style:background={seat.color} aria-hidden="true"
+              >{seat.name.slice(0, 1).toUpperCase()}</span
+            >
+            <span class="grow">
+              {seat.name}
+              {#if i === me}<span class="tag me">{t('W-23')}</span>{/if}
+              {#if !seat.connected}<span class="tag off">{t('W-24')}</span>{/if}
+            </span>
+            <span class="meta">{i === room.host ? t('W-18') : ''}</span>
+            {#if isHost && i !== me && !seat.connected}
+              <button class="btn ghost small" type="button" onclick={() => onremove(i)}
+                >{t('I-08')}</button
+              >
+            {/if}
+          </li>
+        {/each}
+        {#each Array.from({ length: Math.max(0, p.maxPlayers - room.seats.length) }, (_v, k) => k) as k (k)}
+          <li class="row empty"><span class="avatar">+</span><span>{t('W-19')}</span></li>
+        {/each}
+      </ul>
+      {#if isHost}
+        <button
+          class="btn gold"
+          type="button"
+          data-default="true"
+          disabled={!canStart}
+          onclick={onstart}>{options('D-25')[0]}</button
+        >
+        <p class="footnote">{allConnected ? t('W-20') : t('W-45')}</p>
+      {:else}
+        <p class="callout" role="status">
+          <Icon name="info" /><span>{t('W-21', { player: room.seats[room.host]?.name ?? '' })}</span
+          >
+        </p>
+      {/if}
+      <button class="btn ghost" type="button" onclick={onleave}>{t('W-22')}</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .col {
+    display: grid;
+    gap: 0.9em;
+    align-content: start;
+  }
+  .code-big {
+    display: grid;
+    justify-items: center;
+    gap: 0.6em;
+    background: var(--panel);
+    border-radius: 1.1em;
+    padding: 1.1em;
+    text-align: center;
+  }
+  .lab {
+    font-size: 0.75em;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--text-2);
+  }
+  .code {
+    font: 600 2.6em/1 var(--font-display);
+    letter-spacing: 0.14em;
+    font-variant-numeric: tabular-nums;
+  }
+  .count {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .count h2 {
+    margin: 0;
+    font: 600 1.15em var(--font-display);
+  }
+  .count span {
+    color: var(--text-2);
+    font-size: 0.88em;
+  }
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5em;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    background: var(--panel);
+    border-radius: 0.9em;
+    padding: 0.6em 0.8em;
+  }
+  .row.offline {
+    opacity: 0.8;
+  }
+  .grow {
+    flex: 1;
+    min-width: 0;
+    font: 600 1.05em var(--font-display);
+    display: flex;
+    gap: 0.4em;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .meta {
+    color: var(--text-2);
+    font-size: 0.82em;
+  }
+  .row.empty {
+    background: transparent;
+    border: 1.5px dashed var(--line);
+    color: var(--text-2);
+    font-weight: 700;
+  }
+  .row.empty .avatar {
+    background: transparent;
+    border: 1.5px dashed var(--line);
+    color: var(--text-2);
+  }
+  .tag {
+    font: 800 0.58em/1 var(--font-body);
+    letter-spacing: 0.08em;
+    padding: 0.35em 0.5em;
+    border-radius: 0.5em;
+  }
+  .tag.me {
+    background: var(--text);
+    color: var(--ink);
+  }
+  .tag.off {
+    background: var(--danger);
+    color: #2a0f0d;
+  }
+  .btn.small {
+    min-height: 2.2em;
+    padding: 0.3em 0.8em;
+    font-size: 0.85em;
+  }
+  .callout {
+    margin: 0;
+  }
+</style>

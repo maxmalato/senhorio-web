@@ -10,7 +10,15 @@
     ctx,
     onagain,
     onexit,
-  }: { state: GameState; ctx: EngineContext; onagain: () => void; onexit: () => void } = $props();
+    multi = null,
+  }: {
+    state: GameState;
+    ctx: EngineContext;
+    onagain: () => void;
+    onexit: () => void;
+    /** Vários aparelhos: quem criou a sala começa outra partida; os outros esperam. */
+    multi?: { isHost: boolean; hostName: string } | null;
+  } = $props();
 
   const ranking = $derived(state.ranking ?? []);
   const winner = $derived(state.players[ranking[0]?.player ?? 0]);
@@ -59,10 +67,26 @@
       {/each}
     </ol>
     <div class="actions">
-      <button class="btn gold" type="button" data-default="true" onclick={onagain}
-        >{options('D-26')[0]}</button
-      >
-      <button class="btn ghost" type="button" onclick={onexit}>{options('D-26')[1]}</button>
+      {#if multi}
+        {#if multi.isHost}
+          <button class="btn gold" type="button" data-default="true" onclick={onagain}
+            >{t('W-37')}</button
+          >
+        {:else}
+          <p class="waiting" role="status">{t('W-38', { player: multi.hostName })}</p>
+        {/if}
+        <button
+          class="btn ghost"
+          type="button"
+          data-default={multi.isHost ? undefined : 'true'}
+          onclick={onexit}>{t('W-22')}</button
+        >
+      {:else}
+        <button class="btn gold" type="button" data-default="true" onclick={onagain}
+          >{options('D-26')[0]}</button
+        >
+        <button class="btn ghost" type="button" onclick={onexit}>{options('D-26')[1]}</button>
+      {/if}
     </div>
   </div>
 </div>
@@ -128,6 +152,11 @@
     grid-column: 3 / 5;
     color: var(--text-2);
     font-size: 0.82em;
+  }
+  .waiting {
+    margin: 0;
+    color: var(--text-2);
+    text-align: center;
   }
   .actions {
     display: grid;

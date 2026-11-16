@@ -1,5 +1,6 @@
 <script lang="ts">
   // Tela inicial (T-01, D-21, D-22). "Cada um no seu" chega com as salas (Etapa 4).
+  import { formatCode } from '@senhorio/protocol';
   import type { SaveRecord } from '../save/save';
   import { options, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
@@ -14,7 +15,18 @@
     onnew,
     onresume,
     onupdate,
+    roomCode = null,
+    roomError = '',
+    oncreateroom,
+    onjoinroom,
+    onrejoin,
   }: {
+    /** Sala em que este aparelho estava (para voltar a ela). */
+    roomCode?: string | null;
+    roomError?: string;
+    oncreateroom: () => void;
+    onjoinroom: () => void;
+    onrejoin: () => void;
     saved?: SaveRecord | null;
     incompatible?: boolean;
     updateReady?: boolean;
@@ -85,6 +97,23 @@
           </div>
         </div>
       {:else}
+        {#if roomError}
+          <p class="callout" role="alert"><Icon name="info" /><span>{roomError}</span></p>
+        {/if}
+        {#if roomCode}
+          <div class="resume">
+            <div class="grow">
+              <b>{t('W-42', { code: formatCode(roomCode) })}</b>
+              <span>{t('W-44')}</span>
+            </div>
+            <button
+              class="btn gold"
+              type="button"
+              data-default={saved ? undefined : 'true'}
+              onclick={onrejoin}>{t('I-62')}</button
+            >
+          </div>
+        {/if}
         {#if saved}
           <div class="resume">
             <div class="grow">
@@ -111,14 +140,14 @@
               onclick={startNew}>{options('D-21')[1]}</button
             >
           </section>
-          <section class="choice soon">
-            <h2><Icon name="devices" />Cada um no seu <span class="badge">Em breve</span></h2>
-            <p>Crie uma sala e passe o código. Cada jogador entra pelo próprio aparelho.</p>
+          <section class="choice">
+            <h2><Icon name="devices" />{t('W-43')}</h2>
+            <p>{t('W-44')}</p>
             <div class="row">
-              <button class="btn secondary" type="button" disabled>Criar sala</button>
-              <button class="btn ghost" type="button" disabled>Entrar com código</button>
+              <button class="btn secondary" type="button" onclick={oncreateroom}>{t('W-01')}</button
+              >
+              <button class="btn ghost" type="button" onclick={onjoinroom}>{t('W-02')}</button>
             </div>
-            <p class="small">Chega numa próxima versão.</p>
           </section>
         </div>
       {/if}
@@ -178,18 +207,6 @@
   }
   .row .btn {
     flex: 1 1 9em;
-  }
-  .badge {
-    font: 800 0.5em var(--font-body);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: var(--panel-2);
-    color: var(--text);
-    border-radius: 0.5em;
-    padding: 0.35em 0.55em;
-  }
-  .small {
-    font-size: 0.85em;
   }
   .resume,
   .banner {
