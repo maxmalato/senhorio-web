@@ -54,6 +54,17 @@ test('a opção padrão já vem em foco em cada decisão', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Rolar dados' })).toBeFocused();
 });
 
+test('foco perdido: o OK devolve o foco à opção padrão', async ({ page }) => {
+  await startGame(page);
+  const start = page.getByRole('button', { name: 'Começar', exact: true });
+  await expect(start).toBeFocused();
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('Enter');
+  await expect(start).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Rolar dados' })).toBeFocused();
+});
+
 test('Voltar esconde a decisão para ver o tabuleiro e a traz de volta', async ({ page }) => {
   await startGame(page);
   await expect(page.getByRole('button', { name: 'Começar', exact: true })).toBeFocused();

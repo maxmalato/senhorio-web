@@ -245,17 +245,56 @@ Motivos de transferência: `bonusPartida` → `passStart`, `compra` → `purchas
 
 | Item | Definição |
 | --- | --- |
-| Código | 6 caracteres de um alfabeto de 32 sem letras ambíguas (sem 0/O e 1/I): cerca de 1 bilhão de combinações |
-| Criação | Qualquer jogador cria; quem criou é o anfitrião (escolhe o modo de partida, inicia e pode remover jogador desconectado) |
+| Código | 6 caracteres de um alfabeto de 32 sem letras ambíguas (sem 0/O e 1/I): cerca de 1 bilhão de combinações. Aceito com minúsculas, espaços, traços ou ponto |
+| Criação | `POST /api/rooms` com o modo de partida; quem entra primeiro é o anfitrião (inicia, começa outra partida no fim e pode remover jogador desconectado) |
 | Entrada | Só pelo código, antes do início; depois do início, só reconexão de quem já estava |
-| Identidade | Apelido + token aleatório gerado pelo servidor e guardado no navegador; sem conta |
-| Autoridade | O servidor aceita de cada jogador só as ações que cabem a ele (a vez dele, ou a resposta a uma venda simples dirigida a ele) |
-| Persistência | Estado gravado no SQLite do Durable Object em FIM_TURNO, como no Roku |
-| Queda de conexão | Partida pausa; depois de {minutosParaRemover}, o anfitrião pode remover o jogador (RN-115) |
-| Expiração | Sala apagada ao fim da partida ou depois de um tempo sem atividade (alarme do Durable Object) |
-| Proteção | Limite de tentativas de entrada e de tamanho e frequência de mensagens; nenhuma listagem de salas |
+| Identidade | Apelido + token aleatório gerado pelo servidor e guardado no navegador (`localStorage`, chave `senhorio:room`); o servidor guarda só o hash SHA-256 do token; sem conta |
+| Autoridade | O servidor roda o motor, sorteia os dados e aceita de cada aparelho só as ações que cabem a ele (`actorsOf`: a vez dele, a resposta a uma venda simples dirigida a ele, o levantamento de dinheiro da dívida dele). `START_TURN`, `TIME_UP` e `REMOVE_PLAYER` só o servidor aplica |
+| Persistência | Estado da sala gravado no armazenamento SQLite do Durable Object a cada mudança |
+| Queda de conexão | Partida pausa para todos, e o cronômetro do modo tempo também; depois de 3 minutos o anfitrião pode remover o jogador; se o anfitrião também estiver fora, qualquer jogador conectado pode. A remoção devolve os bens ao banco (RN-115) |
+| Expiração | Sala apagada depois de 12 horas sem atividade (alarme do Durable Object) |
+| Proteção | Criar sala: 10 por minuto; consultar código: 60 por minuto (por endereço, melhor esforço); mensagens de até 4 KB e até 40 a cada 10 s por aparelho; nenhuma listagem de salas |
 
-O protocolo de mensagens entre navegador e sala é definido e documentado na Etapa 4.
+As constantes ficam em `packages/protocol` (`REMOVE_AFTER_MS`, `ROOM_TTL_MS`, `MAX_MESSAGE_BYTES`, `MESSAGE_LIMIT`), usadas pelo servidor e pela interface.
+
+### Rotas
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /api/health` | Teste de saúde |
+| `POST /api/rooms` | Corpo `{ "mode": { "type": "rounds", "limit": 30 } }`; devolve `201 { "code" }` |
+| `GET /api/rooms/:code` | Situação da sala antes de entrar: fase, lugares ocupados e cores usadas; `404` se não existe |
+| `GET /api/rooms/:code/ws` | WebSocket da sala (encaminhado ao Durable Object da sala) |
+
+Todas as outras rotas servem o site (`apps/web/dist`), com a página inicial como reserva (aplicativo de página única).
+
+### Protocolo (WebSocket, JSON)
+
+Navegador → sala (`ClientMessage`; tudo passa por `parseClientMessage` antes de ser usado):
+
+| Mensagem | Quando |
+| --- | --- |
+| `hello { name, color }` | Entrar na sala de espera |
+| `hello { token }` | Voltar depois de uma queda (mesma aba ou "Voltar para a sala" na tela inicial) |
+| `start` | Anfitrião começa a partida (2 ou mais jogadores, todos conectados) |
+| `action { action }` | Uma ação do motor (docs/07, "Ações"), exceto as do servidor |
+| `pause { paused }` | Pausar ou continuar pelo menu |
+| `remove { seat }` | Remover jogador (na espera: o anfitrião, a qualquer momento; na partida: depois de 3 minutos sem conexão) |
+| `again` | Anfitrião volta todos à sala de espera no fim da partida |
+| `leave` | Sair da sala |
+
+Sala → navegador (`ServerMessage`):
+
+| Mensagem | Conteúdo |
+| --- | --- |
+| `welcome { seat, token }` | Lugar deste aparelho e o token para voltar (vazio quando só o lugar mudou de número) |
+| `room { room }` | Fotografia da sala (`RoomView`: código, fase, anfitrião, lugares, modo, pausa, cronômetro, relógio do servidor e estado da partida) |
+| `update { room, events, by }` | Depois de uma ação: a sala nova e os eventos do motor, que cada aparelho anima igual ao modo um aparelho |
+| `error { code }` | Recusa: `notFound`, `gameStarted`, `roomFull`, `colorTaken`, `nameTaken`, `invalidName`, `notYourTurn`, `tooManyRequests`, `removed`, `unknownToken`, `badMessage` e outras; a interface mostra os textos W-xx do catálogo |
+
+### Desenvolvimento local
+
+O `wrangler dev` (porta 8787) roda o Worker e as salas localmente, sem conta da Cloudflare, e serve o último build do site. O `vite` (`pnpm dev`) encaminha `/api` para a porta 8787, então a interface com recarga automática conversa com as salas locais. Os testes do servidor rodam no mesmo runtime da produção (workerd) com `@cloudflare/vitest-plugin`; o Playwright sobe os dois servidores sozinho.
 
 ## Salvamento
 

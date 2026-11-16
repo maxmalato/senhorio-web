@@ -2,7 +2,7 @@
 
 Jogo de tabuleiro imobiliário por turnos para o navegador, de 2 a 6 jogadores, em que o computador faz o papel do banco. Versão web do Senhorio para Roku, com as mesmas regras.
 
-> **Situação:** modo "um aparelho" jogável do início ao fim, com salvamento automático e funcionamento sem internet (Etapas 2 e 3). Próxima: salas com vários aparelhos (Etapa 4). Acompanhe em [docs/09-roadmap.md](docs/09-roadmap.md).
+> **Situação:** modo "um aparelho" jogável do início ao fim, com salvamento automático e funcionamento sem internet (Etapas 2 e 3), e salas com vários aparelhos em teste na rede local (Etapa 4). Próxima: publicação na Cloudflare (Etapa 5). Acompanhe em [docs/09-roadmap.md](docs/09-roadmap.md).
 
 ## Modos de jogo
 
@@ -39,6 +39,7 @@ pnpm install
 | Comando | O que faz |
 | --- | --- |
 | `pnpm dev` | Abre a interface em modo de desenvolvimento |
+| `pnpm --filter @senhorio/server dev` | Servidor das salas local (Cloudflare, porta 8787), sem conta |
 | `pnpm test` | Roda os testes de todos os pacotes |
 | `pnpm test:coverage` | Testes com relatório de cobertura |
 | `pnpm e2e` | Testes ponta a ponta (Playwright) |
@@ -46,6 +47,22 @@ pnpm install
 | `pnpm typecheck` | Checagem de tipos |
 | `pnpm build` | Gera a versão de produção |
 | `pnpm --filter @senhorio/engine balance` | Balanceamento: 50 partidas de robôs por cenário (docs/05); `BALANCE_GAMES=200` muda a quantidade |
+
+## Testar salas na rede local
+
+Até a publicação (Etapa 5), as salas rodam no computador. Em um terminal, gere o site e suba o servidor das salas aberto para a rede:
+
+```bash
+pnpm build
+```
+
+```bash
+pnpm --filter @senhorio/server dev --ip 0.0.0.0
+```
+
+Abra `http://<IP do computador na rede>:8787` no computador e nos outros aparelhos, na mesma rede Wi-Fi. Para mexer na interface com recarga automática, deixe o servidor das salas rodando e, em outro terminal, use `pnpm dev` (o Vite encaminha `/api` para a porta 8787).
+
+Instalação como aplicativo e modo offline só funcionam em https ou `localhost`; pela rede local o jogo funciona, mas sem esses dois recursos.
 
 ## Trabalhar em mais de um computador
 

@@ -78,6 +78,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | Celular retrato | 390×844 | Toque |
 | Tablet | 820×1180 e 1180×820 | Toque |
 | Desktop | 1440×900 | Mouse e só teclado |
+| Salas (vários navegadores) | 1280×800 | Mouse, contra o `wrangler dev` |
 | TV HD | 1280×720 | Só setas, Enter e Voltar |
 | TV Full HD | 1920×1080 | Só setas, Enter e Voltar |
 
@@ -89,7 +90,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | 1 – Motor | 45 CTs, invariantes, simulação e balanceamento | Todos passam; balanceamento próximo do Roku |
 | 2 – Telas | Componentes; partida inteira no Playwright em cada perfil de tela | Todos passam; roteiro manual aprovado em celular, desktop e TV reais |
 | 3 – PWA | Salvar e continuar; jogar com o navegador offline | Todos passam |
-| 4 – Salas | Servidor (@cloudflare/vitest-plugin); sala com 3 ou mais navegadores, queda e volta de conexão, remoção de jogador | Todos passam; partida real com aparelhos diferentes |
+| 4 – Salas | Motor (CT-53 a CT-57, remoção de jogador); servidor (@cloudflare/vitest-plugin); sala com 3 navegadores, queda e volta de conexão | Todos passam; partida real com aparelhos diferentes |
 | 5 – Publicação | Fumaça no endereço publicado; acessibilidade | Jogo acessível pela internet |
 | 6 – Acabamento | Desempenho do 3D com reserva 2D | Fluido na TV e no celular mais fraco disponível |
 
@@ -150,3 +151,31 @@ Anote aparelho, navegador e o que estranhou; os ajustes entram antes da tag `v0.
 
 Instalação e modo offline no celular só funcionam em https: ficam para depois da publicação (Etapa 5).
 
+### Testes da Etapa 4 (vários aparelhos)
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Remoção de jogador no motor | `packages/engine/test/remove.test.ts` | CT-53 a CT-57: bens ao banco, vez passa, dívida e carta em andamento, venda simples cancelada, fim com um jogador |
+| Protocolo | `packages/protocol/test/protocol.test.ts` | Código normalizado, mensagens validadas, ações do servidor recusadas, `actorsOf` |
+| Servidor | `apps/server/test/rooms.test.ts` | Criar e consultar sala, entrar, cor e nome repetidos, só o anfitrião começa, só o jogador da vez age, queda e volta pelo token, remoção depois de 3 minutos, cronômetro do servidor, mensagens inválidas e em excesso |
+| Ponta a ponta | `e2e/rooms.spec.ts` (perfil `salas`) | Três navegadores na mesma sala com o mesmo painel; queda pausa para todos e o aparelho volta pela tela inicial; código errado |
+| Foco perdido | `e2e/game.spec.ts` | O OK devolve o foco à opção padrão (rede de segurança do controle remoto) |
+
+### Roteiro da Etapa 4
+
+Até a publicação (Etapa 5), as salas rodam no computador e os outros aparelhos entram pela rede local (Wi-Fi). Comandos no README, "Testar salas na rede local".
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | No computador: Criar sala → apelido, cor e modo → Criar sala | Sala de espera com o código grande e o botão de copiar |
+| 2 | No celular: Entrar com código → digitar o código (minúsculas valem) | Cores já usadas aparecem indisponíveis; ao entrar, "Esperando Ana começar a partida." |
+| 3 | No computador: Começar partida | Os dois aparelhos mostram o tabuleiro; a marca VOCÊ no próprio jogador |
+| 4 | Jogar 2 rodadas | Só quem tem a vez vê os botões; os outros veem "Fulano está decidindo"; dados e peões iguais nos dois |
+| 5 | Venda simples para o outro jogador | A proposta aparece só no aparelho de quem recebe |
+| 6 | Fechar a aba no celular | No computador: "Partida pausada", "perdeu a conexão" e a contagem para remover |
+| 7 | Abrir o jogo de novo no celular → "Voltar para a sala" → Continuar | A partida segue do mesmo ponto nos dois aparelhos |
+| 8 | Fechar a aba de novo e esperar 3 minutos | No computador o botão "Remover" fica disponível; ao remover, os bens voltam ao banco |
+| 9 | Jogar até o fim (modo rodadas curto) | Tela de fim nos dois; só o anfitrião vê "Jogar de novo com a mesma sala" |
+| 10 | Pausar pelo menu em um aparelho | O outro vê a pausa; o cronômetro do modo tempo para |
+
+Anote aparelho, navegador e o que estranhou; os ajustes entram antes da tag `v0.5-salas`.
