@@ -154,6 +154,25 @@ test('QR Code e link: quem abre o link entra com o código já preenchido', asyn
   await expect(ana.getByText('Bruno', { exact: true })).toBeVisible();
 });
 
+test('se o navegador não deixar copiar, mostra o link para copiar à mão', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
+    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+    document.execCommand = () => false;
+  });
+  const page = await context.newPage();
+  await page.goto('/?speed=0');
+  await page.getByRole('button', { name: 'Criar sala' }).click();
+  await page.getByLabel('Seu apelido').fill('Ana');
+  await page.getByRole('button', { name: 'Criar sala' }).click();
+  const code = ((await page.locator('.code-big .code').textContent()) ?? '').replace('·', '');
+  await page.getByRole('button', { name: 'Compartilhar link' }).click();
+  const field = page.getByLabel('Este navegador não deixou copiar. Selecione e copie:');
+  await expect(field).toHaveValue(new RegExp(`/\\?sala=${code}$`));
+  await expect(field).toBeFocused();
+});
+
 test('código errado avisa sem entrar', async ({ browser }) => {
   const page = await device(browser);
   await page.goto('/?speed=0');

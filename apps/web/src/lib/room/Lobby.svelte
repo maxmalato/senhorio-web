@@ -4,6 +4,7 @@
   import { brl, options, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
   import Icon from '../ui/Icon.svelte';
+  import { canShare, copyText } from '../ui/clipboard';
   import { roomLink } from './link';
   import QrCode from './QrCode.svelte';
 
@@ -24,6 +25,8 @@
   const p = rules.parameters;
   let copied = $state(false);
   let linkCopied = $state(false);
+  /** Nada conseguiu copiar: mostra o texto para copiar à mão. */
+  let manual: string | null = $state(null);
   const link = $derived(roomLink(room.code));
   const isHost = $derived(me === room.host);
   const allConnected = $derived(room.seats.every((s) => s.connected));
@@ -37,33 +40,38 @@
   );
 
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(room.code);
+    manual = null;
+    if (await copyText(room.code)) {
       copied = true;
       setTimeout(() => (copied = false), 2000);
-    } catch {
-      // sem acesso à área de transferência: o código continua na tela para ditar
-    }
+    } else manual = formatCode(room.code);
   }
 
-  /** No celular, o menu de compartilhar do sistema; no computador, copia o link. */
+  /** No celular (em https), o menu de compartilhar do sistema; nos outros casos, copia o link. */
   async function share() {
-    const text = t('W-67', { code: formatCode(room.code) });
-    if (typeof navigator.share === 'function') {
+    manual = null;
+    if (canShare()) {
       try {
-        await navigator.share({ title: t('I-01'), text, url: link });
+        await navigator.share({
+          title: t('I-01'),
+          text: t('W-67', { code: formatCode(room.code) }),
+          url: link,
+        });
         return;
       } catch (error) {
         if ((error as DOMException)?.name === 'AbortError') return; // a pessoa desistiu
       }
     }
-    try {
-      await navigator.clipboard.writeText(link);
+    if (await copyText(link)) {
       linkCopied = true;
       setTimeout(() => (linkCopied = false), 2000);
-    } catch {
-      // sem compartilhar nem copiar: o QR Code e o código continuam na tela
-    }
+    } else manual = link;
+  }
+
+  /** Seleciona o texto do campo de cópia manual ao aparecer. */
+  function selectAll(node: HTMLInputElement) {
+    node.focus();
+    node.select();
   }
 </script>
 
@@ -89,6 +97,12 @@
             >{copied ? t('W-14') : t('W-13')}</button
           >
         </div>
+        {#if manual}
+          <label class="manual">
+            <span>{t('W-68')}</span>
+            <input class="input" readonly value={manual} use:selectAll />
+          </label>
+        {/if}
       </div>
       <p class="footnote">{t('W-15')}</p>
     </div>
@@ -158,6 +172,14 @@
   .hint {
     font-size: 0.85em;
     color: var(--text-2);
+  }
+  .manual {
+    display: grid;
+    gap: 0.4em;
+    width: 100%;
+    font-size: 0.85em;
+    color: var(--text-2);
+    text-align: left;
   }
   .share {
     display: grid;

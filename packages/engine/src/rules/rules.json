@@ -1049,6 +1049,7 @@
     "W-64": "Compartilhar link",
     "W-65": "Link copiado",
     "W-66": "QR Code para entrar na sala {code}",
-    "W-67": "Entre na minha sala do Senhorio. Código: {code}"
+    "W-67": "Entre na minha sala do Senhorio. Código: {code}",
+    "W-68": "Este navegador não deixou copiar. Selecione e copie:"
   }
 }
