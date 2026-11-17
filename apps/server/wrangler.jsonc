@@ -1,11 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "senhorio-web",
+  "name": "jogo",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   // Sem telemetria do Wrangler (privacidade)
   "send_metrics": false,
-  // Endereço público gratuito: senhorio-web.<subdomínio da conta>.workers.dev
+  // Endereço público gratuito: jogo.<subdomínio da conta>.workers.dev (docs/07, "Publicação")
   "workers_dev": true,
   // Sem endereços de prévia por versão: só um endereço público
   "preview_urls": false,
