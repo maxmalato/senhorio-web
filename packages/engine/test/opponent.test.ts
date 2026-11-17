@@ -146,7 +146,20 @@ describe('CT-63 · levantar dinheiro preservando o que rende', () => {
 });
 
 describe('CT-64 · prisão', () => {
-  it('no começo sai logo; no fim fica tentando a dupla', () => {
+  it('no fim, quem tem propriedade rendendo sai logo (preso não cobra aluguel, RP-03)', () => {
+    const ctx = testContext();
+    const state = testState(ctx, { players: 2 });
+    state.phase = 'JAIL_DECISION';
+    state.players[0]!.inJail = true;
+    for (const position of ctx.index.properties) setOwner(state, position, 1);
+    setOwner(state, 5, 0); // uma estação rendendo
+    expect(opponentDecision(state, ctx, never)).toEqual({ type: 'PAY_BAIL' });
+    state.properties['5']!.mortgaged = true; // hipotecada não rende: fica tentando a dupla
+    state.players[0]!.money = 150; // sem folga para resgatar a hipoteca
+    expect(opponentDecision(state, ctx, never)).toEqual({ type: 'ROLL_DICE' });
+  });
+
+  it('no começo sai logo; no fim, sem nada para alugar, fica tentando a dupla', () => {
     const ctx = testContext();
     const state = testState(ctx, { players: 2 });
     state.phase = 'JAIL_DECISION';

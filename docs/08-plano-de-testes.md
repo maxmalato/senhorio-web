@@ -55,7 +55,7 @@ Cenários novos da web:
 | CT-61 | Computador | Construir e resgatar | Constrói no grupo completo e resgata com folga |
 | CT-62 | Computador | Responder a uma venda simples | Não vende barato a peça que completa o grupo de quem propõe; compra pelo preço justo |
 | CT-63 | Computador | Levantar dinheiro | Hipoteca a avulsa antes de vender casas |
-| CT-64 | Computador | Prisão | Sai logo no começo; fica no fim |
+| CT-64 | Computador | Prisão | Sai logo no começo ou com propriedade rendendo (RP-03); fica no fim sem nada para alugar |
 | CT-65 | Computador | Propor a compra da rua que falta | Oferece acima do preço |
 | CT-66 | Computador | Partidas inteiras só com o computador (40 sementes) | Toda decisão aceita, invariantes valem, a partida termina |
 | CT-58 | RN-082, RN-110 | Remover e sobrar um jogador enquanto quem fica tem uma carta revelada | A partida acaba e a carta volta ao baralho (achado pelo teste de invariantes) |

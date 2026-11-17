@@ -8,7 +8,14 @@ import { buildableStreets, houseCost, streetsWithSellableHouse } from '../buildi
 import { mortgageableProperties, redeemCost } from '../mortgage';
 import type { RandomSource } from '../random';
 import { isGroupComplete } from '../rent';
-import { activePlayers, currentPlayerIndex, playerProperties, priceOf, propertyAt } from '../state';
+import {
+  activePlayers,
+  currentPlayerIndex,
+  houseRuleActive,
+  playerProperties,
+  priceOf,
+  propertyAt,
+} from '../state';
 import { isTradable, tradeTargets } from '../trade';
 import type { Action, EngineContext, GameState } from '../types';
 import { BANK } from '../types';
@@ -122,11 +129,16 @@ export function opponentDecision(
       return { type: 'CONFIRM' };
     case 'JAIL_DECISION': {
       const unowned = ctx.index.properties.filter((p) => propertyAt(state, p).owner === BANK);
-      if (unowned.length >= OPPONENT.earlyGameUnowned) {
+      // com a RP-03, o dono preso não cobra aluguel: quem tem propriedade rendendo sai logo
+      const losesRent =
+        houseRuleActive(ctx, 'RP-03') &&
+        playerProperties(state, me, ctx).some((p) => !propertyAt(state, p).mortgaged);
+      if (unowned.length >= OPPONENT.earlyGameUnowned || losesRent) {
         if (player.jailCards.length > 0) return { type: 'USE_JAIL_CARD' };
         if (player.money - ctx.rules.parameters.bail >= reserve) return { type: 'PAY_BAIL' };
       }
-      // fim de partida: preso não paga aluguel nas casas dos outros; tenta a dupla
+      // sem nada para alugar e com o tabuleiro já comprado: preso não cai nas casas dos
+      // outros, então tenta a dupla
       return improve(state, ctx, me, reserve) ?? { type: 'ROLL_DICE' };
     }
     case 'PURCHASE_DECISION': {
