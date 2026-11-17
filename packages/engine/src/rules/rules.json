@@ -1065,6 +1065,7 @@
     "W-80": "A mesa não joga: escolha o modo e chame os jogadores pelo QR Code.",
     "W-81": "Mesa sem conexão: qualquer jogador pode começar, remover e jogar de novo.",
     "W-82": "Jogo pausado pela mesa",
-    "W-83": "As decisões aparecem no celular de {player}"
+    "W-83": "As decisões aparecem no celular de {player}",
+    "W-84": "A mesa é para quem está aqui. Para jogar com quem está longe, crie uma sala normal."
   }
 }

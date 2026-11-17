@@ -264,6 +264,8 @@ Uma tela grande (TV, notebook, computador ou tablet) cria a sala como **mesa**: 
 | Item | Definição |
 | --- | --- |
 | Quem vê "Criar mesa" | Só telas com o lado menor a partir de 600 px (`LARGE_SCREEN_QUERY`); celulares não veem |
+| Presencial | A sala de espera da mesa mostra o QR Code e o código, sem "Compartilhar link" nem "Copiar código", e avisa que quem está longe deve usar uma sala normal. A sala continua privada pelo código; o jogo não confere se todos estão na mesma rede (bloquearia celulares nos dados móveis e redes IPv6, e exigiria guardar o endereço de internet da mesa) |
+| Internet | Mesmo na mesma rede Wi-Fi, todos os aparelhos falam com o servidor do jogo na internet: a mesa não funciona numa rede local sem internet |
 | Criar | `POST /api/rooms { mode, table: true }` devolve `{ code, tableToken }`; a mesa entra com `hello { token }` e recebe `welcome { seat: TABLE_SEAT }` (-2). O servidor guarda só o hash do token; a mesa volta pelo mesmo token se recarregar |
 | Lugar | A mesa não ocupa lugar de jogador (continuam até 6 jogadores) e não pode mandar ações do jogo (`tableCannotPlay`) |
 | Quem comanda | Numa sala com mesa, `host` é `TABLE_SEAT`: a mesa começa, pausa, remove quem caiu e começa outra partida. Se a mesa cair, a partida **não** pausa e qualquer jogador conectado passa a comandar |

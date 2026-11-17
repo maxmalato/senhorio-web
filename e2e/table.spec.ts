@@ -4,10 +4,6 @@ import { devices, expect, test, type Browser, type Page } from '@playwright/test
 
 async function createTable(browser: Browser) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
-  });
   const table = await context.newPage();
   await table.goto('/?speed=0');
   await table.getByRole('button', { name: 'Criar mesa' }).click();
@@ -15,8 +11,9 @@ async function createTable(browser: Browser) {
   await expect(table.getByLabel('Seu apelido')).toHaveCount(0); // a mesa não joga
   await table.getByRole('button', { name: 'Criar mesa' }).click();
   await expect(table.getByRole('heading', { name: 'Sala de espera' })).toBeVisible();
-  await table.getByRole('button', { name: 'Compartilhar link' }).click();
-  const link = await table.evaluate(() => navigator.clipboard.readText());
+  // o mesmo link do QR Code, montado a partir do código na tela
+  const code = ((await table.locator('.code-big .code').textContent()) ?? '').replace('·', '');
+  const link = `${new URL(table.url()).origin}/?sala=${code}`;
   return { table, link };
 }
 
@@ -36,6 +33,13 @@ test('a mesa cria a sala, os celulares jogam e a mesa encerra', async ({ browser
   table.on('pageerror', (e) => errors.push(e.message));
   await expect(table.getByRole('button', { name: 'Encerrar sala' })).toBeVisible();
   await expect(table.getByRole('button', { name: 'Sair da sala' })).toHaveCount(0);
+  // mesa é presencial: QR Code e código, sem copiar nem compartilhar o link
+  await expect(table.getByRole('img', { name: /QR Code para entrar na sala/ })).toBeVisible();
+  await expect(table.getByRole('button', { name: 'Compartilhar link' })).toHaveCount(0);
+  await expect(table.getByRole('button', { name: 'Copiar código' })).toHaveCount(0);
+  await expect(
+    table.getByText(/Para jogar com quem está longe, crie uma sala normal/),
+  ).toBeVisible();
 
   const ana = await joinByLink(browser, link, 'Ana');
   const bruno = await joinByLink(browser, link, 'Bruno');

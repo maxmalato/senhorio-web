@@ -308,13 +308,13 @@ Conferência extra feita na implementação: as capturas de tela da sala de espe
 | Servidor | `apps/server/test/rooms.test.ts`, `index.test.ts` | Criar com mesa devolve o token; a mesa entra sem lugar e comanda; não joga; se cai, a partida segue e os jogadores comandam; volta pelo token; só a mesa encerra e a sala some |
 | Sons | `apps/web/src/lib/game/table-sounds.test.ts` | A mesa toca tudo; com mesa, o celular só o próprio dinheiro; sem mesa, como antes |
 | Tela acesa | `apps/web/src/lib/ui/screen.test.ts` | Pede a trava, pede de novo ao voltar para a aba, solta no fim; sem suporte, nada quebra |
-| Ponta a ponta | `e2e/table.spec.ts` (perfil `salas`) | A mesa cria (sem apelido), dois celulares entram pelo link, só a mesa começa, a mesa mostra quem decide sem botões de jogada, pausa para todos e encerra com confirmação; a mesa recarregada volta como mesa; "Criar mesa" não aparece no celular |
+| Ponta a ponta | `e2e/table.spec.ts` (perfil `salas`) | A mesa cria (sem apelido), mostra QR Code e código sem compartilhar o link, dois celulares entram pelo link, só a mesa começa, a mesa mostra quem decide sem botões de jogada, pausa para todos e encerra com confirmação; a mesa recarregada volta como mesa; "Criar mesa" não aparece no celular |
 
 ### Roteiro do modo mesa
 
 | # | Passo | Esperado |
 | --- | --- | --- |
-| 1 | Na TV, notebook ou tablet: "Criar mesa" → modo → Criar mesa | Sala de espera com QR Code grande, Começar, Tela cheia e Encerrar sala; não pede apelido |
+| 1 | Na TV, notebook ou tablet: "Criar mesa" → modo → Criar mesa | Sala de espera com QR Code grande, código, aviso de que a mesa é para quem está presente, Começar, Tela cheia e Encerrar sala; sem Compartilhar link nem Copiar código; não pede apelido |
 | 2 | No celular, abrir o jogo | "Criar mesa" não aparece |
 | 3 | Dois ou três celulares entram pelo QR Code | A mesa mostra quem entrou; nos celulares, "Esperando a mesa começar a partida." |
 | 4 | Começar pela mesa (controle, mouse ou toque) | Tabuleiro grande na mesa; decisões só no celular de quem tem a vez |

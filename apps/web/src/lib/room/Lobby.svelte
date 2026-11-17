@@ -100,14 +100,20 @@
         <span class="code" aria-label="{t('W-08')}: {room.code.split('').join(' ')}"
           >{formatCode(room.code)}</span
         >
-        <div class="share">
-          <button class="btn secondary" type="button" onclick={share}
-            >{linkCopied ? t('W-65') : t('W-64')}</button
-          >
-          <button class="btn ghost" type="button" onclick={copy}
-            >{copied ? t('W-14') : t('W-13')}</button
-          >
-        </div>
+        {#if isTable}
+          <!-- mesa: para quem está diante da tela (QR Code ou código); quem está longe usa
+               uma sala normal, por isso sem copiar nem compartilhar o link -->
+          <p class="hint">{t('W-84')}</p>
+        {:else}
+          <div class="share">
+            <button class="btn secondary" type="button" onclick={share}
+              >{linkCopied ? t('W-65') : t('W-64')}</button
+            >
+            <button class="btn ghost" type="button" onclick={copy}
+              >{copied ? t('W-14') : t('W-13')}</button
+            >
+          </div>
+        {/if}
         {#if manual}
           <label class="manual">
             <span>{t('W-68')}</span>
@@ -198,6 +204,10 @@
   .hint {
     font-size: 0.85em;
     color: var(--text-2);
+  }
+  p.hint {
+    margin: 0;
+    max-width: 24em;
   }
   .manual {
     display: grid;
