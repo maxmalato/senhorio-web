@@ -140,22 +140,23 @@
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.6em;
+    gap: 0.8em;
   }
   .row {
     display: flex;
-    gap: 0.8em;
+    gap: 1em;
     align-items: flex-start;
     background: var(--panel);
     border-radius: 1em;
-    padding: 0.7em 0.8em;
+    padding: 1em 1.1em;
   }
   .row .avatar {
     margin-top: 0.3em;
   }
+  /* nome, quem joga e cor com respiro entre si */
   .fields {
     display: grid;
-    gap: 0.5em;
+    gap: 0.9em;
     flex: 1;
     min-width: 0;
   }
