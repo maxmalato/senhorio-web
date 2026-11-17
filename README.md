@@ -46,7 +46,12 @@ pnpm install
 | `pnpm lint` | ESLint e Prettier |
 | `pnpm typecheck` | Checagem de tipos |
 | `pnpm build` | Gera a versão de produção |
+| `SITE_URL=https://… pnpm smoke` | Teste de fumaça num endereço publicado (ou `http://localhost:8787`) |
 | `pnpm --filter @senhorio/engine balance` | Balanceamento: 50 partidas de robôs por cenário (docs/05); `BALANCE_GAMES=200` muda a quantidade |
+
+## Publicação
+
+O jogo é publicado na Cloudflare (plano gratuito, endereço `workers.dev`) pelo próprio CI, a cada push na `main`, depois de todos os testes passarem. Ninguém publica do próprio computador. O token e o ID da conta ficam só nos segredos do repositório; detalhes, limites e como desfazer em [docs/07](docs/07-arquitetura-tecnica.md#publicação).
 
 ## Testar salas na rede local
 

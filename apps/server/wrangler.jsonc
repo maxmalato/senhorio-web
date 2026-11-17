@@ -5,6 +5,12 @@
   "compatibility_date": "2026-10-01",
   // Sem telemetria do Wrangler (privacidade)
   "send_metrics": false,
+  // Endereço público gratuito: senhorio-web.<subdomínio da conta>.workers.dev
+  "workers_dev": true,
+  // Sem endereços de prévia por versão: só um endereço público
+  "preview_urls": false,
+  // Sem registros de acesso guardados na Cloudflare (docs/07, "Segurança e privacidade")
+  "observability": { "enabled": false },
   // O Worker serve o site (apps/web/dist) e responde primeiro só nas rotas /api/*
   "assets": {
     "directory": "../web/dist",

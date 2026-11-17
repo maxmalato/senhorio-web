@@ -9,9 +9,10 @@ on:
 permissions:
   contents: read
 
+# Em pull request, um push novo cancela o anterior; na main, nunca no meio de uma publicação
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
@@ -47,3 +48,44 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # Etapa 5: publica na Cloudflare só depois de tudo passar, e só em push na main.
+  # Credenciais só nos segredos do repositório (Settings → Secrets and variables → Actions).
+  deploy:
+    name: Publica na Cloudflare
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+
+      # Ação de terceiro fixada pelo commit (v6.1.1)
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @senhorio/web build
+
+      - name: Publica o Worker e o site
+        id: publish
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          pnpm --filter @senhorio/server exec wrangler deploy | tee deploy.log
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -n 1)
+          if [ -z "$url" ]; then echo "Endereço publicado não encontrado na saída do wrangler"; exit 1; fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Teste de fumaça no endereço publicado
+        env:
+          SITE_URL: ${{ steps.publish.outputs.url }}
+        run: pnpm smoke

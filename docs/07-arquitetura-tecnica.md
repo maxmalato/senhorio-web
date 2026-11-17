@@ -320,14 +320,40 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 - **Manifesto:** nome Senhorio, `display: standalone`, cor azul-noite, ícones de 192 e 512 px e ícone "maskable" com margem para o Android, gerados a partir da logo (`apps/web/public/icons/`).
 - **Limite do navegador:** service worker e instalação só funcionam em https ou em `localhost`. Pela rede local (`http://192.168...`), o jogo e o salvamento funcionam, mas não a instalação nem o modo offline; no celular, isso é testado depois da publicação (Etapa 5).
 
+## Publicação
+
+| Item | Definição |
+| --- | --- |
+| Endereço | `senhorio-web.<subdomínio da conta>.workers.dev` (plano gratuito; sem endereços de prévia: `preview_urls: false`) |
+| Quando publica | A cada push na `main`, pelo job `deploy` do CI, só depois de lint, tipos, testes, build e e2e passarem; nunca em pull request |
+| Como | `pnpm --filter @senhorio/web build` e `wrangler deploy` (Worker, Durable Objects e site de `apps/web/dist` juntos) |
+| Credenciais | Segredos do repositório `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`; o GitHub esconde os valores nos registros |
+| Conferência | `scripts/smoke.mjs` (`pnpm smoke` com `SITE_URL`) no endereço publicado: saúde da API, tela inicial, manifesto, privacidade e sala inexistente; não cria salas |
+| Renovação do token | O token vence 1 ano depois de criado (novembro de 2027): criar outro no mesmo modelo e trocar o segredo `CLOUDFLARE_API_TOKEN` |
+| Desfazer | Painel da Cloudflare → Workers & Pages → senhorio-web → Deployments → versão anterior → Rollback; ou reverter o commit na `main` |
+
+Limites do plano gratuito que importam ao jogo (conferidos em novembro de 2026; podem mudar):
+
+| Recurso | Limite por dia | Uso do jogo |
+| --- | --- | --- |
+| Requisições ao Worker | 100 mil (zera à meia-noite UTC) | Abrir o site, consultar e criar salas; arquivos do site em cache no aparelho depois do primeiro acesso |
+| Requisições aos Durable Objects | 100 mil, contando mensagens do WebSocket e alarmes | Uma partida de 4 jogadores e 30 rodadas usa da ordem de mil mensagens |
+| Linhas gravadas no SQLite | 100 mil | Uma gravação por mudança na sala |
+| Armazenamento | 5 GB no total | Salas pequenas, apagadas em 12 horas |
+
+Ao passar de um limite, o plano gratuito recusa as requisições até o dia seguinte, sem cobrança; o modo um aparelho continua funcionando pelo service worker. Fontes: [limites dos Workers](https://developers.cloudflare.com/workers/platform/limits/), [preços dos Durable Objects](https://developers.cloudflare.com/durable-objects/platform/pricing/).
+
+O limite de tentativas por endereço (criar 10 salas e consultar 60 códigos por minuto) é por instância do Worker, de melhor esforço. Se houver abuso, a troca natural é a [vinculação de Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/) da Cloudflare, depois de confirmar que está no plano gratuito.
+
 ## Segurança e privacidade
 
 | Risco | Medida |
 | --- | --- |
-| Segredos no repositório | Nenhuma chave, token ou senha no Git; credenciais da Cloudflare só no painel, no `wrangler secret` ou nos segredos do GitHub Actions |
+| Segredos no repositório | Nenhuma chave, token, senha ou ID de conta no Git; credenciais da Cloudflare só no painel, no `wrangler secret` ou nos segredos do GitHub Actions |
+| Token de publicação | Modelo "Edit Cloudflare Workers" restrito à conta, validade de 1 ano, sem filtro de IP (o GitHub Actions muda de endereço); se vazar, revogar em My Profile → API Tokens |
 | Trapaça no modo de vários dispositivos | Motor e sorteio só no servidor; cada ação validada contra o jogador que enviou |
 | Entrada indevida em sala | Código longo, limite de tentativas, entrada fechada depois do início, expiração |
-| Dados pessoais (LGPD) | Só apelidos; sem conta, sem rastreamento, sem analytics; sala apagada ao fim; política de privacidade publicada na Etapa 5 |
+| Dados pessoais (LGPD) | Só apelidos; sem conta, sem cookies, sem rastreamento, sem analytics; registros de acesso do Worker desligados (`observability.enabled: false`); IP só na memória, por cerca de 1 minuto, para o limite de tentativas; sala apagada depois de 12 horas sem atividade; política de privacidade e termos em `/privacidade.html` |
 | Dependências de terceiros | Só bibliotecas conhecidas e mantidas; atualizações automáticas revisadas antes de entrar |
 | Propriedade intelectual | Nome, regras, valores, textos e arte próprios; fontes com licença aberta (SIL OFL) |
 

@@ -91,7 +91,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | 2 – Telas | Componentes; partida inteira no Playwright em cada perfil de tela | Todos passam; roteiro manual aprovado em celular, desktop e TV reais |
 | 3 – PWA | Salvar e continuar; jogar com o navegador offline | Todos passam |
 | 4 – Salas | Motor (CT-53 a CT-57, remoção de jogador); servidor (@cloudflare/vitest-plugin); sala com 3 navegadores, queda e volta de conexão | Todos passam; partida real com aparelhos diferentes |
-| 5 – Publicação | Fumaça no endereço publicado; acessibilidade | Jogo acessível pela internet |
+| 5 – Publicação | Fumaça no endereço publicado; privacidade com axe nos 5 perfis | Jogo acessível pela internet; roteiro manual aprovado |
 | 6 – Acabamento | Desempenho do 3D com reserva 2D | Fluido na TV e no celular mais fraco disponível |
 
 ## Testes da interface (Etapa 2)
@@ -179,3 +179,27 @@ Até a publicação (Etapa 5), as salas rodam no computador e os outros aparelho
 | 10 | Pausar pelo menu em um aparelho | O outro vê a pausa; o cronômetro do modo tempo para |
 
 Anote aparelho, navegador e o que estranhou; os ajustes entram antes da tag `v0.5-salas`.
+
+### Testes da Etapa 5 (publicação)
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Privacidade e termos | `e2e/game.spec.ts` (5 perfis) | Link na tela inicial, página legível, sem problemas do axe, sem rolagem lateral, volta ao jogo |
+| Fumaça no endereço publicado | `scripts/smoke.mjs`, no job `deploy` do CI | Saúde da API, tela inicial, manifesto, privacidade e sala inexistente (404) |
+
+### Roteiro da Etapa 5
+
+Fazer pelo endereço publicado (https), em pelo menos um celular, um computador e uma Smart TV.
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Abrir o endereço no celular, fora do Wi-Fi de casa (dados móveis) | Tela inicial; nenhum aviso de site inseguro |
+| 2 | Instalar: Android "Instalar app"; iPhone Compartilhar → "Adicionar à Tela de Início" | Ícone do Senhorio; abre em tela cheia |
+| 3 | Abrir o app instalado em modo avião e jogar uma partida no modo um aparelho | Funciona sem internet |
+| 4 | Criar uma sala no computador e entrar pelo celular com dados móveis | Partida com dois aparelhos em redes diferentes |
+| 5 | Jogar algumas rodadas; fechar e reabrir o app no celular | Volta para a sala |
+| 6 | Abrir "Privacidade e termos de uso" | Página legível, com volta ao jogo |
+| 7 | Smart TV: abrir o endereço no navegador da TV e jogar com o controle | Igual à Etapa 2 |
+| 8 | Publicar uma mudança (push na `main`) com o jogo instalado aberto | A tela inicial avisa da versão nova; nada recarrega no meio da partida |
+
+Anote aparelho, navegador e o que estranhou; os ajustes entram antes da tag `v1.0`.
