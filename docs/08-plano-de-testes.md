@@ -32,6 +32,7 @@ Os 45 cenários do Roku (CT-01 a CT-45, em docs/referencia-roku/plano-de-testes-
 | CT-44 (regras inválidas) | `packages/engine/test/rules.test.ts` | Passando |
 | CT-46 a CT-52 (cartas sem cenário no Roku) | `packages/engine/test/cards.test.ts` | Passando |
 | CT-53 a CT-58 (remover jogador desconectado) | `packages/engine/test/remove.test.ts` | Passando |
+| CT-59 a CT-66 (adversário do computador) | `packages/engine/test/opponent.test.ts` | Passando |
 
 Cenários novos da web:
 
@@ -49,6 +50,14 @@ Cenários novos da web:
 | CT-55 | RN-115 | Remover quem está levantando dinheiro | Bens vão ao banco, sem pagar o credor; o turno acaba |
 | CT-56 | RN-110 | Remover e sobrar um jogador | A partida acaba |
 | CT-57 | RN-095 | Remover com venda simples pendente | A proposta é cancelada |
+| CT-59 | Computador | Comprar guardando a reserva; reserva cresce com as casas dos outros | Compra ou recusa conforme a folga |
+| CT-60 | Computador | Comprar o que completa ou bloqueia um grupo | Compra mesmo sem reserva |
+| CT-61 | Computador | Construir e resgatar | Constrói no grupo completo e resgata com folga |
+| CT-62 | Computador | Responder a uma venda simples | Não vende barato a peça que completa o grupo de quem propõe; compra pelo preço justo |
+| CT-63 | Computador | Levantar dinheiro | Hipoteca a avulsa antes de vender casas |
+| CT-64 | Computador | Prisão | Sai logo no começo; fica no fim |
+| CT-65 | Computador | Propor a compra da rua que falta | Oferece acima do preço |
+| CT-66 | Computador | Partidas inteiras só com o computador (40 sementes) | Toda decisão aceita, invariantes valem, a partida termina |
 | CT-58 | RN-082, RN-110 | Remover e sobrar um jogador enquanto quem fica tem uma carta revelada | A partida acaba e a carta volta ao baralho (achado pelo teste de invariantes) |
 
 O CT-42 do Roku gravava no registro do aparelho; na web, o motor confere que o estado vira JSON e volta igual, e a gravação no IndexedDB é testada na Etapa 3.
@@ -249,3 +258,23 @@ Anote aparelho, navegador e o que estranhou; os ajustes entram antes do merge na
 | 4 | Voltar para a aba do jogo | O título volta ao normal; a decisão está na tela |
 | 5 | Mandar uma venda simples para o outro celular | O outro celular avisa (é a vez dele responder) |
 | 6 | iPhone | Sons depois do primeiro toque; sem vibração (o iPhone não deixa sites vibrarem) |
+
+### Testes de jogar contra o computador
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Estratégia do adversário | `packages/engine/test/opponent.test.ts` | CT-59 a CT-66 |
+| Controlador | `apps/web/src/lib/game/bots.test.ts` | O computador joga a vez dele e devolve a decisão à pessoa; espera durante a pausa; cartão "está decidindo" com Pausar; marca COMPUTADOR; sem "Passe o aparelho" com uma pessoa só |
+| Ponta a ponta (5 perfis) | `e2e/bots.spec.ts` | Partida inteira de 20 rodadas contra 3 computadores, a pessoa só com Enter; pelo menos uma pessoa (com axe); partida salva continua com o computador |
+
+### Roteiro de jogar contra o computador
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Nova partida → marcar dois jogadores como "Computador" | A escolha aparece em cada linha; todos como computador desabilita o Continuar com o aviso |
+| 2 | Jogar 3 ou 4 rodadas | O computador joga sozinho, num ritmo dá para acompanhar; os avisos contam o que ele fez |
+| 3 | Pausar na vez do computador | Ele para; ao continuar, segue de onde estava |
+| 4 | Propor uma venda simples para o computador (preço baixo e preço alto) | Recusa a oferta baixa; aceita uma oferta boa |
+| 5 | Jogar até o fim (modo rodadas curto) | O computador compra, constrói e negocia como um jogador de verdade, sem travar a partida |
+| 6 | Fechar no meio e continuar | A partida volta com os mesmos jogadores do computador |
+| 7 | Na TV, só com o controle | Apertar OK na vez do computador não pausa; as setas chegam ao Pausar |
