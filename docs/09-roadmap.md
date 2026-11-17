@@ -108,6 +108,7 @@ Cada melhoria numa branch `develop/nome-da-tarefa`, testada pelo dono do projeto
 | Melhoria | Situação |
 | --- | --- |
 | Jogar contra o computador | Concluída (testada pelo dono do projeto e publicada) |
-| QR Code para entrar na sala e "modo mesa" na TV | Ideia |
+| QR Code para entrar na sala | Em teste (branch `develop/qr-code-sala`) |
+| "Modo mesa" na TV, notebook ou tablet | Próxima (branch `develop/modo-mesa`) |
 | "Como jogar" (regras resumidas) | Ideia |
 | Histórico completo e estatísticas no fim | Ideia |

@@ -255,6 +255,8 @@ Motivos de transferência: `bonusPartida` → `passStart`, `compra` → `purchas
 | Expiração | Sala apagada depois de 12 horas sem atividade (alarme do Durable Object) |
 | Proteção | Criar sala: 10 por minuto; consultar código: 60 por minuto (por endereço, melhor esforço); mensagens de até 4 KB e até 40 a cada 10 s por aparelho; nenhuma listagem de salas |
 
+Convite: a sala de espera mostra um QR Code com o link `/?sala=CÓDIGO` e o botão "Compartilhar link" (menu de compartilhar do sistema no celular; no computador, copia o link). O QR Code é gerado no próprio aparelho com a biblioteca `uqr` (sem serviço de fora) e desenhado como SVG. Quem abre o link vai direto para "Entrar na sala" com o código preenchido; o jogo tira o código da barra de endereço assim que o lê (`apps/web/src/lib/room/link.ts`).
+
 As constantes ficam em `packages/protocol` (`REMOVE_AFTER_MS`, `ROOM_TTL_MS`, `MAX_MESSAGE_BYTES`, `MESSAGE_LIMIT`), usadas pelo servidor e pela interface.
 
 ### Rotas
