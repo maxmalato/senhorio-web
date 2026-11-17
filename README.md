@@ -51,6 +51,8 @@ pnpm install
 
 ## Publicação
 
+**Jogar:** https://senhorio-web.senhorio-web.workers.dev
+
 O jogo é publicado na Cloudflare (plano gratuito, endereço `workers.dev`) pelo próprio CI, a cada push na `main`, depois de todos os testes passarem. Ninguém publica do próprio computador. O token e o ID da conta ficam só nos segredos do repositório; detalhes, limites e como desfazer em [docs/07](docs/07-arquitetura-tecnica.md#publicação).
 
 ## Testar salas na rede local
