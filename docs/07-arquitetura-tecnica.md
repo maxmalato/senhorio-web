@@ -66,7 +66,7 @@ senhorio-web/
 | Build | Vite | Padrão do mercado |
 | Interface | Svelte 5 | Pacote pequeno e rápido em TV e celular |
 | Tabuleiro e animações | SVG/CSS + Web Animations API | Leve, nítido em qualquer resolução, fiel aos mockups |
-| 3D (acabamento) | Three.js carregado sob demanda | Só nos dados (e talvez casas e hotéis), com reserva 2D |
+| 3D (acabamento) | Three.js 0.187, carregado sob demanda | Só nos dados, com reserva 2D (ver "Dados em 3D") |
 | PWA | vite-plugin-pwa | Instalável e offline no modo de um dispositivo |
 | Salvamento local | IndexedDB | Substitui o registro do Roku |
 | Servidor | Cloudflare Workers + Durable Objects (SQLite), WebSocket com hibernação | Plano gratuito; sala ociosa não consome tempo de execução |
@@ -319,6 +319,19 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 - **Atualização:** `registerType: "prompt"`. A versão nova fica esperando e a tela inicial mostra "Há uma versão nova do jogo · Atualizar agora". O jogo nunca recarrega sozinho no meio de uma partida.
 - **Manifesto:** nome Senhorio, `display: standalone`, cor azul-noite, ícones de 192 e 512 px e ícone "maskable" com margem para o Android, gerados a partir da logo (`apps/web/public/icons/`).
 - **Limite do navegador:** service worker e instalação só funcionam em https ou em `localhost`. Pela rede local (`http://192.168...`), o jogo e o salvamento funcionam, mas não a instalação nem o modo offline; no celular, isso é testado depois da publicação (Etapa 5).
+
+## Dados em 3D
+
+| Item | Definição |
+| --- | --- |
+| Onde | `apps/web/src/lib/dice/`: `orientation.ts` (matemática), `dice3d.ts` (cena Three.js), `preference.ts` (quando usar), `load.ts` (carregamento), `Dice.svelte` (componente) |
+| Resultado | Sempre do motor: a animação só gira cada dado até a face sorteada ficar para cima (faces opostas somam 7). Os sorteios do giro são só visuais |
+| Carregamento | Import dinâmico: o Three.js vai no arquivo `assets/dice3d-*.js` (~130 KB comprimido), baixado no começo da partida, nunca na tela inicial. O pacote principal cresce cerca de 1 KB |
+| Sem internet | O service worker não baixa esse arquivo na instalação; ele entra no cache (`senhorio-dice3d`) na primeira partida e depois funciona sem internet |
+| Desempenho | Uma cena só, reaproveitada; desenha só durante a animação (sem laço contínuo); resolução até 2× |
+| Reserva 2D | Sem WebGL, com "menos animação" pedido no sistema, falha ao baixar ou montar a cena, contexto WebGL perdido, ou quadros lentos (média acima de 50 ms na jogada: o aparelho passa a usar 2D) |
+| Escolha do jogador | "Dados em 3D: ligados/desligados" na tela inicial (só aparece se o aparelho pode usar 3D), guardada no aparelho (`localStorage`, chave `senhorio:dice`) |
+| Testes | `?dice=2d` e `?dice=3d` forçam um dos dois |
 
 ## Publicação
 

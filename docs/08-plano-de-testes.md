@@ -92,7 +92,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | 3 – PWA | Salvar e continuar; jogar com o navegador offline | Todos passam |
 | 4 – Salas | Motor (CT-53 a CT-57, remoção de jogador); servidor (@cloudflare/vitest-plugin); sala com 3 navegadores, queda e volta de conexão | Todos passam; partida real com aparelhos diferentes |
 | 5 – Publicação | Fumaça no endereço publicado; privacidade com axe nos 5 perfis | Jogo acessível pela internet; roteiro manual aprovado |
-| 6 – Acabamento | Desempenho do 3D com reserva 2D | Fluido na TV e no celular mais fraco disponível |
+| 6 – Acabamento | Orientação e reserva 2D dos dados; 3D sob demanda nos 5 perfis | Fluido na TV e no celular mais fraco disponível |
 
 ## Testes da interface (Etapa 2)
 
@@ -203,3 +203,27 @@ Fazer pelo endereço publicado (https), em pelo menos um celular, um computador 
 | 8 | Publicar uma mudança (push na `main`) com o jogo instalado aberto | A tela inicial avisa da versão nova; nada recarrega no meio da partida |
 
 Anote aparelho, navegador e o que estranhou; os ajustes entram antes da tag `v1.0`.
+
+### Testes da Etapa 6 (dados em 3D)
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Orientação | `apps/web/src/lib/dice/orientation.test.ts` | A face sorteada termina para cima em qualquer giro, faces opostas somam 7, materiais na face certa, pulo começa e termina no chão |
+| Quando usar | `apps/web/src/lib/dice/preference.test.ts` | Ligado com WebGL; 2D sem WebGL, com menos animação, depois de falha ou lentidão; escolha guardada; `?dice=2d` |
+| Reserva 2D | `apps/web/src/lib/dice/Dice.test.ts` | Sem WebGL ou com falha da cena, os dados 2D continuam |
+| Ponta a ponta (5 perfis) | `e2e/dice.spec.ts` | O 3D não é baixado na tela inicial; a jogada mostra os dados 3D; `?dice=2d` não baixa o 3D; desligar na tela inicial fica guardado |
+
+### Roteiro da Etapa 6
+
+Fazer pela versão da branch (rede local, como no roteiro da Etapa 4) e repetir pelo endereço publicado depois do merge.
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Começar uma partida e rolar os dados | Dados 3D girando e parando nos números do texto ao lado |
+| 2 | Jogar 3 ou 4 rodadas no celular mais simples disponível | Rolagem fluida; se travar, o jogo passa sozinho para os dados 2D nas próximas jogadas |
+| 3 | Mesma coisa na Smart TV, com o controle | Rolagem fluida ou troca para 2D; o resto do jogo igual |
+| 4 | Tela inicial: "Dados em 3D: ligados" → desligar | A partida usa os dados 2D; a escolha continua depois de fechar e abrir |
+| 5 | Ativar "reduzir movimento" no sistema (acessibilidade) | Dados 2D, sem a opção de 3D na tela inicial |
+| 6 | Depois de uma partida com 3D, abrir em modo avião | Dados 3D continuam funcionando |
+
+Anote aparelho, navegador e o que estranhou; os ajustes entram antes do merge na `main`.
