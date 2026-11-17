@@ -2,6 +2,7 @@ import { mount } from 'svelte';
 import { registerSW } from 'virtual:pwa-register';
 import App from './App.svelte';
 import { pwa } from './lib/pwa.svelte';
+import { unlockAudioOnFirstGesture } from './lib/sound/synth';
 import './app.css';
 
 const target = document.getElementById('app');
@@ -17,5 +18,8 @@ const updateSW = registerSW({
   },
 });
 pwa.update = () => void updateSW(true);
+
+// Sons: os navegadores só liberam o áudio depois do primeiro toque ou tecla
+unlockAudioOnFirstGesture();
 
 export default mount(App, { target });

@@ -74,6 +74,19 @@
         padding: 1rem 1.25rem;
         margin: 1.5rem 0;
       }
+      h3 {
+        font-family: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 1.25rem 0 0.25rem;
+      }
+      ol {
+        margin: 0.25rem 0 0;
+        padding-left: 1.4rem;
+      }
+      ol li + li {
+        margin-top: 0.25rem;
+      }
       .summary ul {
         margin: 0.5rem 0 0;
         padding-left: 1.25rem;
@@ -150,6 +163,11 @@
             <td>Até o fim da partida ou até você apagar os dados do site</td>
           </tr>
           <tr>
+            <td>Preferências (dados em 3D, sons e vibração)</td>
+            <td>Só no seu aparelho, no armazenamento do navegador</td>
+            <td>Até você mudar ou apagar os dados do site</td>
+          </tr>
+          <tr>
             <td>Apelido, cor e partida de uma sala com vários aparelhos</td>
             <td>No servidor da sala, na Cloudflare</td>
             <td>Enquanto a sala estiver em uso; apagada depois de 12 horas sem atividade</td>
@@ -192,10 +210,72 @@
         Você pode apagar a qualquer momento os dados guardados no seu aparelho, limpando os dados do
         site nas configurações do navegador. Os dados de uma sala somem sozinhos em até 12 horas sem
         atividade. Para outros pedidos previstos na Lei Geral de Proteção de Dados (Lei nº
-        13.709/2018), use a página de Issues, sem expor dados pessoais nela.
+        13.709/2018), use a página de Issues, sem expor dados pessoais nela. O passo a passo para
+        apagar está na seção 6.
       </p>
 
-      <h2>6. Termos de uso</h2>
+      <h2 id="apagar">6. Quanto ocupa e como apagar</h2>
+      <p>
+        O jogo ocupa cerca de 1,3 MB no aparelho: os arquivos para jogar sem internet (cerca de 740
+        KB), os dados em 3D depois da primeira partida (cerca de 530 KB), a partida salva e as
+        preferências (poucos KB). Os sons não ocupam espaço: são gerados na hora pelo navegador, sem
+        arquivos de áudio.
+      </p>
+      <p>
+        Só para desligar os sons ou os dados em 3D, use os botões no fim da tela inicial do jogo.
+        Para apagar tudo, siga o caminho do seu aparelho (os nomes dos menus mudam um pouco entre
+        versões do navegador):
+      </p>
+
+      <h3>Android (Chrome)</h3>
+      <ol>
+        <li>
+          Se você instalou o jogo, toque e segure o ícone do Senhorio e escolha "Desinstalar".
+        </li>
+        <li>
+          No Chrome, abra o menu (⋮) → Configurações → Configurações do site → Todos os sites.
+        </li>
+        <li>Escolha o endereço do jogo e toque em "Limpar e redefinir".</li>
+      </ol>
+
+      <h3>iPhone e iPad</h3>
+      <ol>
+        <li>
+          Se você adicionou o jogo à Tela de Início, toque e segure o ícone do Senhorio e escolha
+          "Remover app". Isso apaga os dados do jogo instalado.
+        </li>
+        <li>
+          Para os dados guardados pelo Safari: Ajustes → Apps → Safari → Avançado → Dados de Sites
+          (em versões mais antigas: Ajustes → Safari → Avançado → Dados de Sites).
+        </li>
+        <li>Procure o endereço do jogo, deslize para a esquerda e toque em "Apagar".</li>
+      </ol>
+
+      <h3>Computador (Chrome ou Edge)</h3>
+      <ol>
+        <li>
+          Se você instalou o jogo, abra a janela dele, clique no menu (⋮ ou …) e escolha
+          "Desinstalar".
+        </li>
+        <li>
+          No navegador, com o jogo aberto, clique no ícone à esquerda do endereço → Configurações do
+          site → Excluir dados.
+        </li>
+      </ol>
+
+      <h3>Outros navegadores (Firefox, Smart TV)</h3>
+      <ol>
+        <li>Abra as configurações do navegador e procure "Privacidade" ou "Dados de sites".</li>
+        <li>Apague os dados e o cache do endereço do jogo.</li>
+      </ol>
+
+      <p>
+        Uma sala do modo de vários aparelhos não fica no seu aparelho além do código e da chave para
+        voltar, que somem junto com os dados do site. No servidor, a sala é apagada sozinha em até
+        12 horas sem atividade.
+      </p>
+
+      <h2>7. Termos de uso</h2>
       <ul>
         <li>O jogo é gratuito e oferecido como está, sem garantia de funcionamento contínuo.</li>
         <li>

@@ -31,7 +31,7 @@ Os 45 cenários do Roku (CT-01 a CT-45, em docs/referencia-roku/plano-de-testes-
 | CT-43 (salvamento de outra versão das regras) | `apps/web/src/lib/save/save.test.ts` e `resume.test.ts` | Passando |
 | CT-44 (regras inválidas) | `packages/engine/test/rules.test.ts` | Passando |
 | CT-46 a CT-52 (cartas sem cenário no Roku) | `packages/engine/test/cards.test.ts` | Passando |
-| CT-53 a CT-57 (remover jogador desconectado) | `packages/engine/test/remove.test.ts` | Passando |
+| CT-53 a CT-58 (remover jogador desconectado) | `packages/engine/test/remove.test.ts` | Passando |
 
 Cenários novos da web:
 
@@ -49,6 +49,7 @@ Cenários novos da web:
 | CT-55 | RN-115 | Remover quem está levantando dinheiro | Bens vão ao banco, sem pagar o credor; o turno acaba |
 | CT-56 | RN-110 | Remover e sobrar um jogador | A partida acaba |
 | CT-57 | RN-095 | Remover com venda simples pendente | A proposta é cancelada |
+| CT-58 | RN-082, RN-110 | Remover e sobrar um jogador enquanto quem fica tem uma carta revelada | A partida acaba e a carta volta ao baralho (achado pelo teste de invariantes) |
 
 O CT-42 do Roku gravava no registro do aparelho; na web, o motor confere que o estado vira JSON e volta igual, e a gravação no IndexedDB é testada na Etapa 3.
 
@@ -227,3 +228,24 @@ Fazer pela versão da branch (rede local, como no roteiro da Etapa 4) e repetir 
 | 6 | Depois de uma partida com 3D, abrir em modo avião | Dados 3D continuam funcionando |
 
 Anote aparelho, navegador e o que estranhou; os ajustes entram antes do merge na `main`.
+
+### Testes de sons e avisos (Etapa 6)
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Som de cada evento | `apps/web/src/lib/sound/events.test.ts` | Dados, carta, prisão, falência, fim; compra sem som de pagamento junto; dinheiro só no aparelho de quem recebe ou paga |
+| Sons | `apps/web/src/lib/sound/synth.test.ts` | Silêncio sem Web Audio; notas de cada som; repetição seguida toca uma vez; desligado fica em silêncio |
+| Aviso | `apps/web/src/lib/sound/alert.test.ts` | Vibra; com a aba à vista não mexe no título; em outra aba o título pisca até voltar; desligado não vibra |
+| Quando avisar | `apps/web/src/lib/game/turn-alert.test.ts` | Só quando a decisão passa a ser deste aparelho, sem repetir; nunca no modo um aparelho |
+| Ponta a ponta | `e2e/sound.spec.ts` (5 perfis) e `e2e/rooms.spec.ts` | Escolha guardada na tela inicial; jogada com som sem erro; título "Sua vez!" com a aba escondida |
+
+### Roteiro de sons e avisos
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Jogar 2 rodadas no modo um aparelho, com som | Sons curtos nos dados, compra, aluguel, cartas e prisão; nada alto ou irritante |
+| 2 | Tela inicial: "Sons e vibração" → desligados | Partida em silêncio; a escolha continua depois de fechar e abrir |
+| 3 | Sala com dois celulares; no celular que espera, abrir outra aba ou outro app | Quando chega a vez: o título da aba pisca "Sua vez!" e o celular vibra (Android) |
+| 4 | Voltar para a aba do jogo | O título volta ao normal; a decisão está na tela |
+| 5 | Mandar uma venda simples para o outro celular | O outro celular avisa (é a vez dele responder) |
+| 6 | iPhone | Sons depois do primeiro toque; sem vibração (o iPhone não deixa sites vibrarem) |

@@ -290,6 +290,8 @@ export function removePlayer(
 function finishIfOnlyOneLeft(state: GameState, ctx: EngineContext, events: GameEvent[]): boolean {
   if (activePlayers(state).length > 1) return false;
   state.pending = null;
+  // CT-58: carta revelada e não aplicada (de quem continua na partida) volta ao baralho
+  if (state.currentCard) returnCard(state, ctx, state.currentCard.id);
   state.currentCard = null;
   finishGame(state, ctx, events);
   return true;

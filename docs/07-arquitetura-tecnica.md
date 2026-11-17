@@ -333,6 +333,18 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 | Escolha do jogador | "Dados em 3D: ligados/desligados" na tela inicial (só aparece se o aparelho pode usar 3D), guardada no aparelho (`localStorage`, chave `senhorio:dice`) |
 | Testes | `?dice=2d` e `?dice=3d` forçam um dos dois |
 
+## Sons e aviso de "sua vez"
+
+| Item | Definição |
+| --- | --- |
+| Onde | `apps/web/src/lib/sound/`: `events.ts` (evento → som), `synth.ts` (sons), `alert.ts` (aviso de "sua vez"), `preference.ts` |
+| Sons | Gerados pelo navegador (Web Audio): notas curtas e ruídos filtrados, sem arquivos de áudio e sem biblioteca. Dados, moeda (recebe), pagamento, compra, construção, carta, prisão, falência, fim de partida e "sua vez" |
+| Quem ouve o quê | Modo um aparelho: tudo. Vários aparelhos: dinheiro só no aparelho de quem recebe ou paga; o resto em todos |
+| Repetição | O mesmo som em menos de 120 ms toca uma vez só (vários pagamentos seguidos) |
+| Liberação do áudio | Os navegadores só tocam som depois do primeiro toque ou tecla; o áudio é liberado nesse momento (`unlockAudioOnFirstGesture`, em `main.ts`) |
+| "Sua vez" | Só no modo de vários aparelhos, quando a decisão passa a ser deste aparelho (a vez dele, uma proposta para ele, uma dívida dele; `actorsOf`): som, vibração (`navigator.vibrate`, nos celulares que permitem) e, com a aba escondida, o título pisca "Sua vez! · Senhorio" até a pessoa voltar. Sem notificações do sistema: nada a autorizar |
+| Escolha do jogador | "Sons e vibração: ligados/desligados" na tela inicial, ligado por padrão (`localStorage`, chave `senhorio:sound`); o título da aba avisa mesmo com os sons desligados |
+
 ## Publicação
 
 | Item | Definição |

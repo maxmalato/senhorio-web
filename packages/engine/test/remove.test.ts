@@ -1,7 +1,8 @@
-// CT-53 a CT-57: remover jogador desconectado (vários aparelhos, docs/01).
+// CT-53 a CT-58: remover jogador desconectado (vários aparelhos, docs/01).
 
 import { describe, expect, it } from 'vitest';
 import { transition } from '../src/engine';
+import { checkInvariants } from '../src/sim/invariants';
 import { BANK } from '../src/types';
 import { act, eventOf, setHouses, setOwner, testContext, testState, turnOf } from './helpers';
 
@@ -96,5 +97,20 @@ describe('CT-57 · remover com venda simples pendente', () => {
     expect(transition(out.state, { type: 'REMOVE_PLAYER', player: 2 }, ctx).reason?.code).toBe(
       'alreadyOut',
     );
+  });
+});
+
+describe('CT-58 · remover e sobrar um jogador com uma carta revelada', () => {
+  it('a partida acaba e a carta volta ao baralho (nenhuma carta se perde)', () => {
+    const ctx = testContext([1, 2]);
+    const state = testState(ctx, { players: 2, positions: [4, 10] });
+    let r = act(state, { type: 'ROLL_DICE' }, ctx); // 4 + 3 = Revés (casa 7)
+    expect(r.state.phase).toBe('CARD');
+    const card = r.state.currentCard!;
+    r = act(r.state, { type: 'REMOVE_PLAYER', player: 1 }, ctx);
+    expect(r.state.phase).toBe('GAME_OVER');
+    expect(r.state.currentCard).toBeNull();
+    expect(r.state.decks[card.deck]).toContain(card.id);
+    expect(checkInvariants(r.state, ctx)).toEqual([]);
   });
 });

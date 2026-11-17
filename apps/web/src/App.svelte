@@ -29,6 +29,7 @@
   import JoinRoom from './lib/room/JoinRoom.svelte';
   import RoomFlow from './lib/room/RoomFlow.svelte';
   import { t } from './lib/rules';
+  import { clearTurnNotice } from './lib/sound/alert';
 
   type Screen = 'home' | 'players' | 'mode' | 'order' | 'game' | 'end' | 'create' | 'join' | 'room';
 
@@ -182,6 +183,7 @@
   }
 
   function leaveRoom(error?: string) {
+    clearTurnNotice();
     connection = null;
     roomCode = savedSeat()?.code ?? null;
     roomError = error ?? '';
