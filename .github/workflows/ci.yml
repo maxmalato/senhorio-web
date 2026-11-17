@@ -88,4 +88,5 @@ jobs:
       - name: Teste de fumaça no endereço publicado
         env:
           SITE_URL: ${{ steps.publish.outputs.url }}
+          WAIT_SECONDS: 300
         run: pnpm smoke
