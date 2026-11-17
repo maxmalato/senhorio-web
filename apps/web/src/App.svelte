@@ -90,7 +90,7 @@
     const limit = mode.type === 'time' ? mode.minutes : mode.type === 'rounds' ? mode.rounds : null;
     const created = newGame(
       {
-        players: players.map((p) => ({ name: p.name.trim(), color: p.color })),
+        players: players.map((p) => ({ name: p.name.trim(), color: p.color, bot: !!p.bot })),
         mode: { type: mode.type, limit },
       },
       ctx,
@@ -108,6 +108,7 @@
       persist: (st, seconds) => saveGame(store, st, seconds),
       forget: () => deleteGame(store),
       secondsLeft,
+      botRandom: randomSource(),
     });
     screen = 'game';
   }
@@ -131,7 +132,7 @@
     if (!saved) return;
     const state = saved.state;
     // "Jogar de novo" no fim usa os mesmos jogadores e o mesmo modo
-    players = state.players.map((p) => ({ name: p.name, color: p.color }));
+    players = state.players.map((p) => ({ name: p.name, color: p.color, bot: p.bot === true }));
     mode = {
       type: state.mode.type,
       minutes: state.mode.type === 'time' ? (state.mode.limit ?? mode.minutes) : mode.minutes,

@@ -2,12 +2,14 @@
   export interface PlayerSetup {
     name: string;
     color: string;
+    /** Controlado pelo computador. */
+    bot?: boolean;
   }
 </script>
 
 <script lang="ts">
-  // Jogadores (T-03, D-23): quantidade, nome e cor de cada um. Cores já escolhidas ficam
-  // desabilitadas (RN-002).
+  // Jogadores (T-03, D-23): quantidade, nome e cor de cada um, e quem é pessoa ou
+  // computador. Cores já escolhidas ficam desabilitadas (RN-002).
   import { defaultNames, PAWN_COLORS, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
   import Icon from '../ui/Icon.svelte';
@@ -37,9 +39,11 @@
     players = next;
   });
 
+  const someone = $derived(players.some((pl) => !pl.bot));
   const valid = $derived(
     players.every((pl) => pl.name.trim().length > 0 && pl.name.trim().length <= p.maxNameLength) &&
-      new Set(players.map((pl) => pl.color)).size === players.length,
+      new Set(players.map((pl) => pl.color)).size === players.length &&
+      someone,
   );
 </script>
 
@@ -75,6 +79,21 @@
               autocomplete="off"
             />
             <div
+              class="who"
+              role="radiogroup"
+              aria-label="{t('I-105')}: {player.name || t('I-57', { n: i + 1 })}"
+            >
+              {#each [false, true] as bot (bot)}
+                <button
+                  class="chip"
+                  type="button"
+                  role="radio"
+                  aria-checked={!!player.bot === bot}
+                  onclick={() => (player.bot = bot)}>{bot ? t('I-103') : t('I-102')}</button
+                >
+              {/each}
+            </div>
+            <div
               class="swatches"
               role="radiogroup"
               aria-label="{t('I-56')} de {player.name || t('I-57', { n: i + 1 })}"
@@ -97,6 +116,9 @@
         </li>
       {/each}
     </ol>
+    {#if !someone}
+      <p class="callout" role="status">{t('I-106')}</p>
+    {/if}
     <button class="btn gold" type="button" data-default="true" disabled={!valid} onclick={onnext}
       >{t('I-62')}</button
     >
@@ -140,5 +162,27 @@
   .swatch {
     width: 2.1em;
     height: 2.1em;
+  }
+  .who {
+    display: flex;
+    gap: 0.4em;
+  }
+  .chip {
+    font: 700 0.85em var(--font-body);
+    padding: 0.45em 0.9em;
+    border-radius: 999px;
+    border: 2px solid var(--line);
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .chip[aria-checked='true'] {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--ink);
+  }
+  .chip:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
   }
 </style>
