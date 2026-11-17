@@ -100,3 +100,14 @@ Em paralelo com a Etapa 1. Feitos em HTML (`docs/mockups/web/`), publicados como
 - Ajustes vindos das partidas reais.
 
 **Pronto quando:** fluido na TV e no celular mais fraco disponível.
+
+## Melhorias depois da v1.1
+
+Cada melhoria numa branch `develop/nome-da-tarefa`, testada pelo dono do projeto antes do merge.
+
+| Melhoria | Situação |
+| --- | --- |
+| Jogar contra o computador | Concluída (testada pelo dono do projeto e publicada) |
+| QR Code para entrar na sala e "modo mesa" na TV | Ideia |
+| "Como jogar" (regras resumidas) | Ideia |
+| Histórico completo e estatísticas no fim | Ideia |

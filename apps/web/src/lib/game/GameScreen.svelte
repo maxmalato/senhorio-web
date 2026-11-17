@@ -38,6 +38,8 @@
   } = $props();
 
   // ---------- vários aparelhos: quem caiu, quem pausou, quem pode remover ----------
+  // contra o computador: marca COMPUTADOR no painel
+  const bots = $derived(game.state.players.flatMap((p, i) => (game.isBot(i) ? [i] : [])));
   const offline = $derived(
     room ? room.seats.flatMap((seat, i) => (!seat.connected && !seat.out ? [i] : [])) : [],
   );
@@ -228,7 +230,7 @@
     </header>
 
     <section class="players-area" aria-label="Jogadores">
-      <PlayerPanel {view} me={game.me} {offline} />
+      <PlayerPanel {view} me={game.me} {offline} {bots} />
     </section>
 
     <div class="board-wrap">

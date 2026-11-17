@@ -7,7 +7,8 @@
     view,
     me = null,
     offline = [],
-  }: { view: View; me?: number | null; offline?: number[] } = $props();
+    bots = [],
+  }: { view: View; me?: number | null; offline?: number[]; bots?: number[] } = $props();
 
   function owned(i: number): number[] {
     return Object.entries(view.properties)
@@ -33,6 +34,7 @@
           {#if i === view.current && !player.bankrupt}<span class="tag">{t('I-03')}</span>{/if}
           {#if player.inJail}<span class="tag jail">{t('I-04')}</span>{/if}
           {#if i === me}<span class="tag me">{t('W-23')}</span>{/if}
+          {#if bots.includes(i) && !player.bankrupt}<span class="tag bot">{t('I-104')}</span>{/if}
           {#if offline.includes(i) && !player.bankrupt}<span class="tag off">{t('W-24')}</span>{/if}
           {#if player.bankrupt}<span class="tag off">{t('I-05', { n: player.exitRound })}</span
             >{/if}
@@ -113,6 +115,11 @@
   .tag.me {
     background: var(--text);
     color: var(--ink);
+  }
+  .tag.bot {
+    background: var(--panel-2);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px var(--line);
   }
   .tag.off {
     background: var(--danger);

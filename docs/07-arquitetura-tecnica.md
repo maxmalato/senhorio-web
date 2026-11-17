@@ -320,6 +320,20 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 - **Manifesto:** nome Senhorio, `display: standalone`, cor azul-noite, ícones de 192 e 512 px e ícone "maskable" com margem para o Android, gerados a partir da logo (`apps/web/public/icons/`).
 - **Limite do navegador:** service worker e instalação só funcionam em https ou em `localhost`. Pela rede local (`http://192.168...`), o jogo e o salvamento funcionam, mas não a instalação nem o modo offline; no celular, isso é testado depois da publicação (Etapa 5).
 
+## Jogar contra o computador
+
+| Item | Definição |
+| --- | --- |
+| Onde | Motor: `packages/engine/src/ai/opponent.ts` (`opponentDecision`, `decidingPlayer`, `fallbackActions`). Interface: `Game` (`isBot`, `canAct`, `handoff`), tela de jogadores e `Decision.svelte` |
+| Quem é computador | `bot: true` no jogador (`NewGameConfig` e estado da partida); vai junto no salvamento. O motor não trata o computador de forma diferente: as regras são as mesmas |
+| Escopo | Só no modo um aparelho, com pelo menos uma pessoa. As salas de vários aparelhos não têm computador |
+| Estratégia | Compra guardando uma reserva (maior quando os outros têm casas); compra sem reserva o que completa o grupo dele ou impede outro de completar; constrói e resgata hipotecas com folga; de vez em quando propõe comprar a rua que falta num grupo; não vende barato a rua que completaria o grupo de outra pessoa; na dívida, hipoteca primeiro o que não é de grupo completo, depois vende casas; sai logo da prisão no começo da partida e fica nela no fim. Os números ficam em `OPPONENT` (estratégia, não regra do jogo) |
+| Sem trapaça | Só usa o que todos veem no tabuleiro; os dados continuam sorteados pelo motor |
+| Força | Contra 3 robôs da simulação (que decidem ao acaso), ganhou 139 de 300 partidas (46%; 25% seria o acaso) |
+| Ritmo | O computador "pensa" 900 ms antes de cada decisão (500 ms com menos animação; 0 nos testes) e espera durante a pausa ou com o menu aberto |
+| Segurança | Se o motor recusasse a decisão (não deveria), o computador tenta uma ação segura da fase; a partida nunca para esperando por ele |
+| Interface | Na vez do computador, o cartão mostra "Fulano está decidindo" e "O computador está jogando", com o botão Pausar (o foco fica no aviso, para o OK do controle não pausar sem querer). A marca COMPUTADOR aparece no painel. Sem "Passe o aparelho" quando só uma pessoa joga |
+
 ## Dados em 3D
 
 | Item | Definição |

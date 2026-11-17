@@ -137,7 +137,9 @@
         <div class="choices">
           <section class="choice">
             <h2><Icon name="device" />Neste aparelho</h2>
-            <p>Um aparelho só, passado de mão em mão na vez de cada um. Funciona sem internet.</p>
+            <p>
+              Um aparelho só, passado de mão em mão ou contra o computador. Funciona sem internet.
+            </p>
             <button
               class="btn {saved ? 'secondary' : 'gold'}"
               type="button"

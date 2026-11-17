@@ -48,6 +48,8 @@ export interface Player {
   bankrupt: boolean;
   /** RN-105: rodada em que faliu ou abandonou (0 = ainda joga). */
   exitRound: number;
+  /** Jogador controlado pelo computador (só no modo um aparelho; o motor não muda as regras). */
+  bot?: true;
 }
 
 export interface PropertyState {
@@ -169,7 +171,7 @@ export interface EngineContext {
 }
 
 export interface NewGameConfig {
-  players: { name: string; color: string }[];
+  players: { name: string; color: string; bot?: boolean }[];
   mode: { type: ModeType; limit?: number | null };
 }
 

@@ -2,11 +2,15 @@
 // A interface nunca decide regra (docs/07): ela só chama transition() e mostra o resultado.
 
 import {
+  decidingPlayer,
+  fallbackActions,
+  opponentDecision,
   transition,
   type Action,
   type EngineContext,
   type GameEvent,
   type GameState,
+  type RandomSource,
   type Reason,
 } from '@senhorio/engine';
 import { actorsOf } from '@senhorio/protocol';
@@ -23,6 +27,8 @@ export interface Timings {
   step: number;
   jail: number;
   toast: number;
+  /** Quanto o computador "pensa" antes de cada decisão. */
+  bot: number;
 }
 
 export const NORMAL_TIMINGS: Timings = {
@@ -30,15 +36,19 @@ export const NORMAL_TIMINGS: Timings = {
   step: 150,
   jail: 450,
   toast: rules.parameters.messageDurationMs,
+  bot: 900,
 };
 export const REDUCED_TIMINGS: Timings = {
   dice: 200,
   step: 40,
   jail: 150,
   toast: NORMAL_TIMINGS.toast,
+  bot: 500,
 };
 /** Testes automáticos: sem espera nenhuma (parâmetro ?speed=0). */
-export const INSTANT_TIMINGS: Timings = { dice: 0, step: 0, jail: 0, toast: 0 };
+export const INSTANT_TIMINGS: Timings = { dice: 0, step: 0, jail: 0, toast: 0, bot: 0 };
+/** Com a partida pausada ou o menu aberto, o computador espera e confere de novo. */
+const BOT_RETRY_MS = 300;
 
 export interface DiceShown {
   d1: number;
@@ -70,6 +80,8 @@ export interface GameOptions {
   send?: (action: Action) => void;
   /** Vários aparelhos: o lugar deste aparelho na sala. */
   me?: number;
+  /** Sorteios das decisões do computador (o resultado dos dados continua vindo do motor). */
+  botRandom?: RandomSource;
 }
 
 export class Game {
@@ -107,6 +119,9 @@ export class Game {
   timerRunning = $state(true);
   /** Vários aparelhos: a decisão já era deste aparelho na atualização anterior. */
   #myTurnBefore = false;
+  #botRandom: RandomSource;
+  #botTimer: ReturnType<typeof setTimeout> | null = null;
+  #stopped = false;
 
   constructor(
     state: GameState,
@@ -122,6 +137,7 @@ export class Game {
     this.#forget = options.forget;
     this.#send = options.send;
     this.me = options.me ?? null;
+    this.#botRandom = options.botRandom ?? Math.random;
     if (state.mode.type === 'time' && state.mode.limit) {
       this.secondsLeft = options.secondsLeft ?? state.mode.limit * 60;
     }
@@ -129,6 +145,26 @@ export class Game {
 
   get over(): boolean {
     return this.state.phase === 'GAME_OVER';
+  }
+
+  /** Jogador controlado pelo computador (só no modo um aparelho). */
+  isBot(player: number): boolean {
+    return !this.remote && this.state.players[player]?.bot === true;
+  }
+
+  /** A decisão de agora é de uma pessoa neste aparelho (e não do computador ou de outro aparelho). */
+  get canAct(): boolean {
+    if (this.over) return false;
+    if (this.me !== null) return actorsOf(this.state).includes(this.me);
+    return !this.isBot(decidingPlayer(this.state));
+  }
+
+  /**
+   * "Passe o aparelho": só faz sentido no modo um aparelho com duas pessoas ou mais
+   * (contra o computador, a pessoa fica com o aparelho o tempo todo).
+   */
+  get handoff(): boolean {
+    return !this.remote && this.state.players.filter((p) => !p.bot).length >= 2;
   }
 
   /** Envia uma ação ao motor; recusa volta com o motivo e não muda nada. */
@@ -160,7 +196,39 @@ export class Game {
     } finally {
       this.busy = false;
     }
+    this.#scheduleBot();
     return null;
+  }
+
+  /** Se a decisão for do computador, ele age depois de "pensar" um pouco. */
+  #scheduleBot(delay = this.timings.bot): void {
+    if (this.remote || this.over || this.#stopped || this.#botTimer) return;
+    if (!this.isBot(decidingPlayer(this.state))) return;
+    this.#botTimer = setTimeout(() => {
+      this.#botTimer = null;
+      void this.#botMove();
+    }, delay);
+  }
+
+  async #botMove(): Promise<void> {
+    if (this.#stopped || this.over) return;
+    if (this.busy || this.paused || this.menuOpen || this.interstitial) {
+      this.#scheduleBot(BOT_RETRY_MS);
+      return;
+    }
+    if (!this.isBot(decidingPlayer(this.state))) return;
+    // a decisão do adversário; se o motor recusasse (não deveria), uma ação segura da fase
+    const candidates = [
+      opponentDecision(this.state, this.ctx, this.#botRandom),
+      ...fallbackActions(this.state),
+    ];
+    for (const action of candidates) {
+      const refusal = await this.act(action);
+      if (!refusal) return;
+      if (refusal.code === 'busy') break;
+    }
+    this.refusal = null; // recusa do computador não aparece para a pessoa
+    this.#scheduleBot(BOT_RETRY_MS);
   }
 
   /** Vários aparelhos: estado e eventos que a sala mandou, animados em ordem de chegada. */
@@ -221,14 +289,21 @@ export class Game {
     }
   }
 
+  /** Início da tela da partida: cronômetro do modo tempo e, se for a vez dele, o computador. */
   startClock(): void {
+    this.#stopped = false;
+    this.#scheduleBot();
     if (this.secondsLeft === null || this.#clock) return;
     this.#clock = setInterval(() => this.#tick(), 1000);
   }
 
+  /** Saída da tela da partida: para o cronômetro e o computador. */
   stopClock(): void {
     if (this.#clock) clearInterval(this.#clock);
     this.#clock = null;
+    this.#stopped = true;
+    if (this.#botTimer) clearTimeout(this.#botTimer);
+    this.#botTimer = null;
   }
 
   #tick(): void {
@@ -320,8 +395,11 @@ export class Game {
       }
       case 'MandatoryBail':
         this.interstitial = { kind: 'mandatoryBail', player: event.player, amount: event.amount };
-        // vários aparelhos: só o próprio jogador confirma; os outros só veem o aviso
-        if (this.timings.toast > 0 && (this.me === null || this.me === event.player)) {
+        // só quem joga neste aparelho confirma; os outros aparelhos e o computador só veem o aviso
+        if (
+          this.timings.toast > 0 &&
+          (this.me === null ? !this.isBot(event.player) : this.me === event.player)
+        ) {
           await new Promise<void>((resolve) => (this.#ack = resolve));
         } else this.interstitial = null;
         break;

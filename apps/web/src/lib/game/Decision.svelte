@@ -5,6 +5,7 @@
     allowedActions,
     buildableStreets,
     calculateRent,
+    decidingPlayer,
     houseSaleValue,
     maxRaisable,
     mortgageableProperties,
@@ -36,7 +37,6 @@
   import Stepper from '../ui/Stepper.svelte';
   import type { Game } from './game.svelte';
   import { menuAvailable as isMenuAvailable } from './menu';
-  import { actorsOf } from '@senhorio/protocol';
 
   let {
     game,
@@ -130,7 +130,8 @@
       .map(([pos]) => Number(pos)),
   );
   // vários aparelhos: só quem pode agir agora decide; os outros veem quem está decidindo
-  const myTurn = $derived(game.me === null || actorsOf(s).includes(game.me));
+  // a decisão é de uma pessoa neste aparelho (não do computador nem de outro aparelho)
+  const myTurn = $derived(game.canAct);
   const menuAvailable = $derived(isMenuAvailable(s) && myTurn);
 
   function rentLine(pos: number): string {
@@ -382,8 +383,8 @@
     const proposal = s.pending?.type === 'trade' ? s.pending : null;
     if (!proposal) return;
     const refusal = await act({ type: 'RESPOND_TRADE', accept });
-    // "Devolva o aparelho" só faz sentido com um aparelho só
-    if (!refusal && !game.remote) {
+    // "Devolva o aparelho" só com duas pessoas ou mais no mesmo aparelho, e se quem propôs é uma pessoa
+    if (!refusal && game.handoff && !game.isBot(proposal.proposer)) {
       void game.notify(extra('D-18', 'after', { player: name(proposal.proposer) }));
     }
   }
@@ -480,7 +481,7 @@
 {/snippet}
 
 <div class="decision-root" bind:this={root}>
-  {#if game.interstitial && (game.me === null || game.me === game.interstitial.player)}
+  {#if game.interstitial && (game.me === null ? !game.isBot(game.interstitial.player) : game.me === game.interstitial.player)}
     <!-- D-06: fiança obrigatória depois da terceira tentativa -->
     <Card eyebrow={t('I-04')} title={t('D-06', { amount: brl(game.interstitial.amount) })}>
       <div class="actions">
@@ -495,8 +496,8 @@
       </div>
     </Card>
   {:else if !myTurn}
-    {@const waitingFor = actorsOf(s)[0] ?? current}
-    <!-- vários aparelhos: outra pessoa decide; este aparelho acompanha -->
+    {@const waitingFor = decidingPlayer(s)}
+    <!-- o computador ou outro aparelho decide; este aparelho acompanha -->
     <Card
       title={s.pending?.type === 'trade'
         ? t('W-26', { player: name(waitingFor) })
@@ -514,18 +515,33 @@
         </div>
       {/if}
       {@render diceLine(current)}
-      <p class="waiting" role="status">
-        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{t('W-46', {
-          player: name(game.me ?? 0),
-        })} · {brl(s.players[game.me ?? 0]?.money ?? 0)}
-      </p>
+      {#if game.remote}
+        <p class="waiting" role="status">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{t('W-46', {
+            player: name(game.me ?? 0),
+          })} · {brl(s.players[game.me ?? 0]?.money ?? 0)}
+        </p>
+      {:else}
+        <!-- contra o computador: a pessoa pode pausar enquanto ele joga. O foco fica no aviso,
+             não no Pausar: apertar OK sem parar no controle não pausa sem querer -->
+        <p class="waiting" role="status" tabindex="-1" data-default="true">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{t('I-101')}
+        </p>
+        <div class="actions">
+          <button class="btn secondary" type="button" onclick={() => (game.paused = true)}
+            >{options('D-10')[5]}</button
+          >
+        </div>
+      {/if}
     </Card>
   {:else if s.pending?.type === 'trade'}
     {@const proposal = s.pending}
     {@const owner = proposal.direction === 'buy' ? proposal.other : proposal.proposer}
     <!-- D-18: resposta; Recusar em foco para evitar aceite sem querer -->
     <Card
-      eyebrow={game.remote ? t('W-39') : extra('D-18', 'subtitle', { owner: name(proposal.other) })}
+      eyebrow={game.handoff
+        ? extra('D-18', 'subtitle', { owner: name(proposal.other) })
+        : t('W-39')}
       title={proposal.direction === 'buy'
         ? t('D-18', {
             player: name(proposal.proposer),
@@ -761,7 +777,9 @@
     </Card>
   {:else if s.phase === 'TURN_START'}
     <Card title={t('D-01', { player: name(current) })}>
-      <p class="big">{extra('D-01', 'subtitle', { player: name(current) })}</p>
+      {#if game.handoff}
+        <p class="big">{extra('D-01', 'subtitle', { player: name(current) })}</p>
+      {/if}
       <div class="actions">
         <button
           class="btn primary"
