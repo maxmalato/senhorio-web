@@ -23,6 +23,7 @@
     roomError = '',
     oncreateroom,
     oncreatetable,
+    onhelp,
     onjoinroom,
     onrejoin,
   }: {
@@ -34,6 +35,8 @@
     oncreateroom: () => void;
     /** Modo mesa: só em tela grande (TV, notebook, computador, tablet). */
     oncreatetable?: () => void;
+    /** "Como jogar": as regras principais. */
+    onhelp?: () => void;
     onjoinroom: () => void;
     onrejoin: () => void;
     saved?: SaveRecord | null;
@@ -186,6 +189,10 @@
         </div>
       {/if}
       <div class="legal">
+        {#if onhelp}
+          <button class="link" type="button" onclick={onhelp}>{t('A-01')}</button>
+          <span aria-hidden="true">·</span>
+        {/if}
         <button
           class="link"
           type="button"

@@ -118,3 +118,23 @@ test('o painel ao lado do tabuleiro tem espaço e o Menu fica à vista', async (
   // celular em pé usa abas; nas outras telas, o painel não pode ficar espremido
   if (layout.sideBySide) expect(layout.panelWidth).toBeGreaterThanOrEqual(200);
 });
+
+test('Como jogar: pela tela inicial e durante a partida, legível e acessível', async ({ page }) => {
+  await page.goto('/?seed=7&speed=0');
+  await page.getByRole('button', { name: 'Como jogar' }).click();
+  await expect(page.getByRole('heading', { name: 'Como jogar' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Dívidas e falência' })).toBeAttached();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Voltar' }).click();
+
+  // na partida: botão "?" no cabeçalho; Voltar (Esc) fecha
+  await startGame(page);
+  await page.getByRole('button', { name: 'Como jogar' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Como jogar' });
+  await expect(dialog).toBeVisible();
+  expect((await new AxeBuilder({ page }).include('.help-sheet').analyze()).violations).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Começar', exact: true })).toBeVisible();
+});

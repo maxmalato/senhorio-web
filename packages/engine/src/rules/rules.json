@@ -853,6 +853,82 @@
     "M-16": "{owner} recusou. Quem sabe na próxima rodada.",
     "M-17": "{player} faliu. Foi bom enquanto durou.",
     "M-18": "Tempo esgotado! Última rodada.",
+    "A-01": {
+      "text": "Como jogar",
+      "subtitle": "O banco faz as contas. Vocês só decidem."
+    },
+    "A-02": {
+      "text": "Objetivo",
+      "options": [
+        "Comprar propriedades, cobrar aluguel e construir casas para ficar com o maior patrimônio.",
+        "Cada jogador começa na Partida com {startingMoney}; o banco sorteia a ordem de jogo.",
+        "Modo clássico: vence quem sobrar sem falir.",
+        "Modos tempo e rodadas: no fim, vence o maior patrimônio (dinheiro, propriedades e casas)."
+      ]
+    },
+    "A-03": {
+      "text": "Sua vez",
+      "options": [
+        "Role os dois dados e ande a soma. A casa onde parar é resolvida na hora.",
+        "Passou ou parou na Partida: receba {passStartBonus}.",
+        "Dados iguais (dupla): jogue de novo. Três duplas seguidas mandam para a prisão.",
+        "Antes de rolar ou depois de resolver a casa, o Menu tem Construir, Vender casas, Hipotecar, Resgatar e Venda simples."
+      ]
+    },
+    "A-04": {
+      "text": "Propriedades e aluguel",
+      "options": [
+        "Parou numa propriedade sem dono: compre pelo preço ou deixe com o banco.",
+        "Parou na propriedade de outro jogador: o aluguel é pago automaticamente.",
+        "Ruas: com o grupo de cor completo e sem casas, o aluguel dobra.",
+        "Estações: quanto mais estações o dono tem, maior o aluguel (de {station1} a {station4}).",
+        "Companhias de Energia e Água: soma dos dados × {utility1} se o dono tem uma, × {utility2} se tem as duas.",
+        "Propriedade hipotecada não cobra aluguel. O dono preso também não."
+      ]
+    },
+    "A-05": {
+      "text": "Casas e hotéis",
+      "options": [
+        "Só constrói quem tem o grupo de cor completo, sem ruas hipotecadas.",
+        "Construa por igual: a diferença entre as ruas do grupo nunca passa de uma casa.",
+        "Até {maxHouses} casas por rua; com todas as ruas cheias, a próxima construção vira hotel.",
+        "Vender ao banco devolve {salePercent}% do que foi pago."
+      ]
+    },
+    "A-06": {
+      "text": "Prisão",
+      "options": [
+        "Vai para a prisão quem para em Vá para a prisão, tira essa carta ou faz três duplas seguidas. Não passa pela Partida.",
+        "Para sair: tente uma dupla, pague {bail} ou use a carta Saia da prisão.",
+        "No {maxJailTurns}º turno sem dupla, a fiança é obrigatória.",
+        "Preso não cobra aluguel nem faz vendas simples.",
+        "Quem só para na Prisão pela soma dos dados está só visitando."
+      ]
+    },
+    "A-07": {
+      "text": "Sorte, Revés e impostos",
+      "options": [
+        "Sorte tem mais cartas boas; Revés, mais cartas ruins. A carta vale depois do OK.",
+        "A carta Saia da prisão fica com você até ser usada.",
+        "Imposto de Renda: {incomeTax}. Taxa de Luxo: {luxuryTax}."
+      ]
+    },
+    "A-08": {
+      "text": "Hipoteca e venda simples",
+      "options": [
+        "Hipotecar dá {mortgagePercent}% do preço na hora. Para resgatar, devolva esse valor com {interestPercent}% de juros.",
+        "Na sua vez, proponha comprar ou vender uma propriedade sem casas e sem hipoteca, por um valor em dinheiro. A outra pessoa aceita ou recusa.",
+        "Até {maxProposals} propostas por turno."
+      ]
+    },
+    "A-09": {
+      "text": "Dívidas e falência",
+      "options": [
+        "Faltou dinheiro para pagar: venda casas ou hipoteque até cobrir a conta.",
+        "Se nem assim der, é falência: o que sobrou vai para quem você devia (ou volta ao banco), e você sai da partida.",
+        "Também dá para abandonar pelo Menu; as propriedades voltam ao banco."
+      ]
+    },
     "I-01": "senhorio",
     "I-02": "Rodada {n} · Banco: computador",
     "I-03": "JOGANDO",
@@ -986,6 +1062,7 @@
     "I-104": "COMPUTADOR",
     "I-105": "Quem joga",
     "I-106": "Pelo menos uma pessoa precisa jogar.",
+    "I-107": "Fechar",
     "W-01": "Criar sala",
     "W-02": "Entrar com código",
     "W-03": "Você vai receber um código para passar aos outros jogadores.",

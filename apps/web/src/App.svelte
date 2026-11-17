@@ -31,8 +31,12 @@
   import RoomFlow from './lib/room/RoomFlow.svelte';
   import { t } from './lib/rules';
   import { clearTurnNotice } from './lib/sound/alert';
+  import HowToPlay from './lib/help/HowToPlay.svelte';
+  import Icon from './lib/ui/Icon.svelte';
+  import { focusDefault } from './lib/ui/focus';
 
-  type Screen = 'home' | 'players' | 'mode' | 'order' | 'game' | 'end' | 'create' | 'join' | 'room';
+  type Screen =
+    'home' | 'players' | 'mode' | 'order' | 'game' | 'end' | 'create' | 'join' | 'room' | 'help';
 
   let { store = defaultStore() }: { store?: SaveStore } = $props();
 
@@ -245,9 +249,19 @@
       {roomError}
       oncreateroom={() => ((roomError = ''), (tableCreate = false), (screen = 'create'))}
       oncreatetable={() => ((roomError = ''), (tableCreate = true), (screen = 'create'))}
+      onhelp={() => (screen = 'help')}
       onjoinroom={() => ((roomError = ''), (inviteCode = ''), (screen = 'join'))}
       onrejoin={rejoin}
     />
+  {:else if screen === 'help'}
+    <div class="full-screen">
+      <div class="sheet" use:focusDefault>
+        <button class="back" type="button" onclick={() => (screen = 'home')}
+          ><Icon name="back" />{t('I-08')}</button
+        >
+        <HowToPlay />
+      </div>
+    </div>
   {:else if screen === 'create'}
     <CreateRoom
       busy={creating}

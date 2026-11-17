@@ -106,6 +106,8 @@ export class Game {
   secondsLeft: number | null = $state(null);
   menuOpen = $state(false);
   paused = $state(false);
+  /** "Como jogar" aberto: no modo um aparelho, o cronômetro e o computador esperam. */
+  helpOpen = $state(false);
 
   #toastQueue: string[] = [];
   #skip: (() => void) | null = null;
@@ -221,7 +223,7 @@ export class Game {
 
   async #botMove(): Promise<void> {
     if (this.#stopped || this.over) return;
-    if (this.busy || this.paused || this.menuOpen || this.interstitial) {
+    if (this.busy || this.paused || this.menuOpen || this.helpOpen || this.interstitial) {
       this.#scheduleBot(BOT_RETRY_MS);
       return;
     }
@@ -322,7 +324,8 @@ export class Game {
         this.secondsLeft--;
       return;
     }
-    if (this.secondsLeft === null || this.over || this.paused || this.menuOpen) return;
+    if (this.secondsLeft === null || this.over || this.paused || this.menuOpen || this.helpOpen)
+      return;
     if (this.secondsLeft > 0) this.secondsLeft--;
     // RN-113: ao zerar, só marca; a partida acaba quando a rodada fechar
     if (this.secondsLeft === 0 && !this.#timeUpSent && !this.busy) {
