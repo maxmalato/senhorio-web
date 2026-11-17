@@ -324,3 +324,21 @@ Conferência extra feita na implementação: as capturas de tela da sala de espe
 | 8 | Recarregar a página da mesa | "Voltar para a mesa" na tela inicial; Continuar volta à mesma sala |
 | 9 | Fechar a mesa no meio da partida | A partida segue nos celulares; um jogador consegue remover quem cair |
 | 10 | Mesa: Pausar → Encerrar sala → confirmar | Todos voltam à tela inicial; nos celulares, "A mesa encerrou a sala." |
+
+### Testes do Como jogar
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Conteúdo | `apps/web/src/lib/help/HowToPlay.test.ts` | As oito seções; valores vindos do arquivo de regras; nenhum marcador sem valor; título h2 dentro da partida |
+| Pausa | `apps/web/src/lib/game/bots.test.ts` | Com as regras abertas, o computador espera |
+| Ponta a ponta (6 perfis) | `e2e/game.spec.ts` | Pela tela inicial e pelo "?" na partida; acessibilidade (axe), sem rolagem lateral; Voltar fecha |
+
+### Roteiro do Como jogar
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Tela inicial → "Como jogar" | Regras em oito seções, legíveis no celular e na TV |
+| 2 | Na TV, só com o controle | As setas rolam o texto; Voltar volta à tela inicial |
+| 3 | Na partida, botão "?" no cabeçalho | As regras abrem por cima do tabuleiro; Fechar ou Voltar fecham |
+| 4 | Contra o computador ou no modo tempo, abrir as regras | O computador e o cronômetro esperam até fechar |
+| 5 | Numa sala, abrir as regras fora da vez | A partida segue normalmente para os outros |

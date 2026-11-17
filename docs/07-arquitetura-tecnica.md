@@ -342,6 +342,16 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 - **Manifesto:** nome Senhorio, `display: standalone`, cor azul-noite, ícones de 192 e 512 px e ícone "maskable" com margem para o Android, gerados a partir da logo (`apps/web/public/icons/`).
 - **Limite do navegador:** service worker e instalação só funcionam em https ou em `localhost`. Pela rede local (`http://192.168...`), o jogo e o salvamento funcionam, mas não a instalação nem o modo offline; no celular, isso é testado depois da publicação (Etapa 5).
 
+## Como jogar
+
+| Item | Definição |
+| --- | --- |
+| Onde | `apps/web/src/lib/help/HowToPlay.svelte`; textos A-01 a A-09 no `rules.json` (cada seção: título e lista de linhas) |
+| Valores | Preenchidos pelos parâmetros do arquivo de regras (dinheiro inicial, fiança, impostos, aluguéis de estação, multiplicadores das companhias, casas, hipoteca, propostas por turno): mudou o valor, o resumo acompanha |
+| Acesso | Tela inicial ("Como jogar", no rodapé) e, na partida, o botão "?" do cabeçalho, em todos os modos (inclusive na mesa), a qualquer momento |
+| Pausa | No modo um aparelho, com as regras abertas, o cronômetro do modo tempo e o computador esperam (`Game.helpOpen`); nas salas, nada muda para os outros |
+| Teclado e controle | O foco vai para o texto: as setas rolam; Voltar (Esc) fecha |
+
 ## Jogar contra o computador
 
 | Item | Definição |
