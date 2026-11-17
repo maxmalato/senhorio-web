@@ -216,33 +216,43 @@
 
 <div class="app" bind:this={root} data-tab={tab}>
   <div class="game">
-    <header class="brand">
+    <header class="brand" class:table={isTable}>
       <Logo />
       <div class="grow">
         <div class="wordmark">{t('I-01')}</div>
         <div class="round">{status}</div>
       </div>
       {#if clock}<span class="timer" aria-label="Tempo restante">{clock}</span>{/if}
-      <button
-        class="menu-btn"
-        type="button"
-        aria-pressed={showNames}
-        title="Mostrar nomes ou preços das ruas no tabuleiro"
-        onclick={toggleNames}
-      >
-        <Icon name="tag" /><span>{showNames ? 'Preços' : 'Nomes'}</span>
-      </button>
-      {#if isTable && room}
-        <!-- modo mesa: código para consulta, tela cheia e pausa (a mesa não tem menu de jogador) -->
-        {#if fullscreen.supported}
-          <button class="menu-btn" type="button" onclick={() => fullscreen.toggle()}
-            ><span>{fullscreen.active ? t('W-78') : t('W-77')}</span></button
-          >
-        {/if}
-        <button class="menu-btn" type="button" onclick={() => onpause?.(true)}
-          ><Icon name="pause" /><span>{options('D-10')[5]}</span></button
+      {#snippet namesButton()}
+        <button
+          class="menu-btn"
+          type="button"
+          aria-pressed={showNames}
+          title="Mostrar nomes ou preços das ruas no tabuleiro"
+          onclick={toggleNames}
         >
+          <Icon name="tag" /><span>{showNames ? 'Preços' : 'Nomes'}</span>
+        </button>
+      {/snippet}
+      {#if isTable && room}
+        <!-- modo mesa: os botões ficam juntos numa linha própria, abaixo do nome -->
+        <div class="table-actions">
+          {@render namesButton()}
+          {#if fullscreen.supported}
+            <!-- texto fixo (largura fixa): o estado aparece pelo destaque do botão -->
+            <button
+              class="menu-btn fs"
+              type="button"
+              aria-pressed={fullscreen.active}
+              onclick={() => fullscreen.toggle()}><span>{t('W-77')}</span></button
+            >
+          {/if}
+          <button class="menu-btn" type="button" onclick={() => onpause?.(true)}
+            ><Icon name="pause" /><span>{options('D-10')[5]}</span></button
+          >
+        </div>
       {:else}
+        {@render namesButton()}
         <button
           class="menu-btn"
           type="button"
@@ -482,6 +492,22 @@
   }
   .brand .menu-btn {
     white-space: nowrap;
+  }
+  /* mesa: nome numa linha, os botões juntos na linha de baixo (cabem até em tela estreita) */
+  .brand.table {
+    flex-wrap: wrap;
+    row-gap: 0.6em;
+  }
+  .table-actions {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+  .brand .menu-btn.fs[aria-pressed='true'] {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--ink);
   }
   .grow {
     flex: 1;
@@ -734,17 +760,23 @@
       font-size: clamp(13px, min(1.12cqw, 2.05cqh), 28px);
       padding: 2.4cqh 2.6cqw;
       gap: 1.1em 1.6em;
-      grid-template-columns: auto minmax(0, 1fr);
+      /* o painel tem largura garantida; o tabuleiro ocupa o resto, limitado pela altura.
+         Em telas quase quadradas (1024×768, iPad deitado), o tabuleiro encolhe em vez de
+         espremer o painel. */
+      grid-template-columns: minmax(0, 1fr) clamp(16em, 30cqw, 26em);
       grid-template-rows: auto auto 1fr auto;
       grid-template-areas: 'board brand' 'board players' 'board events' 'board keys';
     }
     .board-wrap {
       grid-area: board;
       height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
     .board-wrap :global(.board) {
-      height: 100%;
-      width: auto;
+      width: min(100%, calc((100cqh - 4.8cqh) * 760 / 648));
+      height: auto;
       aspect-ratio: 760 / 648;
       grid-template-rows: 1.45fr repeat(9, 1fr) 1.45fr;
     }
