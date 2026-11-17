@@ -31,18 +31,25 @@ export default {
 
     if (path === '/api/health') return json({ status: 'ok' });
 
-    // criar sala: POST /api/rooms { mode }
+    // criar sala: POST /api/rooms { mode, table? } (table: a mesa cria e recebe o token dela)
     if (path === '/api/rooms') {
       if (request.method !== 'POST') return json({ error: 'methodNotAllowed' }, 405);
       if (!allow(`create:${clientKey(request)}`, LIMITS.create))
         return json({ error: 'tooManyRequests' }, 429);
-      const body = await request.json().catch(() => null);
-      const mode = parseModeConfig((body as { mode?: unknown } | null)?.mode, MODE_OPTIONS);
+      const body = (await request.json().catch(() => null)) as {
+        mode?: unknown;
+        table?: unknown;
+      } | null;
+      const mode = parseModeConfig(body?.mode, MODE_OPTIONS);
       if (!mode) return json({ error: 'invalidMode' }, 400);
+      const table = body?.table === true;
       for (let attempt = 0; attempt < 5; attempt++) {
         const code = newRoomCode();
         const stub = env.ROOMS.get(env.ROOMS.idFromName(code));
-        if (await stub.init(code, mode)) return json({ code }, 201);
+        const created = await stub.init(code, mode, table);
+        if (created) {
+          return json(table ? { code, tableToken: created.tableToken } : { code }, 201);
+        }
       }
       return json({ error: 'tryAgain' }, 503);
     }
