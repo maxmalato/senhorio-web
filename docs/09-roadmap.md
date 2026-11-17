@@ -12,7 +12,7 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 | 2 – Telas (um dispositivo) | Concluída (aprovada no celular e no computador) | `v0.3-telas` |
 | 3 – PWA e salvamento | Concluída | `v0.4-pwa` |
 | 4 – Vários dispositivos | Concluída (testada com aparelhos diferentes na rede local) | `v0.5-salas` |
-| 5 – Publicação | Em andamento | `v1.0` |
+| 5 – Publicação | Concluída (publicada e testada em aparelhos reais) | `v1.0` |
 | 6 – Acabamento | A fazer | `v1.1` |
 
 Atualize esta tabela sempre que uma etapa começar ou fechar.

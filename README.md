@@ -2,7 +2,7 @@
 
 Jogo de tabuleiro imobiliário por turnos para o navegador, de 2 a 6 jogadores, em que o computador faz o papel do banco. Versão web do Senhorio para Roku, com as mesmas regras.
 
-> **Situação:** modo "um aparelho" jogável do início ao fim, com salvamento automático e funcionamento sem internet (Etapas 2 e 3), e salas com vários aparelhos em teste na rede local (Etapa 4). Próxima: publicação na Cloudflare (Etapa 5). Acompanhe em [docs/09-roadmap.md](docs/09-roadmap.md).
+> **Situação:** modo "um aparelho" jogável do início ao fim, com salvamento automático e funcionamento sem internet (Etapas 2 e 3), salas com vários aparelhos (Etapa 4) e publicado na internet (Etapa 5). Próxima: acabamento, com dados em 3D (Etapa 6). Acompanhe em [docs/09-roadmap.md](docs/09-roadmap.md).
 
 ## Modos de jogo
 
