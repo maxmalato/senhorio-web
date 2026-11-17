@@ -28,7 +28,7 @@ Detalhes em [docs/07-arquitetura-tecnica.md](docs/07-arquitetura-tecnica.md).
 ## Requisitos
 
 - Node.js 22 (LTS)
-- pnpm 10 (`corepack enable` instala a versão definida no `package.json`)
+- pnpm 12 (`corepack enable` instala a versão definida no `package.json`)
 
 ## Comandos
 

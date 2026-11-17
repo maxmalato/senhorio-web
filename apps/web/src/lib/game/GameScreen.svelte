@@ -5,7 +5,8 @@
   import { brl, options, t } from '../rules';
   import { focusDefault, focusInside, moveFocus } from '../ui/focus';
   import Icon from '../ui/Icon.svelte';
-  import Die from '../ui/Die.svelte';
+  import Dice from '../dice/Dice.svelte';
+  import { preloadDice3D } from '../dice/load';
   import Logo from '../ui/Logo.svelte';
   import Board from './Board.svelte';
   import Decision from './Decision.svelte';
@@ -127,7 +128,11 @@
     minimized = false;
   });
 
-  onMount(() => game.startClock());
+  onMount(() => {
+    game.startClock();
+    // dados 3D: baixa com folga, antes da primeira jogada (Etapa 6)
+    if (game.timings.dice > 0) preloadDice3D();
+  });
   onDestroy(() => game.stopClock());
 
   const showDecision = $derived((!game.busy || game.interstitial !== null) && !game.over);
@@ -230,8 +235,9 @@
       <Board {view} highlight={current?.position ?? -1} {marked} {showNames}>
         {#if game.dice && game.busy && !game.toast && !game.interstitial}
           <div class="dice-pill" role="status">
-            <Die value={game.dice.d1} rolling />
-            <Die value={game.dice.d2} rolling />
+            {#key game.dice}
+              <Dice d1={game.dice.d1} d2={game.dice.d2} durationMs={game.timings.dice} />
+            {/key}
             <span
               >{t('I-21', {
                 player: game.dice.rentOnly ? t('I-22') : (current?.name ?? ''),

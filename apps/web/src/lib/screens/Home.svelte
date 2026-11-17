@@ -1,6 +1,7 @@
 <script lang="ts">
   // Tela inicial (T-01, D-21, D-22). "Cada um no seu" chega com as salas (Etapa 4).
   import { formatCode } from '@senhorio/protocol';
+  import { canUse3D, setUse3D, use3D } from '../dice/preference';
   import type { SaveRecord } from '../save/save';
   import { options, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
@@ -38,6 +39,8 @@
 
   const p = rules.parameters;
   let confirming = $state(false);
+  const show3DChoice = canUse3D();
+  let dice3D = $state(use3D());
 
   function ago(when: number): string {
     const minutes = Math.round((when - Date.now()) / 60000);
@@ -151,7 +154,22 @@
           </section>
         </div>
       {/if}
-      <p class="legal"><a href="/privacidade.html">{t('W-61')}</a></p>
+      <div class="legal">
+        {#if show3DChoice}
+          <!-- Etapa 6: o jogador pode desligar os dados 3D neste aparelho (TV lenta, bateria) -->
+          <button
+            class="link"
+            type="button"
+            aria-pressed={dice3D}
+            onclick={() => {
+              dice3D = !dice3D;
+              setUse3D(dice3D);
+            }}>{t('I-97', { state: dice3D ? t('I-98') : t('I-99') })}</button
+          >
+          <span aria-hidden="true">·</span>
+        {/if}
+        <a href="/privacidade.html">{t('W-61')}</a>
+      </div>
     </div>
   {/key}
 </div>
@@ -159,12 +177,27 @@
 <style>
   .legal {
     margin: 0.4em 0 0;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3em 0.6em;
     font-size: 0.85em;
-  }
-  .legal a {
     color: var(--text-2);
   }
+  .legal a,
+  .legal .link {
+    color: var(--text-2);
+  }
+  .legal .link {
+    background: none;
+    border: 0;
+    padding: 0.2em 0;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .legal .link:focus-visible,
   .legal a:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 3px;

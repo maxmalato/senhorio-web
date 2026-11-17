@@ -39,6 +39,16 @@ export default defineConfig({
       workbox: {
         // tudo o que o jogo precisa fica guardado no aparelho, inclusive as fontes
         globPatterns: ['**/*.{js,css,html,svg,png,ttf,txt,webmanifest}'],
+        // menos os dados 3D (Three.js, ~130 KB): baixados só na primeira partida e então
+        // guardados para jogar sem internet; sem eles, os dados 2D de sempre
+        globIgnores: ['**/assets/dice3d-*.js'],
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/dice3d-[\w-]+\.js$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'senhorio-dice3d', expiration: { maxEntries: 2 } },
+          },
+        ],
         navigateFallback: '/index.html',
         // as salas sempre vão ao servidor, nunca ao que está guardado no aparelho
         navigateFallbackDenylist: [/^\/api\//],
@@ -46,6 +56,8 @@ export default defineConfig({
       },
     }),
   ],
+  // O arquivo dos dados 3D (Three.js) passa de 500 KB sem compressão; vem sob demanda
+  build: { chunkSizeWarningLimit: 600 },
   // Salas (vários aparelhos): em desenvolvimento, /api vai para o servidor local da
   // Cloudflare (pnpm --filter @senhorio/server dev, porta 8787), inclusive o WebSocket.
   server: { proxy: { '/api': { target: 'http://localhost:8787', ws: true } } },
