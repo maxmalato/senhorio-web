@@ -24,6 +24,12 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 820, height: 1180 }, hasTouch: true },
     },
     {
+      // iPad deitado e notebooks antigos: tela quase quadrada em paisagem
+      name: 'tablet-deitado',
+      testIgnore: ROOMS_SPEC,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 768 }, hasTouch: true },
+    },
+    {
       name: 'desktop',
       testIgnore: ROOMS_SPEC,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
