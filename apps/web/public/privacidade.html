@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#13213a" />
+    <meta name="robots" content="noindex" />
+    <title>Privacidade e termos de uso · Senhorio</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      /* Página estática: abre sem JavaScript e pode ser lida antes de jogar. */
+      @font-face {
+        font-family: 'Fredoka';
+        src: url('/fonts/Fredoka-SemiBold.ttf') format('truetype');
+        font-weight: 500 600;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Nunito';
+        src: url('/fonts/Nunito-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Nunito';
+        src: url('/fonts/Nunito-Bold.ttf') format('truetype');
+        font-weight: 700 800;
+        font-display: swap;
+      }
+      :root {
+        color-scheme: dark;
+        --night: #13213a;
+        --panel: #1c2e4d;
+        --text: #f5f7fa;
+        --text-2: #a9b6cc;
+        --focus: #f2b84b;
+      }
+      body {
+        margin: 0;
+        background: var(--night);
+        color: var(--text);
+        font:
+          400 1.05rem/1.6 'Nunito',
+          'Segoe UI',
+          system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 3rem;
+      }
+      h1,
+      h2 {
+        font-family: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+      h1 {
+        font-size: 2rem;
+        margin: 1rem 0 0.25rem;
+      }
+      h2 {
+        font-size: 1.35rem;
+        margin: 2rem 0 0.5rem;
+      }
+      .date {
+        color: var(--text-2);
+        margin: 0;
+      }
+      .summary {
+        background: var(--panel);
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+      }
+      .summary ul {
+        margin: 0.5rem 0 0;
+        padding-left: 1.25rem;
+      }
+      a {
+        color: var(--focus);
+      }
+      a:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 3px;
+        border-radius: 0.25rem;
+      }
+      .back {
+        display: inline-block;
+        font-weight: 700;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 0.5rem 0.5rem 0.5rem 0;
+        border-bottom: 1px solid #344a72;
+      }
+      th {
+        color: var(--text-2);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="back" href="/">← Voltar ao jogo</a>
+
+      <h1>Privacidade e termos de uso</h1>
+      <p class="date">Em vigor desde 17 de novembro de 2026.</p>
+
+      <div class="summary">
+        <strong>Resumo</strong>
+        <ul>
+          <li>O Senhorio é um jogo gratuito, sem anúncios, sem contas e sem cadastro.</li>
+          <li>O jogo guarda só o apelido e a cor que você escolhe, e a partida em andamento.</li>
+          <li>Sem cookies, sem ferramentas de análise (analytics) e sem rastreamento.</li>
+          <li>Salas com vários aparelhos são apagadas depois de 12 horas sem atividade.</li>
+        </ul>
+      </div>
+
+      <h2>1. Quem cuida do jogo</h2>
+      <p>
+        O Senhorio Web é um projeto pessoal, sem fins comerciais, mantido pelo responsável pelo
+        repositório público do projeto no GitHub. Dúvidas, pedidos e problemas:
+        <a href="https://github.com/maxmalato/senhorio-web/issues" rel="noopener"
+          >página de Issues</a
+        >. As mensagens nessa página são públicas: não escreva dados pessoais nelas.
+      </p>
+
+      <h2>2. Que dados o jogo usa</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Dado</th>
+            <th scope="col">Onde fica</th>
+            <th scope="col">Por quanto tempo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Partida no modo "um aparelho" (apelidos, cores, dinheiro, propriedades)</td>
+            <td>Só no seu aparelho, no armazenamento do navegador</td>
+            <td>Até o fim da partida ou até você apagar os dados do site</td>
+          </tr>
+          <tr>
+            <td>Apelido, cor e partida de uma sala com vários aparelhos</td>
+            <td>No servidor da sala, na Cloudflare</td>
+            <td>Enquanto a sala estiver em uso; apagada depois de 12 horas sem atividade</td>
+          </tr>
+          <tr>
+            <td>Código da sala e uma chave aleatória para voltar depois de uma queda de conexão</td>
+            <td>No seu aparelho; o servidor guarda só uma versão irreversível (hash) da chave</td>
+            <td>Até você sair da sala ou a sala ser apagada</td>
+          </tr>
+          <tr>
+            <td>Endereço IP</td>
+            <td>Usado na memória do servidor para limitar tentativas em excesso, sem gravação</td>
+            <td>Cerca de 1 minuto</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        O jogo não pede nome completo, e-mail, telefone, documento, localização nem contatos. Use um
+        apelido que não identifique você.
+      </p>
+
+      <h2>3. Para que os dados são usados</h2>
+      <p>
+        Só para o jogo funcionar: mostrar quem é quem na partida, guardar a partida para continuar
+        depois, deixar cada jogador voltar à própria sala e proteger o serviço contra abusos. Nada é
+        vendido, compartilhado para publicidade ou usado para criar perfis.
+      </p>
+
+      <h2>4. Hospedagem</h2>
+      <p>
+        O site e as salas rodam na Cloudflare, que processa as conexões para entregar o jogo e pode
+        manter registros técnicos próprios, conforme a
+        <a href="https://www.cloudflare.com/pt-br/privacypolicy/" rel="noopener"
+          >política de privacidade da Cloudflare</a
+        >. O jogo não ativa registros de acesso nem ferramentas de análise.
+      </p>
+
+      <h2>5. Seus direitos (LGPD)</h2>
+      <p>
+        Você pode apagar a qualquer momento os dados guardados no seu aparelho, limpando os dados do
+        site nas configurações do navegador. Os dados de uma sala somem sozinhos em até 12 horas sem
+        atividade. Para outros pedidos previstos na Lei Geral de Proteção de Dados (Lei nº
+        13.709/2018), use a página de Issues, sem expor dados pessoais nela.
+      </p>
+
+      <h2>6. Termos de uso</h2>
+      <ul>
+        <li>O jogo é gratuito e oferecido como está, sem garantia de funcionamento contínuo.</li>
+        <li>
+          O serviço usa o plano gratuito da hospedagem: se o limite diário for atingido, as salas
+          podem ficar indisponíveis até o dia seguinte. O modo "um aparelho" continua funcionando.
+        </li>
+        <li>
+          Não é permitido usar apelidos ofensivos, tentar sobrecarregar o serviço, burlar as
+          proteções ou entrar em salas sem ter recebido o código.
+        </li>
+        <li>Salas podem ser encerradas a qualquer momento, por exemplo em uma atualização.</li>
+        <li>Mudanças nesta página são publicadas aqui, com a nova data de vigência.</li>
+      </ul>
+
+      <p><a class="back" href="/">← Voltar ao jogo</a></p>
+    </main>
+  </body>
+</html>

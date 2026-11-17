@@ -86,3 +86,15 @@ test('celular em pé: a aba Jogadores mostra a lista com o dinheiro', async ({ p
   await page.getByRole('button', { name: 'Tabuleiro' }).click();
   await expect(page.getByRole('group', { name: 'Tabuleiro' })).toBeVisible();
 });
+
+test('privacidade e termos abrem pela tela inicial, legíveis e acessíveis', async ({ page }) => {
+  await page.goto('/?speed=0');
+  await page.getByRole('link', { name: 'Privacidade e termos de uso' }).click();
+  await expect(page.getByRole('heading', { name: 'Privacidade e termos de uso' })).toBeVisible();
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+  // sem rolagem para o lado no celular
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('link', { name: '← Voltar ao jogo' }).first().click();
+  await expect(page.getByRole('button', { name: 'Criar sala' })).toBeVisible();
+});

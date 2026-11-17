@@ -151,11 +151,25 @@
           </section>
         </div>
       {/if}
+      <p class="legal"><a href="/privacidade.html">{t('W-61')}</a></p>
     </div>
   {/key}
 </div>
 
 <style>
+  .legal {
+    margin: 0.4em 0 0;
+    text-align: center;
+    font-size: 0.85em;
+  }
+  .legal a {
+    color: var(--text-2);
+  }
+  .legal a:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 0.3em;
+  }
   .hero {
     display: grid;
     justify-items: center;
