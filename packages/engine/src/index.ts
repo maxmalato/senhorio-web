@@ -27,3 +27,10 @@ export { mortgageableProperties, mortgageValue, redeemCost } from './mortgage';
 export { tradableProperties, tradeTargets } from './trade';
 export { maxRaisable } from './debt';
 export { netWorth, ranking, type NetWorth } from './net-worth';
+export {
+  decidingPlayer,
+  fallbackActions,
+  OPPONENT,
+  opponentDecision,
+  reserveFor,
+} from './ai/opponent';

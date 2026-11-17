@@ -61,6 +61,7 @@ export function newGame(config: NewGameConfig, ctx: EngineContext): NewGameResul
     jailCards: [],
     bankrupt: false,
     exitRound: 0,
+    ...(player.bot ? { bot: true as const } : {}),
   }));
 
   const properties: Record<string, PropertyState> = {};
