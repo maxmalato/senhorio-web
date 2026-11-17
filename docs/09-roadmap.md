@@ -13,7 +13,7 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 | 3 – PWA e salvamento | Concluída | `v0.4-pwa` |
 | 4 – Vários dispositivos | Concluída (testada com aparelhos diferentes na rede local) | `v0.5-salas` |
 | 5 – Publicação | Concluída (publicada e testada em aparelhos reais) | `v1.0` |
-| 6 – Acabamento | Em andamento (branch `develop/dados-3d`) | `v1.1` |
+| 6 – Acabamento | Em andamento (dados 3D publicados; sons e avisos na branch `develop/sons-e-avisos`) | `v1.1` |
 
 Atualize esta tabela sempre que uma etapa começar ou fechar.
 
@@ -95,7 +95,8 @@ Em paralelo com a Etapa 1. Feitos em HTML (`docs/mockups/web/`), publicados como
 
 ## Etapa 6 – Acabamento
 
-- Dados em 3D com Three.js carregado sob demanda e reserva 2D; casas e hotéis em 3D se valer a pena.
+- Dados em 3D com Three.js carregado sob demanda e reserva 2D (concluído). Casas e hotéis em 3D ficaram de fora: pesariam no tabuleiro justamente na TV e no celular fraco, com pouco ganho.
+- Sons gerados pelo navegador e aviso de "sua vez" no modo de vários aparelhos (som, vibração e título da aba).
 - Ajustes vindos das partidas reais.
 
 **Pronto quando:** fluido na TV e no celular mais fraco disponível.
