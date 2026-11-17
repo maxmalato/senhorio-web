@@ -82,6 +82,10 @@ export interface GameOptions {
   me?: number;
   /** Sorteios das decisões do computador (o resultado dos dados continua vindo do motor). */
   botRandom?: RandomSource;
+  /** Modo mesa, na mesa: toca todos os sons (é ela que todos ouvem). */
+  table?: boolean;
+  /** Modo mesa, no celular: só o aviso de "sua vez" e o dinheiro do próprio jogador. */
+  quiet?: boolean;
 }
 
 export class Game {
@@ -120,6 +124,9 @@ export class Game {
   /** Vários aparelhos: a decisão já era deste aparelho na atualização anterior. */
   #myTurnBefore = false;
   #botRandom: RandomSource;
+  /** Para os sons: de quem é o dinheiro que soa (null = de todos). */
+  #soundSeat: number | null;
+  #quiet: boolean;
   #botTimer: ReturnType<typeof setTimeout> | null = null;
   #stopped = false;
 
@@ -138,6 +145,8 @@ export class Game {
     this.#send = options.send;
     this.me = options.me ?? null;
     this.#botRandom = options.botRandom ?? Math.random;
+    this.#soundSeat = options.table ? null : this.me;
+    this.#quiet = options.quiet === true;
     if (state.mode.type === 'time' && state.mode.limit) {
       this.secondsLeft = options.secondsLeft ?? state.mode.limit * 60;
     }
@@ -348,8 +357,9 @@ export class Game {
       const said = narrate(event, this.view, this.state, this.ctx, bankruptcyBatch);
       if (said.history) this.history = [said.history, ...this.history].slice(0, HISTORY_SIZE);
       if (said.toast) this.#toastQueue.push(said.toast);
-      const sound = soundFor(event, this.me);
-      if (sound) playSound(sound);
+      const sound = soundFor(event, this.#soundSeat);
+      // com mesa, os celulares deixam os sons gerais para ela e tocam só o próprio dinheiro
+      if (sound && (!this.#quiet || sound === 'coin' || sound === 'pay')) playSound(sound);
       await this.#apply(event);
     }
   }

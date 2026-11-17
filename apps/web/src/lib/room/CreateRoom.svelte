@@ -1,5 +1,6 @@
 <script lang="ts">
   // Criar sala (mockups, rodada 1): apelido, cor e modo; o código vem na sala de espera.
+  // Criar mesa (modo mesa): só o modo, porque a mesa não joga.
   import type { ModeType } from '@senhorio/engine';
   import type { ModeConfig } from '@senhorio/protocol';
   import { defaultNames, options, PAWN_COLORS, rules, t } from '../rules';
@@ -10,11 +11,14 @@
   let {
     busy = false,
     error = '',
+    table = false,
     onback,
     oncreate,
   }: {
     busy?: boolean;
     error?: string;
+    /** Modo mesa: esta tela (TV, notebook, tablet) cria a sala e não joga. */
+    table?: boolean;
     onback: () => void;
     oncreate: (setup: { name: string; color: string; mode: ModeConfig }) => void;
   } = $props();
@@ -27,7 +31,9 @@
   let rounds = $state(rules.modes.rounds.default);
   const labels = options('D-24');
   const types: ModeType[] = ['classic', 'time', 'rounds'];
-  const valid = $derived(name.trim().length > 0 && name.trim().length <= p.maxNameLength);
+  const valid = $derived(
+    table || (name.trim().length > 0 && name.trim().length <= p.maxNameLength),
+  );
 
   function step(list: number[], value: number, direction: 1 | -1): number {
     const i = list.indexOf(value);
@@ -43,23 +49,25 @@
   <div class="sheet" use:focusDefault>
     <button class="back" type="button" onclick={onback}><Icon name="back" />{t('I-08')}</button>
     <div>
-      <h1>{t('W-01')}</h1>
-      <p class="lead">{t('W-03')}</p>
+      <h1>{table ? t('W-69') : t('W-01')}</h1>
+      <p class="lead">{table ? t('W-80') : t('W-03')}</p>
     </div>
-    <div class="field">
-      <label for="room-name">{t('W-04')}</label>
-      <input
-        id="room-name"
-        class="input"
-        bind:value={name}
-        maxlength={p.maxNameLength}
-        autocomplete="off"
-      />
-    </div>
-    <div class="field">
-      <span class="lab">{t('W-05')}</span>
-      <ColorPicker bind:value={color} label={t('W-05')} />
-    </div>
+    {#if !table}
+      <div class="field">
+        <label for="room-name">{t('W-04')}</label>
+        <input
+          id="room-name"
+          class="input"
+          bind:value={name}
+          maxlength={p.maxNameLength}
+          autocomplete="off"
+        />
+      </div>
+      <div class="field">
+        <span class="lab">{t('W-05')}</span>
+        <ColorPicker bind:value={color} label={t('W-05')} />
+      </div>
+    {/if}
     <div class="field">
       <span class="lab">{t('I-63')}</span>
       <div class="segmented" role="radiogroup" aria-label={t('I-63')}>
@@ -102,7 +110,7 @@
         </div>
       {/if}
     </div>
-    <p class="callout"><Icon name="info" /><span>{t('W-06')}</span></p>
+    {#if !table}<p class="callout"><Icon name="info" /><span>{t('W-06')}</span></p>{/if}
     {#if error}<p class="error" role="alert">{error}</p>{/if}
     <button
       class="btn gold"
@@ -111,7 +119,7 @@
       disabled={!valid || busy}
       onclick={submit}
     >
-      {busy ? t('W-40') : t('W-01')}
+      {busy ? t('W-40') : table ? t('W-69') : t('W-01')}
     </button>
   </div>
 </div>

@@ -11,7 +11,8 @@
   import Board from './Board.svelte';
   import Decision from './Decision.svelte';
   import type { Game } from './game.svelte';
-  import { REMOVE_AFTER_MS, type RoomView } from '@senhorio/protocol';
+  import { formatCode, REMOVE_AFTER_MS, TABLE_SEAT, type RoomView } from '@senhorio/protocol';
+  import { fullscreen } from '../ui/screen.svelte';
   import { menuAvailable } from './menu';
   import PlayerPanel from './PlayerPanel.svelte';
   import Toast from './Toast.svelte';
@@ -25,6 +26,7 @@
     onpause,
     onremove,
     onleave,
+    onclose,
   }: {
     game: Game;
     onend: () => void;
@@ -35,6 +37,8 @@
     onpause?: (paused: boolean) => void;
     onremove?: (seat: number) => void;
     onleave?: () => void;
+    /** Modo mesa: a mesa encerra a sala (pela tela de pausa). */
+    onclose?: () => void;
   } = $props();
 
   // ---------- vários aparelhos: quem caiu, quem pausou, quem pode remover ----------
@@ -53,9 +57,18 @@
   });
   const serverNow = $derived(now + clockOffset);
   const iAmHost = $derived(room !== null && game.me === room.host);
+  /** Modo mesa: este aparelho é a mesa (mostra a partida, não joga). */
+  const isTable = $derived(game.me === TABLE_SEAT);
   const hostAway = $derived(
-    room !== null && (!room.seats[room.host]?.connected || room.seats[room.host]?.out === true),
+    room !== null &&
+      (room.table
+        ? !room.table.connected
+        : !room.seats[room.host]?.connected || room.seats[room.host]?.out === true),
   );
+  /** Nome do jogador que pausou (a pausa da mesa tem texto próprio, W-82). */
+  function pauserName(seat: number): string {
+    return room?.seats[seat]?.name ?? '';
+  }
   const canRemove = $derived(iAmHost || hostAway);
   function mmss(ms: number): string {
     const total = Math.max(0, Math.ceil(ms / 1000));
@@ -219,18 +232,37 @@
       >
         <Icon name="tag" /><span>{showNames ? 'Preços' : 'Nomes'}</span>
       </button>
-      <button
-        class="menu-btn"
-        type="button"
-        onclick={() => decision?.openMenu()}
-        disabled={!showDecision || !menuAvailable(s)}
-      >
-        <Icon name="menu" /><span>{t('I-11').charAt(0).toUpperCase() + t('I-11').slice(1)}</span>
-      </button>
+      {#if isTable && room}
+        <!-- modo mesa: código para consulta, tela cheia e pausa (a mesa não tem menu de jogador) -->
+        {#if fullscreen.supported}
+          <button class="menu-btn" type="button" onclick={() => fullscreen.toggle()}
+            ><span>{fullscreen.active ? t('W-78') : t('W-77')}</span></button
+          >
+        {/if}
+        <button class="menu-btn" type="button" onclick={() => onpause?.(true)}
+          ><Icon name="pause" /><span>{options('D-10')[5]}</span></button
+        >
+      {:else}
+        <button
+          class="menu-btn"
+          type="button"
+          onclick={() => decision?.openMenu()}
+          disabled={!showDecision || !menuAvailable(s)}
+        >
+          <Icon name="menu" /><span>{t('I-11').charAt(0).toUpperCase() + t('I-11').slice(1)}</span>
+        </button>
+      {/if}
     </header>
 
     <section class="players-area" aria-label="Jogadores">
       <PlayerPanel {view} me={game.me} {offline} {bots} />
+      {#if isTable && room}
+        <!-- modo mesa: o código fica à vista para quem precisar entrar de novo -->
+        <p class="table-code">
+          <span>{t('W-12')}</span>
+          <b aria-label={room.code.split('').join(' ')}>{formatCode(room.code)}</b>
+        </p>
+      {/if}
     </section>
 
     <div class="board-wrap">
@@ -287,12 +319,15 @@
       {/each}
     </section>
 
-    <div class="keys" aria-hidden="true">
-      <span><kbd>Enter</kbd>{t('I-09')}</span>
-      <span><kbd>↑↓</kbd>{t('I-10')}</span>
-      <span><kbd>M</kbd>{t('I-11')}</span>
-      <span><kbd>Esc</kbd>{t('I-12')}</span>
-    </div>
+    <!-- a mesa não tem decisões nem menu: as dicas de teclado não servem para ela -->
+    {#if !isTable}
+      <div class="keys" aria-hidden="true">
+        <span><kbd>Enter</kbd>{t('I-09')}</span>
+        <span><kbd>↑↓</kbd>{t('I-10')}</span>
+        <span><kbd>M</kbd>{t('I-11')}</span>
+        <span><kbd>Esc</kbd>{t('I-12')}</span>
+      </div>
+    {/if}
 
     <nav class="tabs" aria-label="Seções">
       <button
@@ -352,15 +387,20 @@
         {:else}
           <p class="small">{t('W-35')}</p>
         {/if}
-        <button class="btn ghost-dark" type="button" onclick={() => onleave?.()}>{t('W-22')}</button
-        >
+        {#if !isTable}
+          <button class="btn ghost-dark" type="button" onclick={() => onleave?.()}
+            >{t('W-22')}</button
+          >
+        {/if}
       </div>
     </div>
   {:else if room && pausedBy !== null}
     <!-- pausa pelo menu vale para todos os aparelhos; o cronômetro para -->
     <div class="overlay">
       <div class="pause-dialog" role="alertdialog" aria-label={t('D-15')} use:focusDefault>
-        <h2>{t('W-36', { player: room.seats[pausedBy]?.name ?? '' })}</h2>
+        <h2>
+          {pausedBy === TABLE_SEAT ? t('W-82') : t('W-36', { player: pauserName(pausedBy) })}
+        </h2>
         <button
           class="btn primary"
           type="button"
@@ -369,7 +409,15 @@
         >
           {options('D-15')[0]}
         </button>
-        <button class="btn secondary" type="button" onclick={() => onleave?.()}>{t('W-22')}</button>
+        {#if isTable}
+          <button class="btn secondary" type="button" onclick={() => onclose?.()}
+            >{t('W-73')}</button
+          >
+        {:else}
+          <button class="btn secondary" type="button" onclick={() => onleave?.()}
+            >{t('W-22')}</button
+          >
+        {/if}
       </div>
     </div>
   {:else if game.paused}
@@ -432,6 +480,9 @@
     gap: 0.6em;
     min-width: 0;
   }
+  .brand .menu-btn {
+    white-space: nowrap;
+  }
   .grow {
     flex: 1;
     min-width: 0;
@@ -450,6 +501,25 @@
     border-radius: 0.6em;
     padding: 0.35em 0.6em;
     font-variant-numeric: tabular-nums;
+  }
+  .table-code {
+    margin: 0.6em 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.6em 0.9em;
+    border-radius: 0.9em;
+    background: var(--panel);
+    font-size: 0.8em;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+  }
+  .table-code b {
+    font: 600 1.5em var(--font-display);
+    letter-spacing: 0.12em;
+    color: var(--text);
   }
   .menu-btn {
     border: 1px solid #3a5079;

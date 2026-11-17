@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = 4173;
 /** Servidor local da Cloudflare (wrangler dev): site + salas na mesma origem. */
 const ROOMS_PORT = 8787;
-const ROOMS_SPEC = /rooms\.spec\.ts/;
+const ROOMS_SPEC = /(rooms|table)\.spec\.ts/;
 
 // Perfis de tela do docs/08-plano-de-testes.md. Todos usam o Chromium.
 export default defineConfig({

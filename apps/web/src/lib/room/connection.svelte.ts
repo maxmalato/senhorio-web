@@ -2,13 +2,20 @@
 // usando o token guardado no navegador para voltar ao mesmo lugar (docs/07, "Salas").
 
 import type { Action, GameEvent } from '@senhorio/engine';
-import type { ClientMessage, RoomView, ServerMessage } from '@senhorio/protocol';
+import {
+  TABLE_SEAT,
+  type ClientMessage,
+  type RoomView,
+  type ServerMessage,
+} from '@senhorio/protocol';
 
 const STORAGE_KEY = 'senhorio:room';
 
 export interface SavedSeat {
   code: string;
   token: string;
+  /** Este aparelho é a mesa da sala (modo mesa). */
+  table?: boolean;
 }
 
 /** Lugar guardado neste navegador (para "Voltar para a sala"). Só código e token. */
@@ -131,7 +138,12 @@ export class RoomConnection {
         this.seat = message.seat;
         // o servidor manda o token vazio quando só muda o número do lugar
         if (message.token) this.#token = message.token;
-        if (this.#token) storeSeat({ code: this.code, token: this.#token });
+        if (this.#token)
+          storeSeat({
+            code: this.code,
+            token: this.#token,
+            ...(message.seat === TABLE_SEAT ? { table: true } : {}),
+          });
         this.status = 'open';
         this.#retries = 0;
         this.error = null;
@@ -146,13 +158,22 @@ export class RoomConnection {
         break;
       case 'error':
         this.error = message.code;
-        // lugar que não existe mais (sala expirada, removido): esquece e para
-        if (message.code === 'unknownToken' || message.code === 'removed') {
+        // lugar que não existe mais (sala expirada, removido, encerrada pela mesa): esquece e para
+        if (
+          message.code === 'unknownToken' ||
+          message.code === 'removed' ||
+          message.code === 'roomClosed'
+        ) {
           this.close(true);
         }
         this.#listener.onError?.(message.code, message.detail);
         break;
     }
+  }
+
+  /** Este aparelho é a mesa da sala. */
+  get isTable(): boolean {
+    return this.seat === TABLE_SEAT;
   }
 
   #setRoom(room: RoomView): void {
@@ -173,4 +194,5 @@ export const ROOM_ERROR_TEXT: Record<string, string> = {
   tooManyRequests: 'W-57',
   removed: 'W-58',
   unknownToken: 'W-58',
+  roomClosed: 'W-72',
 };
