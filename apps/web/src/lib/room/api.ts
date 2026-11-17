@@ -22,11 +22,15 @@ async function call<T>(input: string, init?: RequestInit): Promise<ApiResult<T>>
   }
 }
 
-export function createRoom(mode: ModeConfig): Promise<ApiResult<{ code: string }>> {
+/** Cria a sala; com `table`, quem cria é a mesa e recebe o token para entrar como mesa. */
+export function createRoom(
+  mode: ModeConfig,
+  table = false,
+): Promise<ApiResult<{ code: string; tableToken?: string }>> {
   return call('/api/rooms', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ mode }),
+    body: JSON.stringify(table ? { mode, table: true } : { mode }),
   });
 }
 

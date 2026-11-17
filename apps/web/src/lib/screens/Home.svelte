@@ -3,6 +3,7 @@
   import { formatCode } from '@senhorio/protocol';
   import { canUse3D, setUse3D, use3D } from '../dice/preference';
   import { setSoundOn, soundOn } from '../sound/preference';
+  import { isLargeScreen, LARGE_SCREEN_QUERY } from '../ui/screen.svelte';
   import type { SaveRecord } from '../save/save';
   import { options, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
@@ -18,15 +19,21 @@
     onresume,
     onupdate,
     roomCode = null,
+    roomIsTable = false,
     roomError = '',
     oncreateroom,
+    oncreatetable,
     onjoinroom,
     onrejoin,
   }: {
     /** Sala em que este aparelho estava (para voltar a ela). */
     roomCode?: string | null;
+    /** O lugar guardado é a mesa da sala (modo mesa). */
+    roomIsTable?: boolean;
     roomError?: string;
     oncreateroom: () => void;
+    /** Modo mesa: só em tela grande (TV, notebook, computador, tablet). */
+    oncreatetable?: () => void;
     onjoinroom: () => void;
     onrejoin: () => void;
     saved?: SaveRecord | null;
@@ -43,6 +50,15 @@
   const show3DChoice = canUse3D();
   let dice3D = $state(use3D());
   let sound = $state(soundOn());
+  // "Criar mesa" só em tela grande; acompanha a janela (ex.: notebook redimensionado)
+  let largeScreen = $state(isLargeScreen());
+  $effect(() => {
+    if (typeof matchMedia !== 'function') return;
+    const query = matchMedia(LARGE_SCREEN_QUERY);
+    const update = () => (largeScreen = query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  });
 
   function ago(when: number): string {
     const minutes = Math.round((when - Date.now()) / 60000);
@@ -108,7 +124,11 @@
         {#if roomCode}
           <div class="resume">
             <div class="grow">
-              <b>{t('W-42', { code: formatCode(roomCode) })}</b>
+              <b
+                >{roomIsTable
+                  ? t('W-79', { code: formatCode(roomCode) })
+                  : t('W-42', { code: formatCode(roomCode) })}</b
+              >
               <span>{t('W-44')}</span>
             </div>
             <button
@@ -155,6 +175,13 @@
               >
               <button class="btn ghost" type="button" onclick={onjoinroom}>{t('W-02')}</button>
             </div>
+            {#if oncreatetable && largeScreen}
+              <!-- modo mesa: esta tela mostra o tabuleiro e cada um joga pelo celular -->
+              <p class="table-hint">{t('W-70')}</p>
+              <button class="btn secondary" type="button" onclick={oncreatetable}
+                ><Icon name="board" />{t('W-69')}</button
+              >
+            {/if}
           </section>
         </div>
       {/if}
@@ -189,6 +216,11 @@
 </div>
 
 <style>
+  .table-hint {
+    margin: 0.3em 0 0;
+    font-size: 0.9em;
+    color: var(--text-2);
+  }
   .legal {
     margin: 0.4em 0 0;
     display: flex;

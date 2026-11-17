@@ -16,6 +16,7 @@ import {
   PAWN_COLORS,
   REMOVE_AFTER_MS,
   ROOM_TTL_MS,
+  TABLE_SEAT,
   parseClientMessage,
   type ClientMessage,
   type ModeConfig,
@@ -45,11 +46,20 @@ interface Seat {
   disconnectedAt: number | null;
 }
 
+/** Modo mesa: a TV, notebook ou tablet que criou a sala e mostra a partida sem jogar. */
+interface Table {
+  tokenHash: string;
+  connected: boolean;
+}
+
 export interface RoomRecord {
   code: string;
   status: RoomStatus;
+  /** Lugar de quem criou a sala, ou TABLE_SEAT quando a mesa criou. */
   host: number;
   seats: Seat[];
+  /** Só nas salas criadas por uma mesa (ausente nas salas antigas). */
+  table?: Table | null;
   mode: ModeConfig;
   pausedBy: number | null;
   game: GameState | null;
@@ -60,7 +70,13 @@ export interface RoomRecord {
 }
 
 interface Attachment {
+  /** Lugar do jogador; TABLE_SEAT para a mesa; -1 antes de entrar. */
   seat: number;
+}
+
+/** Conexão que recebe as mensagens da sala: um jogador ou a mesa. */
+function joined(seat: number): boolean {
+  return seat >= 0 || seat === TABLE_SEAT;
 }
 
 export interface RoomInfo {
@@ -102,15 +118,24 @@ export class Room extends DurableObject<Env> {
 
   // ---------- chamadas do Worker ----------
 
-  /** Cria a sala; false se o código já está em uso. */
-  async init(code: string, mode: ModeConfig): Promise<boolean> {
-    if (this.room) return false;
+  /**
+   * Cria a sala; null se o código já está em uso. Com `table`, quem criou é a mesa: devolve
+   * o token dela (só o hash fica guardado), que a mesa usa para entrar e voltar.
+   */
+  async init(
+    code: string,
+    mode: ModeConfig,
+    table = false,
+  ): Promise<{ tableToken: string | null } | null> {
+    if (this.room) return null;
     const now = Date.now();
+    const tableToken = table ? newToken() : null;
     this.room = {
       code,
       status: 'lobby',
-      host: 0,
+      host: table ? TABLE_SEAT : 0,
       seats: [],
+      table: tableToken ? { tokenHash: await hashToken(tableToken), connected: false } : null,
       mode,
       pausedBy: null,
       game: null,
@@ -119,7 +144,7 @@ export class Room extends DurableObject<Env> {
       lastActivity: now,
     };
     await this.persist();
-    return true;
+    return { tableToken };
   }
 
   /** Resumo para a tela "Entrar com código"; null se a sala não existe. */
@@ -211,10 +236,13 @@ export class Room extends DurableObject<Env> {
       await this.hello(ws, seat, message);
       return;
     }
-    if (seat < 0) {
+    if (!joined(seat)) {
       this.send(ws, { type: 'error', code: 'notJoined' });
       return;
     }
+    // a mesa não joga: só comanda a sala (começar, pausar, remover, jogar de novo, encerrar)
+    if (seat === TABLE_SEAT && (message.type === 'action' || message.type === 'leave'))
+      return this.refuse(ws, 'tableCannotPlay');
     switch (message.type) {
       case 'start':
         return this.start(ws, seat);
@@ -228,6 +256,8 @@ export class Room extends DurableObject<Env> {
         return this.again(ws, seat);
       case 'leave':
         return this.leave(ws, seat);
+      case 'close':
+        return this.close(ws, seat);
     }
   }
 
@@ -237,12 +267,21 @@ export class Room extends DurableObject<Env> {
     message: Extract<ClientMessage, { type: 'hello' }>,
   ): Promise<void> {
     const room = this.room as RoomRecord;
-    if (current >= 0) return; // já está na sala
+    if (joined(current)) return; // já está na sala
     const now = Date.now();
 
     // reconexão: o token prova que é o mesmo aparelho
     if (message.token) {
       const hash = await hashToken(message.token);
+      // a mesa entra (e volta) pelo token que recebeu ao criar a sala
+      if (room.table && room.table.tokenHash === hash) {
+        room.table.connected = true;
+        ws.serializeAttachment({ seat: TABLE_SEAT } satisfies Attachment);
+        this.send(ws, { type: 'welcome', seat: TABLE_SEAT, token: message.token });
+        await this.persist();
+        this.broadcastRoom();
+        return;
+      }
       const seat = room.seats.findIndex((s) => s.tokenHash === hash);
       if (seat < 0) {
         this.send(ws, { type: 'error', code: 'unknownToken' });
@@ -280,7 +319,7 @@ export class Room extends DurableObject<Env> {
       disconnectedAt: null,
     });
     const seat = room.seats.length - 1;
-    if (room.seats.length === 1) room.host = 0;
+    if (room.seats.length === 1 && !room.table) room.host = 0;
     ws.serializeAttachment({ seat } satisfies Attachment);
     this.send(ws, { type: 'welcome', seat, token });
     await this.persist();
@@ -290,7 +329,7 @@ export class Room extends DurableObject<Env> {
   private async start(ws: WebSocket, seat: number): Promise<void> {
     const room = this.room as RoomRecord;
     if (room.status !== 'lobby') return this.refuse(ws, 'gameStarted');
-    if (seat !== room.host) return this.refuse(ws, 'onlyHost');
+    if (!this.canCommand(seat)) return this.refuse(ws, 'onlyHost');
     if (room.seats.length < PARAMS.minPlayers) return this.refuse(ws, 'notEnoughPlayers');
     if (room.seats.some((s) => !s.connected)) return this.refuse(ws, 'someoneDisconnected');
 
@@ -359,20 +398,30 @@ export class Room extends DurableObject<Env> {
     else this.broadcastRoom();
   }
 
-  /** Quem pode remover: quem criou a sala; se essa pessoa também caiu, qualquer conectado. */
-  private canRemove(seat: number): boolean {
+  /** Quem criou a sala (a mesa ou o primeiro jogador) caiu ou saiu da partida. */
+  private hostAway(): boolean {
     const room = this.room as RoomRecord;
+    if (room.table) return !room.table.connected;
     const host = room.seats[room.host];
     const hostOut = room.game?.players[room.host]?.bankrupt ?? false;
-    if (seat === room.host) return true;
     return !host?.connected || hostOut;
+  }
+
+  /**
+   * Quem comanda a sala (começar, remover, jogar de novo): quem criou; se essa pessoa ou a
+   * mesa caiu, qualquer jogador conectado, para a partida não travar.
+   */
+  private canCommand(seat: number): boolean {
+    const room = this.room as RoomRecord;
+    if (seat === room.host) return true;
+    return seat >= 0 && this.hostAway();
   }
 
   private async remove(ws: WebSocket, seat: number, target: number): Promise<void> {
     const room = this.room as RoomRecord;
     const victim = room.seats[target];
     if (!victim || target === seat) return this.refuse(ws, 'invalidTarget');
-    if (!this.canRemove(seat)) return this.refuse(ws, 'onlyHost');
+    if (!this.canCommand(seat)) return this.refuse(ws, 'onlyHost');
     if (victim.connected) return this.refuse(ws, 'stillConnected');
 
     if (room.status === 'lobby') {
@@ -394,7 +443,7 @@ export class Room extends DurableObject<Env> {
   private async again(ws: WebSocket, seat: number): Promise<void> {
     const room = this.room as RoomRecord;
     if (room.status !== 'over') return this.refuse(ws, 'notOver');
-    if (!this.canRemove(seat)) return this.refuse(ws, 'onlyHost');
+    if (!this.canCommand(seat)) return this.refuse(ws, 'onlyHost');
     // nova partida com a mesma sala; quem não está conectado sai da lista
     for (let i = room.seats.length - 1; i >= 0; i--)
       if (!room.seats[i]?.connected) this.dropSeat(i);
@@ -417,15 +466,34 @@ export class Room extends DurableObject<Env> {
     ws.close(1000, 'saiu da sala');
   }
 
+  /** Modo mesa: só a mesa encerra a sala; todos voltam à tela inicial e a sala é apagada. */
+  private async close(ws: WebSocket, seat: number): Promise<void> {
+    if (seat !== TABLE_SEAT) return this.refuse(ws, 'onlyTable');
+    for (const other of this.ctx.getWebSockets()) {
+      this.send(other, { type: 'error', code: 'roomClosed' });
+      other.serializeAttachment({ seat: -1 } satisfies Attachment);
+      other.close(1000, 'sala encerrada');
+    }
+    await this.ctx.storage.deleteAll();
+    this.room = null;
+  }
+
   private async disconnected(ws: WebSocket): Promise<void> {
     const room = this.room;
     const seat = this.seatOf(ws);
-    if (!room || seat < 0) return;
-    // outro aparelho do mesmo jogador ainda conectado (duas abas): continua conectado
+    if (!room || !joined(seat)) return;
+    // outro aparelho do mesmo lugar ainda conectado (duas abas): continua conectado
     const others = this.ctx
       .getWebSockets()
       .filter((other) => other !== ws && this.seatOf(other) === seat);
     if (others.length > 0) return;
+    // a mesa caiu: a partida segue nos celulares; os comandos passam para os jogadores
+    if (seat === TABLE_SEAT) {
+      if (room.table) room.table.connected = false;
+      await this.persist();
+      this.broadcastRoom();
+      return;
+    }
     const record = room.seats[seat];
     if (!record) return;
     record.connected = false;
@@ -490,6 +558,7 @@ export class Room extends DurableObject<Env> {
 
   private moveHostIfOut(): void {
     const room = this.room as RoomRecord;
+    if (room.table) return; // com mesa, quem comanda é sempre a mesa
     const out = (i: number) => room.game?.players[i]?.bankrupt ?? false;
     if (!out(room.host)) return;
     const next = room.seats.findIndex((s, i) => s.connected && !out(i));
@@ -511,6 +580,7 @@ export class Room extends DurableObject<Env> {
       code: room.code,
       status: room.status,
       host: room.host,
+      table: room.table ? { connected: room.table.connected } : null,
       seats: room.seats.map((s, i) => ({
         name: s.name,
         color: s.color,
@@ -542,12 +612,12 @@ export class Room extends DurableObject<Env> {
 
   private broadcastRoom(): void {
     const message: ServerMessage = { type: 'room', room: this.view() };
-    for (const ws of this.ctx.getWebSockets()) if (this.seatOf(ws) >= 0) this.send(ws, message);
+    for (const ws of this.ctx.getWebSockets()) if (joined(this.seatOf(ws))) this.send(ws, message);
   }
 
   private broadcastUpdate(events: GameEvent[], by: number): void {
     const message: ServerMessage = { type: 'update', room: this.view(), events, by };
-    for (const ws of this.ctx.getWebSockets()) if (this.seatOf(ws) >= 0) this.send(ws, message);
+    for (const ws of this.ctx.getWebSockets()) if (joined(this.seatOf(ws))) this.send(ws, message);
   }
 
   /** Grava a sala e agenda o próximo alarme: fim do tempo ou expiração. */

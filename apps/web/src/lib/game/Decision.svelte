@@ -515,11 +515,18 @@
         </div>
       {/if}
       {@render diceLine(current)}
-      {#if game.remote}
+      {#if game.remote && (game.me ?? -1) >= 0}
         <p class="waiting" role="status">
           <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{t('W-46', {
             player: name(game.me ?? 0),
           })} · {brl(s.players[game.me ?? 0]?.money ?? 0)}
+        </p>
+      {:else if game.remote}
+        <!-- modo mesa: a mesa só acompanha; a decisão aparece no celular de quem joga -->
+        <p class="waiting" role="status">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{t('W-83', {
+            player: name(waitingFor),
+          })}
         </p>
       {:else}
         <!-- contra o computador: a pessoa pode pausar enquanto ele joga. O foco fica no aviso,

@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = 4173;
 /** Servidor local da Cloudflare (wrangler dev): site + salas na mesma origem. */
 const ROOMS_PORT = 8787;
-const ROOMS_SPEC = /rooms\.spec\.ts/;
+const ROOMS_SPEC = /(rooms|table)\.spec\.ts/;
 
 // Perfis de tela do docs/08-plano-de-testes.md. Todos usam o Chromium.
 export default defineConfig({
@@ -22,6 +22,12 @@ export default defineConfig({
       name: 'tablet',
       testIgnore: ROOMS_SPEC,
       use: { ...devices['Desktop Chrome'], viewport: { width: 820, height: 1180 }, hasTouch: true },
+    },
+    {
+      // iPad deitado e notebooks antigos: tela quase quadrada em paisagem
+      name: 'tablet-deitado',
+      testIgnore: ROOMS_SPEC,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 768 }, hasTouch: true },
     },
     {
       name: 'desktop',

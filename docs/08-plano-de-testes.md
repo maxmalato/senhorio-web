@@ -87,6 +87,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | --- | --- | --- |
 | Celular retrato | 390×844 | Toque |
 | Tablet | 820×1180 e 1180×820 | Toque |
+| Tablet deitado | 1024×768 (iPad deitado, notebooks antigos) | Toque |
 | Desktop | 1440×900 | Mouse e só teclado |
 | Salas (vários navegadores) | 1280×800 | Mouse, contra o `wrangler dev` |
 | TV HD | 1280×720 | Só setas, Enter e Voltar |
@@ -112,7 +113,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | Controlador | `apps/web/src/lib/game/game.test.ts` | Ação aplicada no motor, vista ao fim dos eventos, recusa sem mudança, histórico de 3 linhas |
 | Menu, construção e venda simples | `apps/web/src/lib/game/Decision.test.ts` | Opções desabilitadas com o motivo, escada de aluguel, construção uniforme, foco no Recusar, minimizar a proposta para ver o tabuleiro |
 | Fluxo do início ao jogo | `apps/web/src/App.test.ts` | Início, jogadores, modo, ordem sorteada e primeira jogada |
-| Ponta a ponta (5 perfis de tela) | `e2e/game.spec.ts` | Partida inteira de 20 rodadas só com Enter, acessibilidade (axe) em 5 telas, foco padrão, Voltar, abas do celular |
+| Ponta a ponta (6 perfis de tela) | `e2e/game.spec.ts` | Partida inteira de 20 rodadas só com Enter, acessibilidade (axe) em 5 telas, foco padrão, Voltar, abas do celular, painel lateral com espaço e Menu à vista |
 
 Parâmetros de teste da interface: `?seed=N` reproduz os sorteios e `?speed=0` tira as esperas das animações e dos avisos.
 
@@ -299,3 +300,27 @@ Conferência extra feita na implementação: as capturas de tela da sala de espe
 | 3 | Escolher apelido e entrar | Aparece na sala de espera do outro aparelho |
 | 4 | No celular que criou a sala: "Compartilhar link" | Abre o menu do sistema (WhatsApp, mensagens...) com o link |
 | 5 | No computador: "Compartilhar link" | "Link copiado"; colar mostra o link da sala |
+
+### Testes do modo mesa
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Servidor | `apps/server/test/rooms.test.ts`, `index.test.ts` | Criar com mesa devolve o token; a mesa entra sem lugar e comanda; não joga; se cai, a partida segue e os jogadores comandam; volta pelo token; só a mesa encerra e a sala some |
+| Sons | `apps/web/src/lib/game/table-sounds.test.ts` | A mesa toca tudo; com mesa, o celular só o próprio dinheiro; sem mesa, como antes |
+| Tela acesa | `apps/web/src/lib/ui/screen.test.ts` | Pede a trava, pede de novo ao voltar para a aba, solta no fim; sem suporte, nada quebra |
+| Ponta a ponta | `e2e/table.spec.ts` (perfil `salas`) | A mesa cria (sem apelido), mostra QR Code e código sem compartilhar o link, dois celulares entram pelo link, só a mesa começa, a mesa mostra quem decide sem botões de jogada, pausa para todos e encerra com confirmação; a mesa recarregada volta como mesa; "Criar mesa" não aparece no celular |
+
+### Roteiro do modo mesa
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Na TV, notebook ou tablet: "Criar mesa" → modo → Criar mesa | Sala de espera com QR Code grande, código, aviso de que a mesa é para quem está presente, Começar, Tela cheia e Encerrar sala; sem Compartilhar link nem Copiar código; não pede apelido |
+| 2 | No celular, abrir o jogo | "Criar mesa" não aparece |
+| 3 | Dois ou três celulares entram pelo QR Code | A mesa mostra quem entrou; nos celulares, "Esperando a mesa começar a partida." |
+| 4 | Começar pela mesa (controle, mouse ou toque) | Tabuleiro grande na mesa; decisões só no celular de quem tem a vez |
+| 5 | Jogar algumas rodadas | Sons gerais na mesa; nos celulares, só o "sua vez" e o próprio dinheiro |
+| 6 | Deixar a mesa parada por alguns minutos | A tela não apaga (onde o navegador permitir) |
+| 7 | Tela cheia | Ocupa a tela toda; o mesmo botão (ou Esc) sai |
+| 8 | Recarregar a página da mesa | "Voltar para a mesa" na tela inicial; Continuar volta à mesma sala |
+| 9 | Fechar a mesa no meio da partida | A partida segue nos celulares; um jogador consegue remover quem cair |
+| 10 | Mesa: Pausar → Encerrar sala → confirmar | Todos voltam à tela inicial; nos celulares, "A mesa encerrou a sala." |

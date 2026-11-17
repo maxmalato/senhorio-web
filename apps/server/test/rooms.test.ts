@@ -1,7 +1,7 @@
 // Salas do modo de vários aparelhos, no mesmo runtime da produção (workerd).
 import { env, runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
 import { exports } from 'cloudflare:workers';
-import { MESSAGE_LIMIT, type ServerMessage } from '@senhorio/protocol';
+import { MESSAGE_LIMIT, TABLE_SEAT, type ServerMessage } from '@senhorio/protocol';
 import { describe, expect, it } from 'vitest';
 import type { Room } from '../src/room';
 
@@ -233,5 +233,83 @@ describe('mensagens inválidas', () => {
       expect((await device.next('error')).code).toBe('notJoined');
     device.send({ type: 'start' });
     expect((await device.next('error')).code).toBe('tooManyRequests');
+  });
+});
+
+describe('modo mesa', () => {
+  /** Sala criada por uma mesa (direto no Durable Object: a criação pela API tem limite). */
+  async function tableRoom(code: string) {
+    const created = await stubOf(code).init(code, { type: 'rounds', limit: 20 }, true);
+    if (!created?.tableToken) throw new Error('sem token da mesa');
+    const table = await connect(code);
+    table.send({ type: 'hello', token: created.tableToken });
+    const welcome = await table.next('welcome');
+    return { table, token: created.tableToken, welcome };
+  }
+
+  it('a mesa entra sem lugar de jogador e é quem comanda a sala', async () => {
+    const { table, welcome } = await tableRoom('MESA22');
+    expect(welcome.seat).toBe(TABLE_SEAT);
+    const view = (await table.next('room')).room;
+    expect(view.host).toBe(TABLE_SEAT);
+    expect(view.table).toEqual({ connected: true });
+    expect(view.seats).toEqual([]);
+
+    const ana = await join('MESA22', 'Ana', BLUE);
+    const bruno = await join('MESA22', 'Bruno', CORAL);
+    ana.send({ type: 'start' });
+    expect((await ana.next('error')).code).toBe('onlyHost');
+    table.clear();
+    table.send({ type: 'start' });
+    const update = await table.next('update');
+    expect(update.room.status).toBe('playing');
+    expect(update.room.game?.players.map((p) => p.name)).toEqual(['Ana', 'Bruno']);
+    await bruno.next('update');
+
+    // a mesa não joga
+    table.send({ type: 'action', action: { type: 'ROLL_DICE' } });
+    expect((await table.next('error')).code).toBe('tableCannotPlay');
+  });
+
+  it('se a mesa cai, a partida segue e os jogadores passam a comandar', async () => {
+    const { table } = await tableRoom('MESA23');
+    const ana = await join('MESA23', 'Ana', BLUE);
+    const bruno = await join('MESA23', 'Bruno', CORAL);
+    table.ws.close();
+    // pula os retratos da sala de antes (entradas da Ana e do Bruno)
+    let view = (await ana.next('room')).room;
+    while (view.table?.connected !== false) view = (await ana.next('room')).room;
+    expect(view.table).toEqual({ connected: false });
+    ana.clear();
+    ana.send({ type: 'start' });
+    const update = await ana.next('update');
+    expect(update.room.status).toBe('playing');
+    await bruno.next('update');
+    // sem pausa: o jogador da vez joga normalmente
+    const game = update.room.game!;
+    const current = game.order[game.turn]!;
+    const mine = current === 0 ? ana : bruno;
+    mine.clear();
+    mine.send({ type: 'action', action: { type: 'ROLL_DICE' } });
+    expect((await mine.next('update')).events.some((e) => e.type === 'DiceRolled')).toBe(true);
+  });
+
+  it('a mesa volta pelo mesmo token depois de recarregar', async () => {
+    const { table, token } = await tableRoom('MESA24');
+    table.ws.close();
+    const again = await connect('MESA24');
+    again.send({ type: 'hello', token });
+    expect((await again.next('welcome')).seat).toBe(TABLE_SEAT);
+    expect((await again.next('room')).room.table).toEqual({ connected: true });
+  });
+
+  it('só a mesa encerra a sala; todos saem e a sala deixa de existir', async () => {
+    const { table } = await tableRoom('MESA25');
+    const ana = await join('MESA25', 'Ana', BLUE);
+    ana.send({ type: 'close' });
+    expect((await ana.next('error')).code).toBe('onlyTable');
+    table.send({ type: 'close' });
+    expect((await ana.next('error')).code).toBe('roomClosed');
+    expect(await stubOf('MESA25').info()).toBeNull();
   });
 });

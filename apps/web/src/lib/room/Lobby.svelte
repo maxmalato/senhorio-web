@@ -1,10 +1,11 @@
 <script lang="ts">
   // Sala de espera (mockups, rodada 1): código grande para ditar, jogadores e início.
-  import { formatCode, type RoomView } from '@senhorio/protocol';
+  import { formatCode, TABLE_SEAT, type RoomView } from '@senhorio/protocol';
   import { brl, options, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
   import Icon from '../ui/Icon.svelte';
   import { canShare, copyText } from '../ui/clipboard';
+  import { fullscreen } from '../ui/screen.svelte';
   import { roomLink } from './link';
   import QrCode from './QrCode.svelte';
 
@@ -14,12 +15,15 @@
     onstart,
     onleave,
     onremove,
+    onclose,
   }: {
     room: RoomView;
     me: number | null;
     onstart: () => void;
     onleave: () => void;
     onremove: (seat: number) => void;
+    /** Modo mesa: a mesa encerra a sala para todos (pede confirmação antes). */
+    onclose?: () => void;
   } = $props();
 
   const p = rules.parameters;
@@ -29,8 +33,15 @@
   let manual: string | null = $state(null);
   const link = $derived(roomLink(room.code));
   const isHost = $derived(me === room.host);
+  /** Modo mesa: este aparelho é a mesa. */
+  const isTable = $derived(me === TABLE_SEAT);
+  /** Sem a mesa conectada, qualquer jogador comanda a sala (o servidor confere). */
+  const commands = $derived(
+    isHost || (me !== null && me >= 0 && room.table !== null && !room.table.connected),
+  );
+  const hostName = $derived(room.table ? t('W-71') : (room.seats[room.host]?.name ?? ''));
   const allConnected = $derived(room.seats.every((s) => s.connected));
-  const canStart = $derived(isHost && room.seats.length >= p.minPlayers && allConnected);
+  const canStart = $derived(commands && room.seats.length >= p.minPlayers && allConnected);
   const modeText = $derived(
     room.mode.type === 'classic'
       ? t('I-78')
@@ -83,20 +94,26 @@
     </div>
     <div class="col invite">
       <div class="code-big">
-        <QrCode text={link} label={t('W-66', { code: formatCode(room.code) })} />
+        <QrCode text={link} label={t('W-66', { code: formatCode(room.code) })} large={isTable} />
         <span class="hint">{t('W-63')}</span>
         <span class="lab">{t('W-12')}</span>
         <span class="code" aria-label="{t('W-08')}: {room.code.split('').join(' ')}"
           >{formatCode(room.code)}</span
         >
-        <div class="share">
-          <button class="btn secondary" type="button" onclick={share}
-            >{linkCopied ? t('W-65') : t('W-64')}</button
-          >
-          <button class="btn ghost" type="button" onclick={copy}
-            >{copied ? t('W-14') : t('W-13')}</button
-          >
-        </div>
+        {#if isTable}
+          <!-- mesa: para quem está diante da tela (QR Code ou código); quem está longe usa
+               uma sala normal, por isso sem copiar nem compartilhar o link -->
+          <p class="hint">{t('W-84')}</p>
+        {:else}
+          <div class="share">
+            <button class="btn secondary" type="button" onclick={share}
+              >{linkCopied ? t('W-65') : t('W-64')}</button
+            >
+            <button class="btn ghost" type="button" onclick={copy}
+              >{copied ? t('W-14') : t('W-13')}</button
+            >
+          </div>
+        {/if}
         {#if manual}
           <label class="manual">
             <span>{t('W-68')}</span>
@@ -123,7 +140,7 @@
               {#if !seat.connected}<span class="tag off">{t('W-24')}</span>{/if}
             </span>
             <span class="meta">{i === room.host ? t('W-18') : ''}</span>
-            {#if isHost && i !== me && !seat.connected}
+            {#if commands && i !== me && !seat.connected}
               <button class="btn ghost small" type="button" onclick={() => onremove(i)}
                 >{t('I-08')}</button
               >
@@ -134,7 +151,10 @@
           <li class="row empty"><span class="avatar">+</span><span>{t('W-19')}</span></li>
         {/each}
       </ul>
-      {#if isHost}
+      {#if commands}
+        {#if !isHost}<p class="callout" role="status">
+            <Icon name="info" /><span>{t('W-81')}</span>
+          </p>{/if}
         <button
           class="btn gold"
           type="button"
@@ -145,11 +165,19 @@
         <p class="footnote">{allConnected ? t('W-20') : t('W-45')}</p>
       {:else}
         <p class="callout" role="status">
-          <Icon name="info" /><span>{t('W-21', { player: room.seats[room.host]?.name ?? '' })}</span
-          >
+          <Icon name="info" /><span>{t('W-21', { player: hostName })}</span>
         </p>
       {/if}
-      <button class="btn ghost" type="button" onclick={onleave}>{t('W-22')}</button>
+      {#if isTable}
+        {#if fullscreen.supported}
+          <button class="btn secondary" type="button" onclick={() => fullscreen.toggle()}
+            >{fullscreen.active ? t('W-78') : t('W-77')}</button
+          >
+        {/if}
+        <button class="btn ghost" type="button" onclick={() => onclose?.()}>{t('W-73')}</button>
+      {:else}
+        <button class="btn ghost" type="button" onclick={onleave}>{t('W-22')}</button>
+      {/if}
     </div>
   </div>
 </div>
@@ -176,6 +204,10 @@
   .hint {
     font-size: 0.85em;
     color: var(--text-2);
+  }
+  p.hint {
+    margin: 0;
+    max-width: 24em;
   }
   .manual {
     display: grid;

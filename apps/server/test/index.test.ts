@@ -12,4 +12,15 @@ describe('Worker', () => {
     const response = await exports.default.fetch('https://senhorio.example/api/inexistente');
     expect(response.status).toBe(404);
   });
+
+  it('modo mesa: criar com table devolve o código e o token da mesa', async () => {
+    const response = await exports.default.fetch('https://senhorio.example/api/rooms', {
+      method: 'POST',
+      body: JSON.stringify({ mode: { type: 'classic' }, table: true }),
+    });
+    expect(response.status).toBe(201);
+    const body = (await response.json()) as { code: string; tableToken: string };
+    expect(body.code).toMatch(/^[A-HJ-NP-Z2-9]{6}$/);
+    expect(body.tableToken.length).toBeGreaterThan(20);
+  });
 });

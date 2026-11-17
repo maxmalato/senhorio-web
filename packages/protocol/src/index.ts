@@ -18,6 +18,11 @@ export const MAX_MESSAGE_BYTES = 4096;
  * acima disso a mensagem é descartada com o erro tooManyRequests.
  */
 export const MESSAGE_LIMIT = { count: 40, windowMs: 10_000 };
+/**
+ * Lugar da mesa (modo mesa): uma TV, notebook ou tablet que mostra a partida sem jogar.
+ * Nas mensagens, `seat: TABLE_SEAT` é a mesa; numa sala com mesa, `host` também é a mesa.
+ */
+export const TABLE_SEAT = -2;
 /** Cores dos peões (docs/06 do Roku), sempre com a inicial do nome. */
 export const PAWN_COLORS = ['#4FC3F7', '#FF8A65', '#B39DDB', '#81C784', '#F48FB1', '#4DB6AC'];
 
@@ -55,7 +60,10 @@ export type RoomStatus = 'lobby' | 'playing' | 'over';
 export interface RoomView {
   code: string;
   status: RoomStatus;
+  /** Lugar de quem criou a sala, ou TABLE_SEAT quando a mesa criou. */
   host: number;
+  /** Modo mesa: a mesa está conectada? (null numa sala sem mesa) */
+  table: { connected: boolean } | null;
   seats: SeatView[];
   mode: ModeConfig;
   /** Quem pausou pelo menu (null se ninguém). */
@@ -74,7 +82,9 @@ export type ClientMessage =
   | { type: 'pause'; paused: boolean }
   | { type: 'remove'; seat: number }
   | { type: 'again' }
-  | { type: 'leave' };
+  | { type: 'leave' }
+  /** Modo mesa: a mesa encerra a sala para todos. */
+  | { type: 'close' };
 
 export type ServerMessage =
   | { type: 'welcome'; seat: number; token: string }
@@ -160,6 +170,7 @@ export function parseClientMessage(raw: string): ClientMessage | null {
     case 'start':
     case 'again':
     case 'leave':
+    case 'close':
       return { type: v.type };
     case 'action': {
       const action = parseAction(v.action);

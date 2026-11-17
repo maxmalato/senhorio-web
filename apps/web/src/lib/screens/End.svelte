@@ -17,7 +17,7 @@
     onagain: () => void;
     onexit: () => void;
     /** Vários aparelhos: quem criou a sala começa outra partida; os outros esperam. */
-    multi?: { isHost: boolean; hostName: string } | null;
+    multi?: { isHost: boolean; hostName: string; exitLabel?: string } | null;
   } = $props();
 
   const ranking = $derived(state.ranking ?? []);
@@ -79,7 +79,7 @@
           class="btn ghost"
           type="button"
           data-default={multi.isHost ? undefined : 'true'}
-          onclick={onexit}>{t('W-22')}</button
+          onclick={onexit}>{multi.exitLabel ?? t('W-22')}</button
         >
       {:else}
         <button class="btn gold" type="button" data-default="true" onclick={onagain}

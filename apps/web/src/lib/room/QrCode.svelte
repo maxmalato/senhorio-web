@@ -3,7 +3,7 @@
   // serviço de fora. Desenhado como SVG pelo Svelte, quadradinho por quadradinho.
   import { encode } from 'uqr';
 
-  let { text, label }: { text: string; label: string } = $props();
+  let { text, label, large = false }: { text: string; label: string; large?: boolean } = $props();
 
   const qr = $derived(encode(text, { ecc: 'M', border: 2 }));
   // um único caminho com todos os módulos escuros (leve até numa TV fraca)
@@ -20,6 +20,7 @@
 
 <svg
   class="qr"
+  class:large
   viewBox="0 0 {qr.size} {qr.size}"
   role="img"
   aria-label={label}
@@ -36,5 +37,9 @@
     max-width: 14em;
     height: auto;
     border-radius: 0.6em;
+  }
+  /* na mesa, maior: os celulares leem de longe */
+  .qr.large {
+    max-width: 20em;
   }
 </style>

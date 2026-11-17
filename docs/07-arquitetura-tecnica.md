@@ -257,6 +257,24 @@ Motivos de transferência: `bonusPartida` → `passStart`, `compra` → `purchas
 
 Convite: a sala de espera mostra um QR Code com o link `/?sala=CÓDIGO` e o botão "Compartilhar link" (menu de compartilhar do sistema no celular; no computador, copia o link). O QR Code é gerado no próprio aparelho com a biblioteca `uqr` (sem serviço de fora) e desenhado como SVG. Quem abre o link vai direto para "Entrar na sala" com o código preenchido; o jogo tira o código da barra de endereço assim que o lê (`apps/web/src/lib/room/link.ts`).
 
+### Modo mesa
+
+Uma tela grande (TV, notebook, computador ou tablet) cria a sala como **mesa**: mostra o tabuleiro para todos e não joga; cada pessoa joga pelo próprio celular.
+
+| Item | Definição |
+| --- | --- |
+| Quem vê "Criar mesa" | Só telas com o lado menor a partir de 600 px (`LARGE_SCREEN_QUERY`); celulares não veem |
+| Presencial | A sala de espera da mesa mostra o QR Code e o código, sem "Compartilhar link" nem "Copiar código", e avisa que quem está longe deve usar uma sala normal. A sala continua privada pelo código; o jogo não confere se todos estão na mesma rede (bloquearia celulares nos dados móveis e redes IPv6, e exigiria guardar o endereço de internet da mesa) |
+| Internet | Mesmo na mesma rede Wi-Fi, todos os aparelhos falam com o servidor do jogo na internet: a mesa não funciona numa rede local sem internet |
+| Criar | `POST /api/rooms { mode, table: true }` devolve `{ code, tableToken }`; a mesa entra com `hello { token }` e recebe `welcome { seat: TABLE_SEAT }` (-2). O servidor guarda só o hash do token; a mesa volta pelo mesmo token se recarregar |
+| Lugar | A mesa não ocupa lugar de jogador (continuam até 6 jogadores) e não pode mandar ações do jogo (`tableCannotPlay`) |
+| Quem comanda | Numa sala com mesa, `host` é `TABLE_SEAT`: a mesa começa, pausa, remove quem caiu e começa outra partida. Se a mesa cair, a partida **não** pausa e qualquer jogador conectado passa a comandar |
+| Encerrar | Só a mesa (`close`), com confirmação ("Não, voltar" em foco); todos recebem `roomClosed`, voltam à tela inicial e a sala é apagada. Os jogadores só saem (`leave`) |
+| Tela da mesa | Tabuleiro grande, jogadores, código da sala, dados e avisos; o cartão "Fulano está decidindo" diz que as decisões aparecem no celular dele. Cabeçalho com Nomes, Tela cheia e Pausar; sem menu de jogador nem dicas de teclado |
+| Sons | A mesa toca todos os sons; com mesa, os celulares tocam só o "sua vez" e o próprio dinheiro |
+| Tela acesa | Wake Lock enquanto a mesa estiver na sala, pedido de novo ao voltar para a aba; sem suporte, o jogo segue sem ele |
+| Tela cheia | Botão na sala de espera e no cabeçalho da partida (Fullscreen API); some onde o navegador não oferece |
+
 As constantes ficam em `packages/protocol` (`REMOVE_AFTER_MS`, `ROOM_TTL_MS`, `MAX_MESSAGE_BYTES`, `MESSAGE_LIMIT`), usadas pelo servidor e pela interface.
 
 ### Rotas
@@ -280,10 +298,12 @@ Navegador → sala (`ClientMessage`; tudo passa por `parseClientMessage` antes d
 | `hello { token }` | Voltar depois de uma queda (mesma aba ou "Voltar para a sala" na tela inicial) |
 | `start` | Anfitrião começa a partida (2 ou mais jogadores, todos conectados) |
 | `action { action }` | Uma ação do motor (docs/07, "Ações"), exceto as do servidor |
-| `pause { paused }` | Pausar ou continuar pelo menu |
+| `hello { token }` (mesa) | A mesa entra com o token recebido ao criar a sala |
+| `pause { paused }` | Pausar ou continuar pelo menu (ou pela mesa) |
 | `remove { seat }` | Remover jogador (na espera: o anfitrião, a qualquer momento; na partida: depois de 3 minutos sem conexão) |
 | `again` | Anfitrião volta todos à sala de espera no fim da partida |
 | `leave` | Sair da sala |
+| `close` | Modo mesa: a mesa encerra a sala para todos |
 
 Sala → navegador (`ServerMessage`):
 

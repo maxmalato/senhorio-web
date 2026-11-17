@@ -98,3 +98,23 @@ test('privacidade e termos abrem pela tela inicial, legíveis e acessíveis', as
   await page.getByRole('link', { name: '← Voltar ao jogo' }).first().click();
   await expect(page.getByRole('button', { name: 'Criar sala' })).toBeVisible();
 });
+
+test('o painel ao lado do tabuleiro tem espaço e o Menu fica à vista', async ({ page }) => {
+  await startGame(page);
+  const layout = await page.evaluate(() => {
+    const panel = document.querySelector('.players-area')?.getBoundingClientRect();
+    const menu = document.querySelector('.brand .menu-btn:last-of-type')?.getBoundingClientRect();
+    const tabs = document.querySelector('.tabs') as HTMLElement | null;
+    return {
+      sideBySide: !tabs || getComputedStyle(tabs).display === 'none',
+      panelWidth: panel?.width ?? 0,
+      menuInside:
+        !!menu && menu.width > 0 && menu.right <= innerWidth && menu.bottom <= innerHeight,
+      noScroll: document.documentElement.scrollWidth <= innerWidth,
+    };
+  });
+  expect(layout.menuInside).toBe(true);
+  expect(layout.noScroll).toBe(true);
+  // celular em pé usa abas; nas outras telas, o painel não pode ficar espremido
+  if (layout.sideBySide) expect(layout.panelWidth).toBeGreaterThanOrEqual(200);
+});

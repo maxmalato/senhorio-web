@@ -153,6 +153,9 @@
   // ---------- vários aparelhos ----------
   let connection: RoomConnection | null = $state.raw(null);
   let roomCode: string | null = $state(savedSeat()?.code ?? null);
+  let roomIsTable = $state(savedSeat()?.table === true);
+  /** Modo mesa: a tela de criar está criando uma mesa (sem apelido nem cor). */
+  let tableCreate = $state(false);
   let roomError = $state('');
 
   // convite por link ou QR Code (?sala=ABC234): abre "Entrar na sala" já com o código.
@@ -196,10 +199,26 @@
     screen = 'room';
   }
 
+  /** Modo mesa: esta tela cria a sala e entra como mesa, com o token que a sala devolveu. */
+  async function onCreateTable(mode: ModeConfig) {
+    creating = true;
+    createError = '';
+    const result = await createRoom(mode, true);
+    creating = false;
+    if (!result.ok || !result.value.tableToken) {
+      const error = result.ok ? 'unavailable' : result.error;
+      createError = t(error === 'offline' ? 'W-59' : (ROOM_ERROR_TEXT[error] ?? 'W-56'));
+      return;
+    }
+    connection = new RoomConnection(result.value.code, { token: result.value.tableToken });
+    screen = 'room';
+  }
+
   function leaveRoom(error?: string) {
     clearTurnNotice();
     connection = null;
     roomCode = savedSeat()?.code ?? null;
+    roomIsTable = savedSeat()?.table === true;
     roomError = error ?? '';
     screen = 'home';
   }
@@ -222,8 +241,10 @@
       onresume={resume}
       onupdate={() => pwa.update()}
       {roomCode}
+      {roomIsTable}
       {roomError}
-      oncreateroom={() => ((roomError = ''), (screen = 'create'))}
+      oncreateroom={() => ((roomError = ''), (tableCreate = false), (screen = 'create'))}
+      oncreatetable={() => ((roomError = ''), (tableCreate = true), (screen = 'create'))}
       onjoinroom={() => ((roomError = ''), (inviteCode = ''), (screen = 'join'))}
       onrejoin={rejoin}
     />
@@ -231,8 +252,9 @@
     <CreateRoom
       busy={creating}
       error={createError}
+      table={tableCreate}
       onback={() => (screen = 'home')}
-      oncreate={onCreateRoom}
+      oncreate={(setup) => (tableCreate ? onCreateTable(setup.mode) : onCreateRoom(setup))}
     />
   {:else if screen === 'join'}
     <JoinRoom onback={() => (screen = 'home')} onjoin={onJoinRoom} initialCode={inviteCode} />

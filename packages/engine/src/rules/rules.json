@@ -1050,6 +1050,22 @@
     "W-65": "Link copiado",
     "W-66": "QR Code para entrar na sala {code}",
     "W-67": "Entre na minha sala do Senhorio. Código: {code}",
-    "W-68": "Este navegador não deixou copiar. Selecione e copie:"
+    "W-68": "Este navegador não deixou copiar. Selecione e copie:",
+    "W-69": "Criar mesa",
+    "W-70": "Use esta tela como mesa: o tabuleiro fica aqui e cada um joga pelo próprio celular.",
+    "W-71": "a mesa",
+    "W-72": "A mesa encerrou a sala.",
+    "W-73": "Encerrar sala",
+    "W-74": "Encerrar a sala para todos?",
+    "W-75": "Não, voltar",
+    "W-76": "Sim, encerrar",
+    "W-77": "Tela cheia",
+    "W-78": "Sair da tela cheia",
+    "W-79": "Voltar para a mesa {code}",
+    "W-80": "A mesa não joga: escolha o modo e chame os jogadores pelo QR Code.",
+    "W-81": "Mesa sem conexão: qualquer jogador pode começar, remover e jogar de novo.",
+    "W-82": "Jogo pausado pela mesa",
+    "W-83": "As decisões aparecem no celular de {player}",
+    "W-84": "A mesa é para quem está aqui. Para jogar com quem está longe, crie uma sala normal."
   }
 }
