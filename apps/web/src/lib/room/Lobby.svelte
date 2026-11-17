@@ -4,6 +4,8 @@
   import { brl, options, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
   import Icon from '../ui/Icon.svelte';
+  import { roomLink } from './link';
+  import QrCode from './QrCode.svelte';
 
   let {
     room,
@@ -21,6 +23,8 @@
 
   const p = rules.parameters;
   let copied = $state(false);
+  let linkCopied = $state(false);
+  const link = $derived(roomLink(room.code));
   const isHost = $derived(me === room.host);
   const allConnected = $derived(room.seats.every((s) => s.connected));
   const canStart = $derived(isHost && room.seats.length >= p.minPlayers && allConnected);
@@ -41,6 +45,26 @@
       // sem acesso à área de transferência: o código continua na tela para ditar
     }
   }
+
+  /** No celular, o menu de compartilhar do sistema; no computador, copia o link. */
+  async function share() {
+    const text = t('W-67', { code: formatCode(room.code) });
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: t('I-01'), text, url: link });
+        return;
+      } catch (error) {
+        if ((error as DOMException)?.name === 'AbortError') return; // a pessoa desistiu
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      linkCopied = true;
+      setTimeout(() => (linkCopied = false), 2000);
+    } catch {
+      // sem compartilhar nem copiar: o QR Code e o código continuam na tela
+    }
+  }
 </script>
 
 <div class="full-screen">
@@ -51,13 +75,20 @@
     </div>
     <div class="col">
       <div class="code-big">
+        <QrCode text={link} label={t('W-66', { code: formatCode(room.code) })} />
+        <span class="hint">{t('W-63')}</span>
         <span class="lab">{t('W-12')}</span>
         <span class="code" aria-label="{t('W-08')}: {room.code.split('').join(' ')}"
           >{formatCode(room.code)}</span
         >
-        <button class="btn secondary" type="button" onclick={copy}
-          >{copied ? t('W-14') : t('W-13')}</button
-        >
+        <div class="share">
+          <button class="btn secondary" type="button" onclick={share}
+            >{linkCopied ? t('W-65') : t('W-64')}</button
+          >
+          <button class="btn ghost" type="button" onclick={copy}
+            >{copied ? t('W-14') : t('W-13')}</button
+          >
+        </div>
       </div>
       <p class="footnote">{t('W-15')}</p>
     </div>
@@ -123,6 +154,15 @@
     border-radius: 1.1em;
     padding: 1.1em;
     text-align: center;
+  }
+  .hint {
+    font-size: 0.85em;
+    color: var(--text-2);
+  }
+  .share {
+    display: grid;
+    gap: 0.5em;
+    width: 100%;
   }
   .lab {
     font-size: 0.75em;

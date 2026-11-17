@@ -1,6 +1,7 @@
 <script lang="ts">
   // Entrar com código (mockups, rodada 1): o código é conferido antes, para mostrar as cores livres.
   import { normalizeCode, ROOM_CODE_LENGTH } from '@senhorio/protocol';
+  import { untrack } from 'svelte';
   import { defaultNames, PAWN_COLORS, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
   import Icon from '../ui/Icon.svelte';
@@ -10,16 +11,19 @@
 
   let {
     initialError = '',
+    initialCode = '',
     onback,
     onjoin,
   }: {
     initialError?: string;
+    /** Código vindo do link ou do QR Code da sala. */
+    initialCode?: string;
     onback: () => void;
     onjoin: (setup: { code: string; name: string; color: string }) => void;
   } = $props();
 
   const p = rules.parameters;
-  let raw = $state('');
+  let raw = $state(untrack(() => initialCode));
   let name = $state(defaultNames[1] ?? '');
   let color = $state(PAWN_COLORS[1] ?? '');
   let info = $state<RoomInfo | null>(null);

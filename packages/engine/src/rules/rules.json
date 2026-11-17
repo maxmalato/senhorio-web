@@ -1044,6 +1044,11 @@
     "W-59": "As salas precisam de internet. Sem conexão, jogue \"Neste aparelho\".",
     "W-60": "Não foi possível falar com a sala. Tente de novo.",
     "W-61": "Privacidade e termos de uso",
-    "W-62": "Sua vez!"
+    "W-62": "Sua vez!",
+    "W-63": "Aponte a câmera do celular para entrar",
+    "W-64": "Compartilhar link",
+    "W-65": "Link copiado",
+    "W-66": "QR Code para entrar na sala {code}",
+    "W-67": "Entre na minha sala do Senhorio. Código: {code}"
   }
 }
