@@ -3,6 +3,6 @@ packages:
   - packages/*
 
 # pnpm 10 só roda scripts de instalação dos pacotes listados aqui
-onlyBuiltDependencies:
-  - esbuild
-  - workerd
+allowBuilds:
+  esbuild: true
+  workerd: true
