@@ -9,7 +9,11 @@ import {
   type GameState,
   type Reason,
 } from '@senhorio/engine';
+import { actorsOf } from '@senhorio/protocol';
 import { index, rules, t } from '../rules';
+import { notifyTurn } from '../sound/alert';
+import { soundFor } from '../sound/events';
+import { playSound } from '../sound/synth';
 import { narrate } from './narrate';
 import { viewFrom, type View } from './view';
 
@@ -101,6 +105,8 @@ export class Game {
   readonly me: number | null;
   /** Vários aparelhos: o cronômetro do servidor está correndo. */
   timerRunning = $state(true);
+  /** Vários aparelhos: a decisão já era deste aparelho na atualização anterior. */
+  #myTurnBefore = false;
 
   constructor(
     state: GameState,
@@ -169,8 +175,20 @@ export class Game {
       } finally {
         this.busy = false;
       }
+      this.#alertTurn();
     });
     return this.#remoteQueue;
+  }
+
+  /**
+   * Vários aparelhos: quando a decisão passa a ser deste aparelho (a vez dele, uma proposta
+   * para ele, uma dívida dele), avisa com som, vibração e o título da aba (Etapa 6).
+   */
+  #alertTurn(): void {
+    if (this.me === null) return;
+    const mine = !this.over && actorsOf(this.state).includes(this.me);
+    if (mine && !this.#myTurnBefore) notifyTurn(t('W-62'));
+    this.#myTurnBefore = mine;
   }
 
   /** Vários aparelhos: o servidor manda o tempo restante e se o cronômetro corre. */
@@ -255,6 +273,8 @@ export class Game {
       const said = narrate(event, this.view, this.state, this.ctx, bankruptcyBatch);
       if (said.history) this.history = [said.history, ...this.history].slice(0, HISTORY_SIZE);
       if (said.toast) this.#toastQueue.push(said.toast);
+      const sound = soundFor(event, this.me);
+      if (sound) playSound(sound);
       await this.#apply(event);
     }
   }

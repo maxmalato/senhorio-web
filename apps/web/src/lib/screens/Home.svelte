@@ -2,6 +2,7 @@
   // Tela inicial (T-01, D-21, D-22). "Cada um no seu" chega com as salas (Etapa 4).
   import { formatCode } from '@senhorio/protocol';
   import { canUse3D, setUse3D, use3D } from '../dice/preference';
+  import { setSoundOn, soundOn } from '../sound/preference';
   import type { SaveRecord } from '../save/save';
   import { options, rules, t } from '../rules';
   import { focusDefault } from '../ui/focus';
@@ -41,6 +42,7 @@
   let confirming = $state(false);
   const show3DChoice = canUse3D();
   let dice3D = $state(use3D());
+  let sound = $state(soundOn());
 
   function ago(when: number): string {
     const minutes = Math.round((when - Date.now()) / 60000);
@@ -155,6 +157,16 @@
         </div>
       {/if}
       <div class="legal">
+        <button
+          class="link"
+          type="button"
+          aria-pressed={sound}
+          onclick={() => {
+            sound = !sound;
+            setSoundOn(sound);
+          }}>{t('I-100', { state: sound ? t('I-98') : t('I-99') })}</button
+        >
+        <span aria-hidden="true">·</span>
         {#if show3DChoice}
           <!-- Etapa 6: o jogador pode desligar os dados 3D neste aparelho (TV lenta, bateria) -->
           <button

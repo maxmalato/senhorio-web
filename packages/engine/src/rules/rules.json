@@ -979,6 +979,7 @@
     "I-97": "Dados em 3D: {state}",
     "I-98": "ligados",
     "I-99": "desligados",
+    "I-100": "Sons e vibração: {state}",
     "W-01": "Criar sala",
     "W-02": "Entrar com código",
     "W-03": "Você vai receber um código para passar aos outros jogadores.",
@@ -1036,6 +1037,7 @@
     "W-58": "Você saiu desta sala.",
     "W-59": "As salas precisam de internet. Sem conexão, jogue \"Neste aparelho\".",
     "W-60": "Não foi possível falar com a sala. Tente de novo.",
-    "W-61": "Privacidade e termos de uso"
+    "W-61": "Privacidade e termos de uso",
+    "W-62": "Sua vez!"
   }
 }

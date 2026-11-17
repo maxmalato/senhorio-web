@@ -98,6 +98,28 @@ test('queda de conexão pausa a partida para todos; o aparelho volta pela tela i
   await expect(ana.getByRole('alertdialog', { name: 'Partida pausada' })).toBeHidden();
 });
 
+test('em outra aba, o título pisca quando chega a vez deste aparelho', async ({ browser }) => {
+  const { ana, bruno } = await startRoom(browser);
+  // quem espera finge estar em outra aba; quem decide joga até passar a vez
+  const anaWaits = (await ana.getByText(/está decidindo/).count()) > 0;
+  const [waiting, playing] = anaWaits ? [ana, bruno] : [bruno, ana];
+  await waiting.evaluate(() =>
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }),
+  );
+  for (let i = 0; i < 40 && !(await waiting.title()).startsWith('Sua vez!'); i++) {
+    const button = playing.locator('.decision .card button[data-default]:not([disabled])').first();
+    if (await button.isVisible()) await button.click();
+    await playing.waitForTimeout(50);
+  }
+  await expect(waiting).toHaveTitle(/Sua vez!/);
+  // de volta à aba: o título volta ao normal
+  await waiting.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect(waiting).toHaveTitle('Senhorio');
+});
+
 test('código errado avisa sem entrar', async ({ browser }) => {
   const page = await device(browser);
   await page.goto('/?speed=0');
