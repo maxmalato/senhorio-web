@@ -1,8 +1,9 @@
 name: CI
 
+# main: testa e publica; develop/*: só testa (o dono do projeto faz o merge depois de testar)
 on:
   push:
-    branches: [main]
+    branches: [main, 'develop/**']
   pull_request:
 
 # Menor privilégio: o CI só lê o repositório
