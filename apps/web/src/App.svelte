@@ -27,6 +27,7 @@
   import { RoomConnection, savedSeat, ROOM_ERROR_TEXT } from './lib/room/connection.svelte';
   import CreateRoom from './lib/room/CreateRoom.svelte';
   import JoinRoom from './lib/room/JoinRoom.svelte';
+  import { clearCodeFromUrl, codeFromUrl } from './lib/room/link';
   import RoomFlow from './lib/room/RoomFlow.svelte';
   import { t } from './lib/rules';
   import { clearTurnNotice } from './lib/sound/alert';
@@ -153,6 +154,18 @@
   let connection: RoomConnection | null = $state.raw(null);
   let roomCode: string | null = $state(savedSeat()?.code ?? null);
   let roomError = $state('');
+
+  // convite por link ou QR Code (?sala=ABC234): abre "Entrar na sala" já com o código.
+  // Quem já está nessa sala vê o "Voltar para a sala" da tela inicial.
+  let inviteCode = $state('');
+  const invited = codeFromUrl();
+  if (invited) {
+    clearCodeFromUrl();
+    if (invited !== savedSeat()?.code) {
+      inviteCode = invited;
+      screen = 'join';
+    }
+  }
   let creating = $state(false);
   let createError = $state('');
 
@@ -211,7 +224,7 @@
       {roomCode}
       {roomError}
       oncreateroom={() => ((roomError = ''), (screen = 'create'))}
-      onjoinroom={() => ((roomError = ''), (screen = 'join'))}
+      onjoinroom={() => ((roomError = ''), (inviteCode = ''), (screen = 'join'))}
       onrejoin={rejoin}
     />
   {:else if screen === 'create'}
@@ -222,7 +235,7 @@
       oncreate={onCreateRoom}
     />
   {:else if screen === 'join'}
-    <JoinRoom onback={() => (screen = 'home')} onjoin={onJoinRoom} />
+    <JoinRoom onback={() => (screen = 'home')} onjoin={onJoinRoom} initialCode={inviteCode} />
   {:else if screen === 'room' && connection}
     {#key connection}
       <RoomFlow {connection} {timings} onexit={leaveRoom} />

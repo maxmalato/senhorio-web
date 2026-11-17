@@ -278,3 +278,24 @@ Anote aparelho, navegador e o que estranhou; os ajustes entram antes do merge na
 | 5 | Jogar até o fim (modo rodadas curto) | O computador compra, constrói e negocia como um jogador de verdade, sem travar a partida |
 | 6 | Fechar no meio e continuar | A partida volta com os mesmos jogadores do computador |
 | 7 | Na TV, só com o controle | Apertar OK na vez do computador não pausa; as setas chegam ao Pausar |
+
+### Testes do QR Code da sala
+
+| Teste | Onde | O que confere |
+| --- | --- | --- |
+| Link e QR Code | `apps/web/src/lib/room/link.test.ts` | Link com o código; leitura do endereço (minúsculas, separadores, código inválido); código tirado da barra de endereço; QR Code desenhado com descrição; links diferentes, desenhos diferentes |
+| Ponta a ponta | `e2e/rooms.spec.ts` (perfil `salas`) | QR Code na sala de espera; "Compartilhar link" copia o link certo; quem abre o link entra com o código preenchido e o código sai da barra de endereço; sem permissão para copiar, aparece o link para copiar à mão |
+
+Pela rede local (`http://IP`), o navegador desliga a área de transferência e o menu de compartilhar (só funcionam em https ou `localhost`). O jogo então copia do jeito antigo e, se nem isso der, mostra o texto para copiar à mão. No endereço publicado (https), tudo funciona normalmente.
+
+Conferência extra feita na implementação: as capturas de tela da sala de espera no celular e na TV foram decodificadas por um leitor de QR Code independente, com o link exato da sala.
+
+### Roteiro do QR Code
+
+| # | Passo | Esperado |
+| --- | --- | --- |
+| 1 | Criar uma sala no computador ou na TV | QR Code grande, código e "Compartilhar link" |
+| 2 | Apontar a câmera do celular (Android e iPhone) | Abre o jogo em "Entrar na sala" com o código preenchido |
+| 3 | Escolher apelido e entrar | Aparece na sala de espera do outro aparelho |
+| 4 | No celular que criou a sala: "Compartilhar link" | Abre o menu do sistema (WhatsApp, mensagens...) com o link |
+| 5 | No computador: "Compartilhar link" | "Link copiado"; colar mostra o link da sala |
