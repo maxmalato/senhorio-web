@@ -81,7 +81,7 @@
       <h1>{t('W-11')}</h1>
       <p class="lead">{t('I-77', { amount: brl(p.startingMoney), mode: modeText })}</p>
     </div>
-    <div class="col">
+    <div class="col invite">
       <div class="code-big">
         <QrCode text={link} label={t('W-66', { code: formatCode(room.code) })} />
         <span class="hint">{t('W-63')}</span>
@@ -159,6 +159,10 @@
     display: grid;
     gap: 0.9em;
     align-content: start;
+  }
+  /* em duas colunas, o convite (QR Code e código) fica centralizado na altura dos jogadores */
+  .col.invite {
+    align-self: center;
   }
   .code-big {
     display: grid;
