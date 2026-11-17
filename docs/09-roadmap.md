@@ -13,7 +13,7 @@ Cada etapa termina com testes passando, commit e tag. Uma etapa só começa quan
 | 3 – PWA e salvamento | Concluída | `v0.4-pwa` |
 | 4 – Vários dispositivos | Concluída (testada com aparelhos diferentes na rede local) | `v0.5-salas` |
 | 5 – Publicação | Concluída (publicada e testada em aparelhos reais) | `v1.0` |
-| 6 – Acabamento | Em andamento (dados 3D publicados; sons e avisos na branch `develop/sons-e-avisos`) | `v1.1` |
+| 6 – Acabamento | Concluída (dados 3D, sons e aviso de "sua vez", testados em aparelhos reais) | `v1.1` |
 
 Atualize esta tabela sempre que uma etapa começar ou fechar.
 
