@@ -107,7 +107,7 @@ Cada melhoria numa branch `develop/nome-da-tarefa`, testada pelo dono do projeto
 
 | Melhoria | Situação |
 | --- | --- |
-| Jogar contra o computador | Em teste (branch `develop/jogar-contra-computador`) |
+| Jogar contra o computador | Concluída (testada pelo dono do projeto e publicada) |
 | QR Code para entrar na sala e "modo mesa" na TV | Ideia |
 | "Como jogar" (regras resumidas) | Ideia |
 | Histórico completo e estatísticas no fim | Ideia |
