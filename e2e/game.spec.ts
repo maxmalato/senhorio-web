@@ -134,6 +134,15 @@ test('Como jogar: pela tela inicial e durante a partida, legível e acessível',
   const dialog = page.getByRole('dialog', { name: 'Como jogar' });
   await expect(dialog).toBeVisible();
   expect((await new AxeBuilder({ page }).include('.help-sheet').analyze()).violations).toEqual([]);
+  // a janela cabe na tela e o texto rola por dentro até a última seção
+  const fit = await page.evaluate(() => {
+    const sheet = document.querySelector('.help-sheet')!.getBoundingClientRect();
+    const scroll = document.querySelector('.help-scroll') as HTMLElement;
+    scroll.scrollTop = scroll.scrollHeight;
+    return { insideScreen: sheet.bottom <= innerHeight + 1, scrolls: scroll.scrollTop > 0 };
+  });
+  expect(fit).toEqual({ insideScreen: true, scrolls: true });
+  await expect(dialog.getByRole('heading', { name: 'Dívidas e falência' })).toBeInViewport();
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   await expect(page.getByRole('button', { name: 'Começar', exact: true })).toBeVisible();
