@@ -110,5 +110,5 @@ Cada melhoria numa branch `develop/nome-da-tarefa`, testada pelo dono do projeto
 | Jogar contra o computador | Concluída (testada pelo dono do projeto e publicada) |
 | QR Code para entrar na sala | Concluída (testada pelo dono do projeto e publicada) |
 | "Modo mesa" na TV, notebook ou tablet | Concluída (testada pelo dono do projeto e publicada) |
-| "Como jogar" (regras resumidas) | Em teste (branch `develop/como-jogar`) |
+| "Como jogar" (regras resumidas) | Concluída (testada pelo dono do projeto e publicada) |
 | Histórico completo e estatísticas no fim | Ideia |
