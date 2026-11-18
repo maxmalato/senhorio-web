@@ -342,6 +342,16 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 - **Manifesto:** nome Senhorio, `display: standalone`, cor azul-noite, ícones de 192 e 512 px e ícone "maskable" com margem para o Android, gerados a partir da logo (`apps/web/public/icons/`).
 - **Limite do navegador:** service worker e instalação só funcionam em https ou em `localhost`. Pela rede local (`http://192.168...`), o jogo e o salvamento funcionam, mas não a instalação nem o modo offline; no celular, isso é testado depois da publicação (Etapa 5).
 
+## Como jogar
+
+| Item | Definição |
+| --- | --- |
+| Onde | `apps/web/src/lib/help/HowToPlay.svelte`; textos A-01 a A-09 no `rules.json` (cada seção: título e lista de linhas) |
+| Valores | Preenchidos pelos parâmetros do arquivo de regras (dinheiro inicial, fiança, impostos, aluguéis de estação, multiplicadores das companhias, casas, hipoteca, propostas por turno): mudou o valor, o resumo acompanha |
+| Acesso | Tela inicial ("Como jogar", no rodapé) e, na partida, o botão "?" do cabeçalho, em todos os modos (inclusive na mesa), a qualquer momento |
+| Pausa | No modo um aparelho, com as regras abertas, o cronômetro do modo tempo e o computador esperam (`Game.helpOpen`); nas salas, nada muda para os outros |
+| Teclado e controle | O foco vai para o texto: as setas rolam; Voltar (Esc) fecha |
+
 ## Jogar contra o computador
 
 | Item | Definição |
@@ -349,9 +359,9 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 | Onde | Motor: `packages/engine/src/ai/opponent.ts` (`opponentDecision`, `decidingPlayer`, `fallbackActions`). Interface: `Game` (`isBot`, `canAct`, `handoff`), tela de jogadores e `Decision.svelte` |
 | Quem é computador | `bot: true` no jogador (`NewGameConfig` e estado da partida); vai junto no salvamento. O motor não trata o computador de forma diferente: as regras são as mesmas |
 | Escopo | Só no modo um aparelho, com pelo menos uma pessoa. As salas de vários aparelhos não têm computador |
-| Estratégia | Compra guardando uma reserva (maior quando os outros têm casas); compra sem reserva o que completa o grupo dele ou impede outro de completar; constrói e resgata hipotecas com folga; de vez em quando propõe comprar a rua que falta num grupo; não vende barato a rua que completaria o grupo de outra pessoa; na dívida, hipoteca primeiro o que não é de grupo completo, depois vende casas; sai logo da prisão no começo da partida e fica nela no fim. Os números ficam em `OPPONENT` (estratégia, não regra do jogo) |
+| Estratégia | Compra guardando uma reserva (maior quando os outros têm casas); compra sem reserva o que completa o grupo dele ou impede outro de completar; constrói e resgata hipotecas com folga; de vez em quando propõe comprar a rua que falta num grupo; não vende barato a rua que completaria o grupo de outra pessoa; na dívida, hipoteca primeiro o que não é de grupo completo, depois vende casas; sai logo da prisão no começo da partida ou quando tem propriedade rendendo (com a RP-03, o dono preso não cobra aluguel); só fica preso no fim, sem nada para alugar. Os números ficam em `OPPONENT` (estratégia, não regra do jogo) |
 | Sem trapaça | Só usa o que todos veem no tabuleiro; os dados continuam sorteados pelo motor |
-| Força | Contra 3 robôs da simulação (que decidem ao acaso), ganhou 139 de 300 partidas (46%; 25% seria o acaso) |
+| Força | Contra 3 robôs da simulação (que decidem ao acaso), ganhou 142 de 300 partidas (47%; 25% seria o acaso) |
 | Ritmo | O computador "pensa" 900 ms antes de cada decisão (500 ms com menos animação; 0 nos testes) e espera durante a pausa ou com o menu aberto |
 | Segurança | Se o motor recusasse a decisão (não deveria), o computador tenta uma ação segura da fase; a partida nunca para esperando por ele |
 | Interface | Na vez do computador, o cartão mostra "Fulano está decidindo" e "O computador está jogando", com o botão Pausar (o foco fica no aviso, para o OK do controle não pausar sem querer). A marca COMPUTADOR aparece no painel. Sem "Passe o aparelho" quando só uma pessoa joga |

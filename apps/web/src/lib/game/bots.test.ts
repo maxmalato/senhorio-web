@@ -76,6 +76,19 @@ describe('jogar contra o computador', () => {
     game.stopClock();
   });
 
+  it('com o "Como jogar" aberto, o computador espera', async () => {
+    const game = gameAgainstComputer();
+    game.state = { ...game.state, turn: game.state.order.indexOf(1) };
+    game.helpOpen = true;
+    game.startClock();
+    const before = game.state;
+    await new Promise((r) => setTimeout(r, 400));
+    expect(game.state).toBe(before);
+    game.helpOpen = false;
+    await until(() => game.state !== before);
+    game.stopClock();
+  });
+
   it('na vez do computador, a pessoa vê quem está jogando e pode pausar', async () => {
     const user = userEvent.setup();
     const game = gameAgainstComputer();

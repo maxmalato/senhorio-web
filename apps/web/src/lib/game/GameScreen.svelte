@@ -13,6 +13,7 @@
   import type { Game } from './game.svelte';
   import { formatCode, REMOVE_AFTER_MS, TABLE_SEAT, type RoomView } from '@senhorio/protocol';
   import { fullscreen } from '../ui/screen.svelte';
+  import HowToPlay from '../help/HowToPlay.svelte';
   import { menuAvailable } from './menu';
   import PlayerPanel from './PlayerPanel.svelte';
   import Toast from './Toast.svelte';
@@ -65,6 +66,11 @@
         ? !room.table.connected
         : !room.seats[room.host]?.connected || room.seats[room.host]?.out === true),
   );
+  /** Ao abrir o "Como jogar", o foco vai para o texto (setas rolam; Voltar fecha). */
+  function focusHelp(node: HTMLElement) {
+    node.focus({ preventScroll: true });
+  }
+
   /** Nome do jogador que pausou (a pausa da mesa tem texto próprio, W-82). */
   function pauserName(seat: number): string {
     return room?.seats[seat]?.name ?? '';
@@ -113,7 +119,7 @@
       const visible = !box.hidden && !minimized;
       const lost = !document.activeElement || document.activeElement === document.body;
       if (visible && (lost || !box.contains(document.activeElement))) {
-        if (!root?.querySelector('.restore, .pause-dialog')) focusInside(box);
+        if (!root?.querySelector('.restore, .pause-dialog, .help-sheet')) focusInside(box);
       }
     });
   });
@@ -171,6 +177,14 @@
   }
 
   function onkeydown(event: KeyboardEvent) {
+    // "Como jogar" aberto: Voltar fecha; as setas rolam o texto (sem mexer no jogo)
+    if (game.helpOpen) {
+      if (['Escape', 'GoBack', 'BrowserBack', 'Backspace'].includes(event.key)) {
+        event.preventDefault();
+        game.helpOpen = false;
+      }
+      return;
+    }
     const typing = event.target instanceof HTMLInputElement;
     if (game.toast && ['Enter', ' ', 'Escape', 'Backspace'].includes(event.key)) {
       event.preventDefault();
@@ -223,6 +237,14 @@
         <div class="round">{status}</div>
       </div>
       {#if clock}<span class="timer" aria-label="Tempo restante">{clock}</span>{/if}
+      <!-- regras a qualquer momento, inclusive fora da vez -->
+      <button
+        class="menu-btn help-btn"
+        type="button"
+        aria-label={t('A-01')}
+        title={t('A-01')}
+        onclick={() => (game.helpOpen = true)}><Icon name="question" /></button
+      >
       {#snippet namesButton()}
         <button
           class="menu-btn"
@@ -359,7 +381,21 @@
     </nav>
   </div>
 
-  {#if room && offline.length > 0}
+  {#if game.helpOpen}
+    <div class="overlay help-overlay">
+      <div class="help-sheet" role="dialog" aria-modal="true" aria-label={t('A-01')}>
+        <button
+          class="btn secondary help-close"
+          type="button"
+          onclick={() => (game.helpOpen = false)}>{t('I-107')}</button
+        >
+        <!-- a área com o texto recebe o foco: no controle remoto, as setas rolam -->
+        <div class="help-scroll" tabindex="-1" use:focusHelp>
+          <HowToPlay heading="h2" />
+        </div>
+      </div>
+    </div>
+  {:else if room && offline.length > 0}
     {@const who = offline[0] ?? 0}
     {@const since = room.seats[who]?.disconnectedAt ?? serverNow}
     {@const left = REMOVE_AFTER_MS - (serverNow - since)}
@@ -803,6 +839,37 @@
     }
   }
 
+  .help-btn {
+    padding-inline: 0.6em;
+  }
+  .help-overlay {
+    z-index: 20;
+    align-items: stretch;
+  }
+  .help-sheet {
+    width: min(40em, 100%);
+    max-height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.8em;
+    background: var(--night);
+    border-radius: 1.1em;
+    padding: 1em;
+    box-shadow: 0 0 0 1px var(--line);
+    justify-self: center;
+  }
+  .help-close {
+    justify-self: end;
+  }
+  .help-scroll {
+    overflow-y: auto;
+    outline: none;
+    padding-right: 0.3em;
+  }
+  .help-scroll:focus-visible {
+    box-shadow: inset 0 0 0 3px var(--focus);
+    border-radius: 0.8em;
+  }
   .overlay {
     position: absolute;
     inset: 0;
