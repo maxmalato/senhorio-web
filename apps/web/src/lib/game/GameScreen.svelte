@@ -389,8 +389,10 @@
           type="button"
           onclick={() => (game.helpOpen = false)}>{t('I-107')}</button
         >
-        <!-- a área com o texto recebe o foco: no controle remoto, as setas rolam -->
-        <div class="help-scroll" tabindex="-1" use:focusHelp>
+        <!-- a área com o texto recebe o foco: no controle remoto, as setas rolam. Área com
+             rolagem precisa ser focável pelo teclado (axe: scrollable-region-focusable) -->
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+        <div class="help-scroll" tabindex="0" role="region" aria-label={t('A-01')} use:focusHelp>
           <HowToPlay heading="h2" />
         </div>
       </div>
@@ -842,13 +844,18 @@
   .help-btn {
     padding-inline: 0.6em;
   }
-  .help-overlay {
+  /* duas classes: vence o "place-items: center" das outras sobreposições. A janela fica
+     com a altura da tela, e o texto rola por dentro (sem isso, a janela crescia do tamanho
+     do texto, passava da tela e não rolava) */
+  .overlay.help-overlay {
     z-index: 20;
+    grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
   }
   .help-sheet {
     width: min(40em, 100%);
-    max-height: 100%;
+    height: 100%;
+    min-height: 0;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     gap: 0.8em;
