@@ -395,13 +395,13 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 
 | Item | Definição |
 | --- | --- |
-| Endereço | `jogo.<subdomínio da conta>.workers.dev` (nome do Worker `jogo` no `wrangler.jsonc`; plano gratuito; sem endereços de prévia: `preview_urls: false`). Trocar o nome do Worker cria outro Worker, com outras salas; o antigo é apagado à mão no painel |
+| Endereço | `senhorio.<subdomínio da conta>.workers.dev` (nome do Worker `senhorio` no `wrangler.jsonc`; a conta guarda outros jogos no mesmo subdomínio, cada um com o próprio nome de Worker; plano gratuito; sem endereços de prévia: `preview_urls: false`). Trocar o nome do Worker cria outro Worker, com outras salas; o antigo é apagado à mão no painel |
 | Quando publica | A cada push na `main`, pelo job `deploy` do CI, só depois de lint, tipos, testes, build e e2e passarem; nunca em pull request |
 | Como | `pnpm --filter @senhorio/web build` e `wrangler deploy` (Worker, Durable Objects e site de `apps/web/dist` juntos) |
 | Credenciais | Segredos do repositório `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`; o GitHub esconde os valores nos registros |
 | Conferência | `scripts/smoke.mjs` (`pnpm smoke` com `SITE_URL`) no endereço publicado: saúde da API, tela inicial, manifesto, privacidade e sala inexistente; não cria salas |
 | Renovação do token | O token vence 1 ano depois de criado (novembro de 2027): criar outro no mesmo modelo e trocar o segredo `CLOUDFLARE_API_TOKEN` |
-| Desfazer | Painel da Cloudflare → Workers & Pages → jogo → Deployments → versão anterior → Rollback; ou reverter o commit na `main` |
+| Desfazer | Painel da Cloudflare → Workers & Pages → senhorio → Deployments → versão anterior → Rollback; ou reverter o commit na `main` |
 
 Limites do plano gratuito que importam ao jogo (conferidos em novembro de 2026; podem mudar):
 
