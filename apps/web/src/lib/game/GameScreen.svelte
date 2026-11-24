@@ -514,8 +514,10 @@
     height: 100%;
     display: grid;
     gap: 12px;
-    padding: 12px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    /* áreas seguras do celular (app instalado): barra de status em cima, barra de início
+       embaixo e entalhe dos lados. Em pé, quem desconta a barra de início são as abas */
+    padding: calc(12px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px))
+      12px max(12px, env(safe-area-inset-left, 0px));
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-areas: 'brand' 'main' 'tabs';
@@ -691,6 +693,8 @@
     grid-template-columns: 1fr 1fr;
     gap: 6px;
     margin: 0 -12px -12px;
+    /* a barra de início é descontada só aqui (antes também na tela: as abas subiam e
+       ficavam atrás do cartão de decisão) */
     padding: 6px 12px calc(10px + env(safe-area-inset-bottom, 0px));
     background: var(--night-deep);
     border-top: 1px solid #23365a;
@@ -765,7 +769,8 @@
   @container app (min-width: 600px) and (max-aspect-ratio: 6/5) {
     .game {
       font-size: 16px;
-      padding: 20px;
+      padding: calc(20px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px))
+        calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
       gap: 16px;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto 1fr;
@@ -796,7 +801,9 @@
   @container app (min-width: 880px) and (min-aspect-ratio: 6/5) {
     .game {
       font-size: clamp(13px, min(1.12cqw, 2.05cqh), 28px);
-      padding: 2.4cqh 2.6cqw;
+      padding: calc(2.4cqh + env(safe-area-inset-top, 0px))
+        max(2.6cqw, env(safe-area-inset-right, 0px)) calc(2.4cqh + env(safe-area-inset-bottom, 0px))
+        max(2.6cqw, env(safe-area-inset-left, 0px));
       gap: 1.1em 1.6em;
       /* o painel tem largura garantida; o tabuleiro ocupa o resto, limitado pela altura.
          Em telas quase quadradas (1024×768, iPad deitado), o tabuleiro encolhe em vez de
@@ -813,7 +820,13 @@
       align-items: flex-start;
     }
     .board-wrap :global(.board) {
-      width: min(100%, calc((100cqh - 4.8cqh) * 760 / 648));
+      width: min(
+        100%,
+        calc(
+          (100cqh - 4.8cqh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) *
+            760 / 648
+        )
+      );
       height: auto;
       aspect-ratio: 760 / 648;
       grid-template-rows: 1.45fr repeat(9, 1fr) 1.45fr;
@@ -884,7 +897,8 @@
     display: grid;
     place-items: center;
     z-index: 10;
-    padding: 16px;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+      calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   }
   .pause-dialog {
     background: var(--card);

@@ -25,7 +25,8 @@
     display: grid;
     place-items: center;
     z-index: 40;
-    padding: 16px;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px
+      calc(16px + env(safe-area-inset-bottom, 0px));
   }
   .pause-dialog {
     background: var(--card);

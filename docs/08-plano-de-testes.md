@@ -113,7 +113,7 @@ A simulação de partidas automáticas do Roku (`simular=200` e `balancear=50`) 
 | Controlador | `apps/web/src/lib/game/game.test.ts` | Ação aplicada no motor, vista ao fim dos eventos, recusa sem mudança, histórico de 3 linhas |
 | Menu, construção e venda simples | `apps/web/src/lib/game/Decision.test.ts` | Opções desabilitadas com o motivo, escada de aluguel, construção uniforme, foco no Recusar, minimizar a proposta para ver o tabuleiro |
 | Fluxo do início ao jogo | `apps/web/src/App.test.ts` | Início, jogadores, modo, ordem sorteada e primeira jogada |
-| Ponta a ponta (6 perfis de tela) | `e2e/game.spec.ts` | Partida inteira de 20 rodadas só com Enter, acessibilidade (axe) em 5 telas, foco padrão, Voltar, abas do celular, painel lateral com espaço e Menu à vista |
+| Ponta a ponta (6 perfis de tela) | `e2e/game.spec.ts` | Partida inteira de 20 rodadas só com Enter, acessibilidade (axe) em 5 telas, foco padrão, Voltar, abas do celular, painel lateral com espaço e Menu à vista, app instalado no iPhone (áreas seguras simuladas: cabeçalho abaixo da barra de status, abas abaixo do cartão e até o rodapé) |
 
 Parâmetros de teste da interface: `?seed=N` reproduz os sorteios e `?speed=0` tira as esperas das animações e dos avisos.
 

@@ -340,6 +340,7 @@ Modo um dispositivo (Etapa 3, `apps/web/src/lib/save/`):
 - **Ferramenta:** `vite-plugin-pwa` (Workbox). O service worker guarda no aparelho todos os arquivos do jogo, inclusive as fontes (cerca de 700 KB), e o modo um dispositivo funciona sem internet depois do primeiro acesso.
 - **Atualização:** `registerType: "prompt"`. A versão nova fica esperando e a tela inicial mostra "Há uma versão nova do jogo · Atualizar agora". O jogo nunca recarrega sozinho no meio de uma partida.
 - **Manifesto:** nome Senhorio, `display: standalone`, cor azul-noite, ícones de 192 e 512 px e ícone "maskable" com margem para o Android, gerados a partir da logo (`apps/web/public/icons/`).
+- **Áreas seguras:** instalado, o jogo ocupa a tela inteira do celular (`viewport-fit=cover`, barra de status translúcida no iPhone). As telas descontam `env(safe-area-inset-*)`: a barra de status em cima, a barra de início embaixo (no celular em pé, só pelas abas, uma vez) e o entalhe dos lados.
 - **Limite do navegador:** service worker e instalação só funcionam em https ou em `localhost`. Pela rede local (`http://192.168...`), o jogo e o salvamento funcionam, mas não a instalação nem o modo offline; no celular, isso é testado depois da publicação (Etapa 5).
 
 ## Como jogar

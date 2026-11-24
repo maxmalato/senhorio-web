@@ -147,3 +147,31 @@ test('Como jogar: pela tela inicial e durante a partida, legível e acessível',
   await expect(dialog).toBeHidden();
   await expect(page.getByRole('button', { name: 'Começar', exact: true })).toBeVisible();
 });
+
+test('app instalado no iPhone: respeita a barra de status e a barra de início', async ({
+  page,
+  context,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'celular', 'áreas seguras só existem no celular');
+  // simula o app instalado num iPhone com entalhe: 59 px em cima, 34 px embaixo
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setSafeAreaInsetsOverride', {
+    insets: { top: 59, bottom: 34, left: 0, right: 0 },
+  });
+  await startGame(page);
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Rolar dados' })).toBeVisible();
+  const layout = await page.evaluate(() => {
+    const r = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+    return {
+      brandTop: r('.brand').top,
+      cardBottom: r('.decision .card').bottom,
+      tabsTop: r('.tabs').top,
+      tabsBottom: r('.tabs').bottom,
+      height: innerHeight,
+    };
+  });
+  expect(layout.brandTop).toBeGreaterThanOrEqual(59); // abaixo da barra de status
+  expect(layout.tabsTop).toBeGreaterThanOrEqual(layout.cardBottom); // abas à vista, abaixo do cartão
+  expect(Math.round(layout.tabsBottom)).toBe(layout.height); // abas até o rodapé, sem faixa vazia
+});
