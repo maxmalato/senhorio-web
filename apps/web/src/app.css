@@ -160,7 +160,7 @@ input {
   display: grid;
   justify-items: center;
   align-content: start;
-  padding: 22px max(18px, env(safe-area-inset-right, 0px))
+  padding: calc(22px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px))
     calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
   container: screen / inline-size;
 }
